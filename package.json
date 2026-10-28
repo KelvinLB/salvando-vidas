@@ -1,0 +1,34 @@
+{
+  "name": "salvando-vidas",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "PWA sin fines de lucro para acompañar a personas que atraviesan depresión o pensamientos de crisis.",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit",
+    "icons": "pwa-assets-generator"
+  },
+  "dependencies": {
+    "@fontsource-variable/caveat": "^5.3.0",
+    "@fontsource-variable/fraunces": "^5.3.0",
+    "@fontsource-variable/inter": "^5.3.0",
+    "animejs": "^4.5.0",
+    "lucide-react": "^1.55.0",
+    "motion": "^12.43.0",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "react-router-dom": "^7.18.4"
+  },
+  "devDependencies": {
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vite-pwa/assets-generator": "^2.0.0",
+    "@vitejs/plugin-react": "^6.1.2",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.5",
+    "vite-plugin-pwa": "^2.0.0"
+  }
+}

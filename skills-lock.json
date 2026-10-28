@@ -1,0 +1,23 @@
+{
+  "version": 1,
+  "skills": {
+    "gad7-anxiety-screening": {
+      "source": "open-medica/open-medical-skills",
+      "sourceType": "github",
+      "skillPath": "skills/gad7-anxiety-screening/SKILL.md",
+      "computedHash": "8647df7e479c6aec785b411ccd676b9f72c98f3eb42cb4e3f6f858d4a5049bd0"
+    },
+    "phq9-depression-screening": {
+      "source": "open-medica/open-medical-skills",
+      "sourceType": "github",
+      "skillPath": "skills/phq9-depression-screening/SKILL.md",
+      "computedHash": "3867536f5b42bb203e3b222e3bf0057e08102b31056cc5666bcaa58893c35c31"
+    },
+    "psychologist-analyst": {
+      "source": "rysweet/amplihack",
+      "sourceType": "github",
+      "skillPath": "skills/psychologist-analyst/SKILL.md",
+      "computedHash": "4b8cffb974156dc1170aebfba9bc6b4ea4bcac889eb433647448506db7f5516b"
+    }
+  }
+}
