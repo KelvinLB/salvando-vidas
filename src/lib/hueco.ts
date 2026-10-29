@@ -9,18 +9,29 @@ import { dayOf } from './diary'
 import { soundsLikeRisk } from './risk'
 import { type MoodEntry, read, today, useStored } from './storage'
 
-// Salir del hueco: el hueco se parece a lo que la persona ya anotó en la app, y lo que
-// construye al subir se queda. Todo se lee aquí, en el teléfono; nada sale de él.
+// Salir del hueco: el lugar se parece a lo que la persona ya anotó en la app (el hueco para el
+// ánimo bajo, el faro para los nervios, los faroles para la soledad), y lo que construye al
+// avanzar se queda. Todo se lee aquí, en el teléfono; nada sale de él.
 
-/** La subida de hoy. Si la persona sale de la pantalla y vuelve, sigue donde iba. */
+/** Un «¿y si…?» del faro, en el frasco que la persona eligió. */
+export type Sorted = { worry: string; mine: boolean }
+
+/**
+ * La subida de hoy. Si la persona sale de la pantalla y vuelve, sigue donde iba. Los pasos se
+ * guardan juntos aunque cambie de lugar: lo que hizo en uno cuenta en el otro.
+ */
 export type Climb = {
   date: string
   /** Lo que eligió en «¿Así te sientes hoy?»; sin valor, el lugar sale de sus registros. */
   state?: HoleState
   built: Step[]
-  /** Lo que nombró: va escrito en su escalón. */
+  /** En el hueco, lo que nombró: va escrito en su escalón. */
   named?: string
-  /** La razón de su caja de esperanza que se prendió como estrella. */
+  /** En el faro, los «¿y si…?» que ya acomodó. */
+  sorted?: Sorted[]
+  /** En los faroles, de quién se acordó: una de sus personas (`persona:<id>`) o alguien más. */
+  remembered?: string
+  /** La razón de su caja de esperanza que se prendió. */
   reason?: string
   out?: boolean
 }

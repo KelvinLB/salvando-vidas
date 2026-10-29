@@ -33,7 +33,7 @@ export default function Distraer() {
         </p>
       </div>
       <h2 className="section-title">Juegos tranquilos</h2>
-      {/* Salir del hueco va primero: su mascota es quien juega, y el hueco se parece a su día. */}
+      {/* Salir del hueco va primero: su mascota es quien juega, y el lugar se parece a su día. */}
       <Link to="/juegos/hueco" className="tile hole-tile">
         <span className="hole-tile-pet" aria-hidden="true">
           <CompanionView look={companion ?? DEFAULT_COMPANION} mood={mood} size={64} />
@@ -41,8 +41,8 @@ export default function Distraer() {
         <span className="hole-tile-text">
           <strong>Salir del hueco</strong>
           <small>
-            {companion ? `${companionName(companion)} y tú salen` : 'Tu mascota y tú salen'} de un hueco que se parece a tu
-            día, un escalón a la vez.
+            {companion ? `${companionName(companion)} y tú salen` : 'Tu mascota y tú salen'} adelante, un paso a la vez, en
+            un lugar que se parece a tu día.
           </small>
         </span>
       </Link>

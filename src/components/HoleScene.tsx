@@ -1,8 +1,7 @@
-import { type CSSProperties, useEffect, useId, useLayoutEffect, useRef, useState } from 'react'
-import CompanionView from './Companion'
+import { type CSSProperties, useId } from 'react'
+import { Cloud, Person, ScenePet, Tag, seeded } from './sceneBits'
 import type { CompanionLook, CompanionMood } from '../data/companion'
 import { type Place, type Sky, type Step, THOUGHTS } from '../data/hueco'
-import { still } from '../lib/petfx'
 
 // El hueco, en un lienzo de 320×420: arriba el pasto y el cielo, abajo el fondo. Los escalones
 // se pegan a una pared y a la otra, y la mascota sube de uno en uno. El clima (lluvia, niebla,
@@ -35,69 +34,10 @@ const THOUGHT_AT: [number, number, number][] = [
 ]
 
 // La lluvia: rayitas en dos capas que caen desfasadas. Siempre las mismas, para que no brinquen.
-function seeded(seed: number) {
-  let s = seed
-  return () => (s = (s * 16807) % 2147483647) / 2147483647
-}
 const random = seeded(11)
 const RAIN = [0, 1].map(() =>
   Array.from({ length: 30 }, () => `M${(8 + random() * 304).toFixed(1)} ${(random() * 410).toFixed(1)} l-3 10`).join(' '),
 )
-
-function Cloud({ x, y, s = 1 }: { x: number; y: number; s?: number }) {
-  return (
-    <g className="hole-cloud" transform={`translate(${x} ${y}) scale(${s})`}>
-      <circle cx="-12" cy="2" r="10" />
-      <circle cx="2" cy="-4" r="13" />
-      <circle cx="16" cy="2" r="9" />
-      <rect x="-22" y="2" width="46" height="11" rx="5.5" />
-    </g>
-  )
-}
-
-function Person({ x, warm, small }: { x: number; warm?: boolean; small?: boolean }) {
-  const r = small ? 6.5 : 7
-  const h = small ? 17 : 18
-  const half = small ? 8 : 9
-  return (
-    <g transform={`translate(${x} ${MOUTH})`} className={warm ? 'hole-person warm' : 'hole-person'}>
-      <circle cy={-h - r - 2} r={r} />
-      <path d={`M${-half} 0 Q${-half} ${-h} 0 ${-h} Q${half} ${-h} ${half} 0 Z`} />
-    </g>
-  )
-}
-
-/** Un escalón con lo que lo hizo escrito encima. Si la palabra no cabe, crece desde su pared. */
-function Ledge({ x, y, w, text, fresh }: { x: number; y: number; w: number; text: string; fresh: boolean }) {
-  const label = useRef<SVGTextElement>(null)
-  const [long, setLong] = useState(0)
-  useLayoutEffect(() => {
-    let live = true
-    const measure = () => live && label.current && setLong(Math.ceil(label.current.getComputedTextLength()) + 16)
-    measure()
-    // La letra a mano llega después: se vuelve a medir con ella.
-    void document.fonts?.ready.then(measure)
-    return () => {
-      live = false
-    }
-  }, [text])
-  const width = Math.min(132, Math.max(w, long))
-  const left = x < W / 2 ? x : x + w - width
-  return (
-    <g className={fresh ? 'hole-ledge new' : 'hole-ledge'}>
-      <rect className="hole-slab" x={left} y={y} width={width} height="18" rx="5" />
-      <text
-        ref={label}
-        className="hole-slab-label"
-        x={left + width / 2}
-        y={y + 14}
-        {...(long > width ? { textLength: width - 12, lengthAdjust: 'spacingAndGlyphs' } : {})}
-      >
-        {text}
-      </text>
-    </g>
-  )
-}
 
 type Props = {
   look: CompanionLook
@@ -122,25 +62,6 @@ export default function HoleScene({ look, name, place, built, named, out, rope, 
   const n = built.length
   const at = out ? OUT : n === 0 ? BOTTOM : { x: LEDGES[n - 1].x + LEDGES[n - 1].w / 2, y: LEDGES[n - 1].y }
 
-  // Brinca cada vez que cambia de lugar (no al abrir la pantalla).
-  const hopper = useRef<SVGGElement>(null)
-  const spot = `${at.x},${at.y}`
-  const last = useRef(spot)
-  useEffect(() => {
-    if (last.current === spot) return
-    last.current = spot
-    if (still()) return
-    hopper.current?.animate(
-      [
-        { transform: 'translateY(0)' },
-        { transform: 'translateY(-22px)', offset: 0.4 },
-        { transform: 'translateY(2px)', offset: 0.7 },
-        { transform: 'translateY(0)' },
-      ],
-      { duration: 1000, easing: 'ease-out' },
-    )
-  }, [spot])
-
   // Cada escalón aligera el clima. Respirar baja la niebla y el viento; ponerle nombre calla
   // los pensamientos; la razón y la mano dejan entrar más luz.
   const w = place.weather
@@ -153,7 +74,6 @@ export default function HoleScene({ look, name, place, built, named, out, rope, 
     '--wind': w.wind * ease * (breathed ? 0.3 : 1),
     '--thoughts': out || built.includes('nombrar') ? 0 : w.thoughts * (breathed ? 0.6 : 1),
     '--dark': w.dark * ease,
-    '--echo': out ? 0 : w.echo * (n >= 2 ? 0.4 : 1),
     '--light': out ? 1 : Math.min(1, 0.22 + n * 0.16 + (built.includes('razon') ? 0.08 : 0) + (helped ? 0.08 : 0)),
   }
   const sky: Sky = out ? 'dia' : n >= 3 ? 'alba' : place.sky
@@ -299,19 +219,19 @@ export default function HoleScene({ look, name, place, built, named, out, rope, 
       </g>
 
       {built.map((step, i) => (
-        <Ledge key={i} {...LEDGES[i]} text={slabText(step, named)} fresh={fresh === i} />
+        <Tag key={i} {...LEDGES[i]} anchor={LEDGES[i].x < W / 2 ? 'left' : 'right'} text={slabText(step, named)} fresh={fresh === i} />
       ))}
 
       {/* Quien ayuda baja una cuerda */}
       <g className={`hole-rope${helped && !out ? ' on' : ''}`}>
         <path className="hole-rope-line" d={ropePath} />
-        <Person x={80} warm />
+        <Person x={80} y={MOUTH} warm />
       </g>
 
       {/* Afuera: quien ayudó, alguien más y unas flores */}
       <g className={`hole-outside${out ? ' on' : ''}`}>
-        <Person x={46} small />
-        <Person x={244} warm />
+        <Person x={46} y={MOUTH} small />
+        <Person x={244} y={MOUTH} warm />
         <path className="hole-heart" transform="translate(214 -12)" d="M39 46 c-3 -4 -9 -2 -8 3 c1 4 8 8 8 8 s7 -4 8 -8 c1 -5 -5 -7 -8 -3 Z" />
         {[
           [14, 75],
@@ -340,20 +260,8 @@ export default function HoleScene({ look, name, place, built, named, out, rope, 
         })}
       </g>
 
-      {/* La mascota, que sube; la acompañan un eco (si está a solas) y su respiración */}
-      <g className="hole-mover" style={{ transform: `translate(${at.x}px, ${at.y}px)` }}>
-        <g ref={hopper}>
-          <g className="hole-echo">
-            {[0, 1, 2].map((i) => (
-              <circle key={i} cx="0" cy="-36" r="40" />
-            ))}
-          </g>
-          <circle className="hole-ring" cx="0" cy="-36" r="46" />
-          <g transform="translate(-37 -70)">
-            <CompanionView look={look} mood={face} size={74} name={name} />
-          </g>
-        </g>
-      </g>
+      {/* La mascota, que sube con su respiración */}
+      <ScenePet at={at} look={look} mood={face} name={name} />
     </svg>
   )
 }

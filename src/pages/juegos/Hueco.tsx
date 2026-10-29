@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
-import { ChevronDown, HandHelping, Star, Tag, Wind } from 'lucide-react'
+import { ChevronDown, HandHelping, Heart, type LucideIcon, Split, Star, Tag, Users, Wind } from 'lucide-react'
 import { Link } from 'react-router-dom'
+import FaroScene from '../../components/FaroScene'
+import FarolesScene from '../../components/FarolesScene'
 import HoleScene from '../../components/HoleScene'
 import PageHeader from '../../components/PageHeader'
 import PetSays from '../../components/PetSays'
@@ -9,30 +11,46 @@ import {
   BREATHS,
   HEAVY_HINT,
   type HoleState,
+  JAR_MINE,
+  JAR_NOT_MINE,
+  MISS_YOU,
   NAME_ASK,
-  OUT_SAYS,
+  OWN_WORRY,
   PLACE,
   PLACES,
-  RISK_HELLO,
-  STEPS,
+  REMEMBER,
+  REMEMBER_ASK,
+  SCENES,
+  STEP_ORDER,
+  type SceneId,
   type Step,
-  afterBreath,
-  handSays,
+  WORRIES,
+  WORRY_ASK,
+  jarAsk,
   namedSays,
-  reasonSays,
-  stillHere,
+  rememberSays,
+  sortedSays,
 } from '../../data/hueco'
+import { PLAN_STEPS } from '../../data/plan'
 import { useCompanion } from '../../lib/companion'
 import { type Climb, EXITS_KEY, type HoleExit, type HoleReading, readHole, useClimb } from '../../lib/hueco'
 import { markMoment, useMoments } from '../../lib/moments'
-import { firstName, usePeople } from '../../lib/people'
+import { firstName, usePeople, whatsappOf } from '../../lib/people'
+import { usePlan } from '../../lib/plan'
 import { type JournalEntry, pick, read, store, today, useStored } from '../../lib/storage'
 
-// Salir del hueco: su mascota está en un hueco que se parece a lo que trae hoy, y salen un
-// escalón a la vez. No hay vidas, reloj, puntos ni rachas: nada se pierde ni se cae, y lo que
-// construye se queda aunque salga de la pantalla. Con señales de riesgo, la ayuda va primero.
+// Salir del hueco: su mascota está en un lugar que se parece a lo que trae hoy (el hueco, la
+// niebla del faro o la calle de los faroles), y salen adelante un paso a la vez. No hay vidas,
+// reloj, puntos ni rachas: nada se pierde ni se cae, y lo que construye se queda aunque salga de
+// la pantalla. Cada paso puede volverse algo de verdad (escribirle a alguien, seguir respirando
+// en Calma, abrir su plan), siempre si la persona quiere. Con señales de riesgo, la ayuda va
+// primero.
 
-const ICONS = { respirar: Wind, nombrar: Tag, razon: Star, mano: HandHelping }
+const ICONS: Record<SceneId, Record<Step, LucideIcon>> = {
+  hueco: { respirar: Wind, nombrar: Tag, razon: Star, mano: HandHelping },
+  faro: { respirar: Wind, nombrar: Split, razon: Star, mano: HandHelping },
+  faroles: { respirar: Wind, nombrar: Heart, razon: Star, mano: Users },
+}
 
 type Breath = { phase: 'in' | 'out'; count: number; round: number }
 
@@ -43,10 +61,13 @@ export default function Hueco() {
   const [climb, update] = useClimb()
   const [reading, setReading] = useState<HoleReading | null>(null)
   const [reasons] = useStored<JournalEntry[]>('razones', [])
-  const { people } = usePeople()
+  const { people, reachable, message, country } = usePeople()
+  const { has: planHas } = usePlan()
   const { got } = useMoments()
   const [picking, setPicking] = useState(false)
-  const [naming, setNaming] = useState(false)
+  // El segundo paso abre su elección: lo que siente, un «¿y si…?» o de quién se acuerda.
+  const [choosing, setChoosing] = useState(false)
+  const [worry, setWorry] = useState<string | null>(null)
   const [last, setLast] = useState<Step | null>(null)
   const [breath, setBreath] = useState<Breath | null>(null)
   const [fresh, setFresh] = useState<number | null>(null)
@@ -65,32 +86,59 @@ export default function Hueco() {
   const auto = reading?.state ?? null
   const state: HoleState = climb.state ?? auto ?? 'animo'
   const place = PLACE[state]
+  const scene = SCENES[place.scene]
   const n = climb.built.length
   const out = !!climb.out
   const risk = !!reading?.risk
   const heavy = !!reading?.heavy
   const breaths = heavy ? BREATHS.heavy : BREATHS.light
   const face: CompanionMood = out ? 'feliz' : breath || n >= 2 ? 'calma' : place.mood
-  const helper = people.find((p) => p.name.trim())
   const reason = reasons.find((r) => r.id === climb.reason)
+
+  // Quien baja la cuerda: de preferencia alguien a quien se le puede escribir.
+  const helper = reachable.find((p) => p.name.trim()) ?? reachable[0] ?? people.find((p) => p.name.trim())
+  const helperName = helper?.name.trim() ? firstName(helper) : null
+  const planned = PLAN_STEPS.some((s) => s.key !== 'personas' && planHas(s.key))
+
+  // Lo que va en el segundo paso de cada lugar.
+  const sorted = climb.sorted ?? []
+  const lastSorted = sorted.at(-1)
+  const worriesLeft = WORRIES.filter((w) => !sorted.some((s) => s.worry === w))
+  const rememberedPerson = people.find((p) => climb.remembered === `persona:${p.id}`)
+  const rememberedOption = REMEMBER.find((r) => r.id === climb.remembered)
+  const rememberedTag = rememberedPerson ? firstName(rememberedPerson) : (rememberedOption?.tag ?? (climb.remembered ? 'alguien' : undefined))
 
   const build = (step: Step, patch: Partial<Climb> = {}) => {
     update({ ...patch, built: [...climb.built, step] })
     setLast(step)
-    setNaming(false)
+    setChoosing(false)
+    setWorry(null)
     setFresh(climb.built.length)
     resumed.current = false
   }
 
-  // Con los cuatro escalones, sale. Si la persona se va justo antes, sale al volver.
+  // En el faro, cada «¿y si…?» va al frasco que la persona elige. El primero ya es un tramo; los
+  // demás, si quiere acomodar más, solo llenan los frascos.
+  const sort = (mine: boolean) => {
+    if (!worry) return
+    const next = [...sorted, { worry, mine }]
+    if (!climb.built.includes('nombrar')) return build('nombrar', { sorted: next })
+    update({ sorted: next })
+    setLast('nombrar')
+    setChoosing(false)
+    setWorry(null)
+  }
+
+  // Con los cuatro pasos, llegan. Si la persona se va justo antes, llegan al volver. Lo que
+  // ofrecía el último paso se queda a la mano: si pidió una mano, todavía puede escribirle.
   useEffect(() => {
     if (n < 4 || out) return
     const timer = setTimeout(() => {
-      setFirstOut(!got.hueco)
+      const moment = PLACE[state].scene
+      setFirstOut(!got[moment])
       store(EXITS_KEY, [...read<HoleExit[]>(EXITS_KEY, []), { date: today(), state }].slice(-60))
-      markMoment('hueco')
+      markMoment(moment)
       update({ out: true })
-      setLast(null)
     }, 1400)
     return () => clearTimeout(timer)
   }, [n, out])
@@ -111,11 +159,12 @@ export default function Hueco() {
   const act = (step: Step) => {
     if (out || breath || climb.built.includes(step)) return
     setLast(null)
+    setWorry(null)
     if (step === 'respirar') {
-      setNaming(false)
+      setChoosing(false)
       setBreath({ phase: 'in', count: 4, round: 1 })
     } else if (step === 'nombrar') {
-      setNaming(true)
+      setChoosing(true)
     } else if (step === 'razon') {
       build('razon', { reason: reasons.length ? pick(reasons).id : undefined })
     } else {
@@ -132,45 +181,59 @@ export default function Hueco() {
   const choose = (next: HoleState) => {
     update({ state: next === auto ? undefined : next })
     setPicking(false)
-    setNaming(false)
+    setChoosing(false)
+    setWorry(null)
     setLast(null)
+    setFresh(null)
     resumed.current = n > 0
   }
 
   const again = () => {
-    update({ built: [], named: undefined, reason: undefined, out: false })
+    update({ built: [], named: undefined, sorted: undefined, remembered: undefined, reason: undefined, out: false })
     setLast(null)
     setFresh(null)
     setFirstOut(false)
     resumed.current = false
   }
 
+  const ask =
+    place.scene === 'faro' ? (worry ? jarAsk(worry) : WORRY_ASK) : place.scene === 'faroles' ? REMEMBER_ASK : NAME_ASK
+  const secondSays =
+    place.scene === 'faro'
+      ? sortedSays(!!lastSorted?.mine)
+      : place.scene === 'faroles'
+        ? rememberedPerson
+          ? rememberSays(firstName(rememberedPerson))
+          : (rememberedOption?.says ?? rememberSays('esa persona'))
+        : namedSays(climb.named ?? '')
   const says = breath
     ? breath.phase === 'in'
       ? `Toma aire… ${breath.count}`
       : `Suéltalo despacio… ${breath.count}`
     : out
-      ? OUT_SAYS
-      : naming
-        ? NAME_ASK
+      ? scene.outSays
+      : choosing
+        ? ask
         : last === 'respirar'
-          ? afterBreath(place.weather)
+          ? scene.afterBreath(place.weather)
           : last === 'nombrar'
-            ? namedSays(climb.named ?? '')
+            ? secondSays
             : last === 'razon'
-              ? reasonSays(!!reason)
+              ? scene.reasonSays(!!reason)
               : last === 'mano'
-                ? handSays(helper ? firstName(helper) : 'Alguien de confianza')
+                ? scene.handSays(helperName ?? 'Alguien de confianza')
                 : risk
-                  ? RISK_HELLO
+                  ? scene.riskHello
                   : resumed.current
-                    ? stillHere(n)
+                    ? scene.stillHere(n)
                     : place.hello
-  const idle = !breath && !out && !naming && !last && !resumed.current
+  const idle = !breath && !out && !choosing && !last && !resumed.current
+
+  const common = { look, name, place, built: climb.built, out, rope: risk, breath: breath?.phase ?? null, face, fresh }
 
   return (
     <div className="stack">
-      <PageHeader title="Salir del hueco" subtitle={`${name} y tú, un escalón a la vez. Aquí nada se pierde ni se cae.`} />
+      <PageHeader title="Salir del hueco" subtitle={`${name} y tú, un paso a la vez. Aquí nada se pierde ni se cae.`} />
 
       {!reading ? (
         <div className="card hole-card" aria-busy="true">
@@ -222,18 +285,14 @@ export default function Hueco() {
             </div>
           )}
 
-          <HoleScene
-            look={look}
-            name={name}
-            place={place}
-            built={climb.built}
-            named={climb.named}
-            out={out}
-            rope={risk}
-            breath={breath?.phase ?? null}
-            face={face}
-            fresh={fresh}
-          />
+          {/* Si el segundo paso lo hizo en otro lugar, su letrero dice lo que hizo allá */}
+          {place.scene === 'faro' ? (
+            <FaroScene {...common} sorted={sorted} />
+          ) : place.scene === 'faroles' ? (
+            <FarolesScene {...common} remembered={rememberedTag ?? climb.named?.toLowerCase() ?? (sorted.length ? 'acomodaste' : undefined)} />
+          ) : (
+            <HoleScene {...common} named={climb.named ?? (sorted.length ? 'acomodaste' : climb.remembered ? 'te acordaste' : undefined)} />
+          )}
 
           <PetSays mood={face} compact>
             <p aria-live="polite">{says}</p>
@@ -249,41 +308,131 @@ export default function Hueco() {
                 </button>
               </div>
             )}
-            {naming && (
+
+            {/* El segundo paso: lo que siente, un «¿y si…?» o de quién se acuerda */}
+            {choosing && place.scene === 'hueco' && (
               <div className="chips hole-feelings">
-                {place.feelings.map((f) => (
+                {(place.feelings ?? []).map((f) => (
                   <button key={f} type="button" className="chip" onClick={() => build('nombrar', { named: f })}>
                     {f}
                   </button>
                 ))}
               </div>
             )}
+            {choosing && place.scene === 'faro' && !worry && (
+              <div className="chips hole-feelings">
+                {[...worriesLeft, OWN_WORRY].map((w) => (
+                  <button key={w} type="button" className="chip" onClick={() => setWorry(w)}>
+                    {w}
+                  </button>
+                ))}
+              </div>
+            )}
+            {choosing && place.scene === 'faro' && worry && (
+              <div className="row hole-jars">
+                <button type="button" className="btn small" onClick={() => sort(true)}>
+                  {JAR_MINE}
+                </button>
+                <button type="button" className="btn small ghost" onClick={() => sort(false)}>
+                  {JAR_NOT_MINE}
+                </button>
+              </div>
+            )}
+            {choosing && place.scene === 'faroles' && (
+              <div className="chips hole-feelings">
+                {people
+                  .filter((p) => p.name.trim())
+                  .map((p) => (
+                    <button key={p.id} type="button" className="chip" onClick={() => build('nombrar', { remembered: `persona:${p.id}` })}>
+                      {firstName(p)}
+                    </button>
+                  ))}
+                {REMEMBER.map((r) => (
+                  <button key={r.id} type="button" className="chip" onClick={() => build('nombrar', { remembered: r.id })}>
+                    {r.label}
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {/* Cada paso puede volverse algo de verdad, si la persona quiere */}
+            {last === 'respirar' && (
+              <Link to="/calma" className="btn small ghost">
+                Seguir respirando en Calma
+              </Link>
+            )}
+            {last === 'nombrar' && place.scene === 'faro' && (lastSorted?.mine || (worriesLeft.length > 0 && !out)) && (
+              <div className="row hole-more">
+                {lastSorted?.mine && (
+                  <Link to="/mi-dia" className="btn small ghost">
+                    Anotar un pasito en Mi día
+                  </Link>
+                )}
+                {worriesLeft.length > 0 && !out && (
+                  <button
+                    type="button"
+                    className="btn small ghost"
+                    onClick={() => {
+                      setChoosing(true)
+                      setWorry(null)
+                    }}
+                  >
+                    Acomodar otro
+                  </button>
+                )}
+              </div>
+            )}
+            {last === 'nombrar' && rememberedPerson && reachable.includes(rememberedPerson) && (
+              <>
+                <a className="btn small" href={whatsappOf(rememberedPerson.phone, country, MISS_YOU)} target="_blank" rel="noreferrer">
+                  Escribirle a {firstName(rememberedPerson)}
+                </a>
+                <p className="muted small">Se abre WhatsApp con «{MISS_YOU}». Solo se manda si tú lo envías.</p>
+              </>
+            )}
             {last === 'razon' &&
               (reason ? (
                 <>
                   <p className="hole-reason">{reason.text}</p>
                   <p className="muted small">La guardaste en tu caja de esperanza.</p>
+                  <Link to="/mi-espacio/caja" className="btn small ghost">
+                    Abrir mi caja de esperanza
+                  </Link>
                 </>
               ) : (
                 <Link to="/mi-espacio/caja" className="btn small ghost">
                   Guardar una razón para seguir
                 </Link>
               ))}
-            {last === 'mano' && !helper && (
-              <Link to="/mi-espacio/personas" className="btn small ghost">
-                Anotar a alguien de confianza
+            {last === 'mano' &&
+              (helper && reachable.includes(helper) ? (
+                <>
+                  <a className="btn small" href={whatsappOf(helper.phone, country, message)} target="_blank" rel="noreferrer">
+                    Mandarle un WhatsApp a {helperName ?? 'tu persona de confianza'}
+                  </a>
+                  <p className="muted small">Se abre WhatsApp con tu mensaje: «{message}». Solo se manda si tú lo envías.</p>
+                </>
+              ) : (
+                <Link to="/mi-espacio/personas" className="btn small ghost">
+                  {helperName ? `Anotar el teléfono de ${helperName}` : 'Anotar a alguien de confianza'}
+                </Link>
+              ))}
+            {last === 'mano' && planned && (
+              <Link to="/mi-espacio/plan" className="btn small ghost">
+                Ver mi plan para días difíciles
               </Link>
             )}
-            {idle && risk && <p className="muted small">La cuerda ya está aquí. Cuando quieras, también respiro contigo.</p>}
+
+            {idle && risk && <p className="muted small">{scene.riskHint}</p>}
             {idle && heavy && !risk && <p className="muted small">{HEAVY_HINT}</p>}
             {out && (
               <>
                 {firstOut && companion && (
                   <p className="muted small">
-                    Este día se guardó en «Nuestros momentos», y en el rincón de {name} ya hay una cuerda tejida.
+                    Este día se guardó en «Nuestros momentos», y en el rincón de {name} ya hay {scene.keepsake}.
                   </p>
                 )}
-                {!companion && <p className="muted small">Si creas tu mascota, será quien salga contigo del hueco.</p>}
+                {!companion && <p className="muted small">Si creas tu mascota, será quien salga contigo.</p>}
                 <div className="row">
                   <button type="button" className="btn small" onClick={again}>
                     Volver a jugar
@@ -298,21 +447,21 @@ export default function Hueco() {
 
           {!out && (
             <div className="hole-actions">
-              {STEPS.map(({ id, label }) => {
-                const Icon = ICONS[id]
+              {STEP_ORDER.map((id) => {
+                const Icon = ICONS[place.scene][id]
                 const done = climb.built.includes(id)
                 return (
                   <button
                     key={id}
                     type="button"
-                    className={`hole-act${done ? ' done' : ''}${naming && id === 'nombrar' ? ' active' : ''}`}
+                    className={`hole-act${done ? ' done' : ''}${choosing && id === 'nombrar' ? ' active' : ''}`}
                     disabled={done || !!breath}
                     onClick={() => act(id)}
                   >
                     <span className="hole-ico" aria-hidden="true">
                       <Icon size={18} strokeWidth={2} />
                     </span>
-                    <span>{label}</span>
+                    <span>{scene.steps[id]}</span>
                     {done && <span className="visually-hidden">, hecho</span>}
                   </button>
                 )
@@ -326,7 +475,7 @@ export default function Hueco() {
                 <i key={i} className={i < n ? 'on' : ''} />
               ))}
             </span>
-            <span className="muted small">{out ? 'Afuera' : n === 0 ? 'En el fondo' : `${n} de 4 escalones`}</span>
+            <span className="muted small">{out ? scene.end : n === 0 ? scene.start : `${n} de 4 ${scene.unit}`}</span>
           </div>
         </section>
       )}

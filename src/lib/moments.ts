@@ -2,6 +2,7 @@ import type { BodyRecord } from './bodyCheck'
 import type { Review } from './companion'
 import { type DayPlan, planDone } from './dayplan'
 import { listThoughts } from './db'
+import { PLACE, type SceneId } from '../data/hueco'
 import { EXITS_KEY, type HoleExit } from './hueco'
 import { type JournalEntry, type Letter, localDate, read, store, today, useStored } from './storage'
 
@@ -22,6 +23,8 @@ export type MomentId =
   | 'platica'
   | 'especialista'
   | 'hueco'
+  | 'faro'
+  | 'faroles'
 
 export type Moment = { id: MomentId; emoji: string; title: string; text: string; item: string }
 
@@ -111,6 +114,20 @@ export const MOMENTS: Moment[] = [
     text: 'Un escalón a la vez, y salimos. Ahora ya conoces el camino.',
     item: 'una cuerda tejida, colgada en la pared',
   },
+  {
+    id: 'faro',
+    emoji: '⛵',
+    title: 'Llegamos al faro',
+    text: 'Respiramos, acomodamos los «¿y si…?» y la niebla se fue. El faro se quedó prendido.',
+    item: 'un faro chiquito en la ventana',
+  },
+  {
+    id: 'faroles',
+    emoji: '🏮',
+    title: 'Se armó la verbena',
+    text: 'Prendimos los faroles uno por uno, y con cada luz llegó alguien.',
+    item: 'un farol de papel, colgado en la pared',
+  },
 ]
 
 /** La fecha de cada momento vivido. */
@@ -165,8 +182,12 @@ export async function syncMoments() {
   const steps = read<Record<string, boolean>>('camino', {})
   on('especialista', Object.values(steps).some(Boolean))
 
+  // Salir del hueco: cada lugar (el hueco, el faro y los faroles) deja lo suyo la primera vez.
   const exits = read<HoleExit[]>(EXITS_KEY, [])
-  on('hueco', exits.length > 0, earliest(exits.map((e) => e.date)))
+  for (const scene of ['hueco', 'faro', 'faroles'] satisfies SceneId[]) {
+    const here = exits.filter((e) => PLACE[e.state]?.scene === scene)
+    on(scene, here.length > 0, earliest(here.map((e) => e.date)))
+  }
 
   const body = read<BodyRecord[]>('cuerpo-registros', [])
   const breathed = body.filter((r) => r.after !== null)

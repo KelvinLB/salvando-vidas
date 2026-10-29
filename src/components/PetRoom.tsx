@@ -22,6 +22,8 @@ const SPARK_AT: Partial<Record<MomentId, [number, number]>> = {
   platica: [292, 176],
   especialista: [110, 74],
   hueco: [300, 126],
+  faro: [58, 62],
+  faroles: [272, 122],
 }
 
 const STAR_COLORS = ['#f2c46d', '#f5b7c5', '#a9c8f0', '#b9dd8f', '#c7b5ee']
@@ -121,6 +123,30 @@ export default function PetRoom({ name, got, reasons, period, fresh, gift, child
   const lit = period !== 'dia' && has('plan')
   const when = period === 'dia' ? 'de día' : period === 'tarde' ? 'al atardecer' : 'de noche'
   const things = lived.map((m) => (m.id === 'razon' ? `${stars} ${stars === 1 ? 'estrellita' : 'estrellitas'} de papel` : m.item))
+
+  // El faro chiquito (por llegar al faro) y el farol de papel (por la verbena) también se prenden
+  // de tarde y de noche.
+  const glowing = period !== 'dia'
+  const faro = (
+    <g>
+      <path d="M37 94 L40 72 L48 72 L51 94 Z" className="room-faro" />
+      <path d="M38.9 78 L49.1 78 L49.5 81.5 L38.5 81.5 Z M37.9 86 L50.1 86 L50.5 89.5 L37.5 89.5 Z" className="room-faro-stripe" />
+      <rect x="39" y="66" width="10" height="6" rx="1" className={`room-faro-lamp${glowing ? ' on' : ''}`} />
+      <path d="M38 66 Q44 59 50 66 Z" className="room-faro-dome" />
+      <rect x="35" y="92" width="18" height="3" rx="1" className="room-faro-base" />
+    </g>
+  )
+  const lantern = (
+    <g>
+      <circle cx="258" cy="114" r="2.4" className="room-hook" />
+      <path d="M258 116 L258 121" className="room-thread" />
+      <ellipse cx="258" cy="133" rx="10" ry="11" className={`room-farol${glowing ? ' on' : ''}`} />
+      <path d="M249 128 Q258 131 267 128 M248.5 133 Q258 136 267.5 133 M249 138 Q258 141 267 138" className="room-farol-ribs" />
+      <rect x="252" y="120" width="12" height="3" rx="1" className="room-farol-cap" />
+      <rect x="252" y="143" width="12" height="3" rx="1" className="room-farol-cap" />
+      <path d="M258 146 L258 154" className="room-farol-tassel" />
+    </g>
+  )
 
   // La lamparita (por el plan): de tarde y de noche se prende.
   const lamp = (
@@ -288,6 +314,8 @@ export default function PetRoom({ name, got, reasons, period, fresh, gift, child
         )}
 
         {has('plan') && !lit && lamp}
+        {has('faro') && !glowing && faro}
+        {has('faroles') && !glowing && lantern}
 
         {/* Dos tazas para platicar, en una mesita */}
         {has('platica') && (
@@ -321,6 +349,18 @@ export default function PetRoom({ name, got, reasons, period, fresh, gift, child
           <>
             <circle cx="330" cy="140" r="62" fill={`url(#${id}-glow)`} className="room-glow" />
             {lamp}
+          </>
+        )}
+        {glowing && has('faro') && (
+          <>
+            <circle cx="44" cy="69" r="16" fill={`url(#${id}-glow)`} className="room-glow" />
+            {faro}
+          </>
+        )}
+        {glowing && has('faroles') && (
+          <>
+            <circle cx="258" cy="133" r="30" fill={`url(#${id}-glow)`} className="room-glow" />
+            {lantern}
           </>
         )}
       </svg>

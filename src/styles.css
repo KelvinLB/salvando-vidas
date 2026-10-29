@@ -4635,6 +4635,45 @@ html.diary-open {
 .room-rope-tie {
   fill: var(--room-rope-dark);
 }
+/* El faro chiquito y el farol de papel, que de tarde y de noche se prenden. */
+.room-faro {
+  fill: #f6f1e8;
+  stroke: #b8ab98;
+  stroke-width: 0.8;
+}
+.room-faro-stripe {
+  fill: #d9604f;
+}
+.room-faro-dome,
+.room-faro-base {
+  fill: #3a464e;
+}
+.room-faro-lamp {
+  fill: #b7c6cc;
+}
+.room-faro-lamp.on {
+  fill: #ffe39a;
+}
+.room-farol {
+  fill: #e8637f;
+}
+.room-farol.on {
+  fill: #ff9b86;
+}
+.room-farol-ribs {
+  fill: none;
+  stroke: #b8435e;
+  stroke-width: 1;
+}
+.room-farol-cap {
+  fill: #c9a24a;
+}
+.room-farol-tassel {
+  fill: none;
+  stroke: #c9a24a;
+  stroke-width: 2;
+  stroke-linecap: round;
+}
 .room-lamp-base {
   fill: #6f5a4a;
 }
@@ -4930,9 +4969,10 @@ html.diary-open {
 }
 
 /* ---------- Salir del hueco ---------- */
-/* El juego de Distraer: la mascota sube de un hueco que se parece al día de la persona. El
-   clima sale de sus registros y se aligera con cada escalón; lo hondo nunca cambia. Los
-   valores del clima (de 0 a 1) llegan como variables desde el componente. */
+/* El juego de Distraer: la mascota sale adelante en un lugar que se parece al día de la persona
+   (el hueco, el faro o los faroles). El clima sale de sus registros y se aligera con cada paso;
+   lo difícil nunca cambia. Los valores del clima (de 0 a 1) llegan como variables desde el
+   componente. */
 :root {
   --hole-sky-gris: #c3cad1;
   --hole-sky-bruma: #dfe3e4;
@@ -5474,7 +5514,7 @@ html.diary-open {
 }
 .hole-actions {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 8px;
 }
 .hole-act {
@@ -5525,6 +5565,15 @@ html.diary-open {
 .hole-act.done .hole-ico {
   background: var(--surface);
 }
+/* En teléfonos muy angostos se quitan los dibujitos de los pasos, para que quepan las palabras. */
+@media (max-width: 359px) {
+  .hole-act {
+    overflow-wrap: anywhere;
+  }
+  .hole-act .hole-ico {
+    display: none;
+  }
+}
 .hole-foot {
   display: flex;
   align-items: center;
@@ -5559,4 +5608,517 @@ html.diary-open {
   margin: 12px 0 8px;
   padding-left: 20px;
   color: var(--text-2);
+}
+
+/* Los botones del globo no se estiran: cada acción mide lo que dice */
+.hole-card :is(.pet-says-bubble, .pet-says.plain) > .btn {
+  justify-self: start;
+}
+.hole-jars,
+.hole-more {
+  gap: 8px;
+}
+
+/* ---------- El faro ---------- */
+/* Para los días de nervios: la mascota cruza en lancha entre la niebla, los «¿y si…?» se
+   acomodan en dos frascos y, con su razón, el faro se prende y barre la niebla. */
+:root {
+  --faro-sea-top: #8fb3c2;
+  --faro-sea-bottom: #3f6f86;
+  --faro-wave: #eef5f7;
+  --faro-rock: #8b918d;
+  --faro-rock-2: #737a76;
+  --faro-tower: #f6f1e8;
+  --faro-stripe: #d9604f;
+  --faro-trim: #3a464e;
+  --faro-glass: #b7c6cc;
+  --faro-lamp: #6f7b83;
+  --faro-wood: #a0744b;
+  --faro-wood-2: #7b5537;
+  --faro-boat: #e07a55;
+  --faro-boat-stripe: #fbf1dc;
+  --faro-buoy: #e8634f;
+  --faro-jar: rgba(236, 246, 250, 0.45);
+  --faro-jar-line: #9fb7c1;
+  --faro-lid: #c9a46a;
+  --faro-label: #fdf8ec;
+  --faro-label-ink: #4a3d2e;
+  --faro-note-mine: #ffe08a;
+  --faro-note-not: #dfe8f2;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --faro-sea-top: #3f5d6c;
+    --faro-sea-bottom: #152a36;
+    --faro-wave: #8fb0bf;
+    --faro-rock: #4a504d;
+    --faro-rock-2: #3c423f;
+    --faro-tower: #d8d1c5;
+    --faro-stripe: #b9493c;
+    --faro-trim: #1f272c;
+    --faro-glass: #6a7b82;
+    --faro-lamp: #4c565d;
+    --faro-wood: #74532f;
+    --faro-wood-2: #563c24;
+    --faro-boat: #c0643f;
+    --faro-boat-stripe: #eadbbd;
+    --faro-buoy: #c9503e;
+    --faro-jar: rgba(190, 215, 225, 0.18);
+    --faro-jar-line: #7895a1;
+    --faro-lid: #9c7c4c;
+    --faro-label: #e6dcc6;
+    --faro-note-mine: #e8c463;
+    --faro-note-not: #b8c6d4;
+  }
+}
+.faro-scene {
+  background: var(--faro-sea-bottom);
+}
+.faro-sea-top {
+  stop-color: var(--faro-sea-top);
+}
+.faro-sea-bottom {
+  stop-color: var(--faro-sea-bottom);
+}
+.faro-waves path {
+  fill: none;
+  stroke: var(--faro-wave);
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  opacity: 0.5;
+  animation: faro-wave 7s linear infinite;
+}
+.faro-waves .w1 {
+  opacity: 0.35;
+  animation-duration: 9s;
+  animation-direction: reverse;
+}
+.faro-waves .w2 {
+  opacity: 0.42;
+  animation-duration: 11s;
+}
+/* Cada ola mide 40: al recorrer eso, vuelve a empezar sin que se note. */
+@keyframes faro-wave {
+  to {
+    transform: translateX(40px);
+  }
+}
+.faro-rock {
+  fill: var(--faro-rock);
+}
+.faro-rock-2 {
+  fill: var(--faro-rock-2);
+}
+.faro-tower {
+  fill: var(--faro-tower);
+}
+.faro-stripe {
+  fill: var(--faro-stripe);
+}
+.faro-door,
+.faro-gallery,
+.faro-dome {
+  fill: var(--faro-trim);
+}
+.faro-room {
+  fill: var(--faro-glass);
+}
+.faro-mullions {
+  fill: none;
+  stroke: var(--faro-trim);
+  stroke-width: 1.5;
+}
+.faro-lamp {
+  fill: var(--faro-lamp);
+  transition: fill 0.8s ease;
+}
+.faro-lamp.on {
+  fill: var(--hole-glow);
+}
+.faro-glow,
+.faro-beam {
+  opacity: 0;
+  transition: opacity 1.2s ease;
+}
+:is(.faro-glow, .faro-beam).on {
+  opacity: 1;
+}
+/* La luz barre despacio de un lado a otro, desde la lámpara. */
+.faro-beam path {
+  transform-origin: 268px 81px;
+  animation: faro-sweep 9s ease-in-out infinite alternate;
+}
+@keyframes faro-sweep {
+  from {
+    transform: rotate(-7deg);
+  }
+  to {
+    transform: rotate(9deg);
+  }
+}
+.faro-plank {
+  fill: var(--faro-wood);
+}
+.faro-post {
+  fill: var(--faro-wood-2);
+}
+.faro-boat {
+  fill: var(--faro-boat);
+}
+.faro-boat-stripe {
+  fill: none;
+  stroke: var(--faro-boat-stripe);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+}
+/* La lancha, y la mascota en ella, se mecen con las olas. */
+.faro-bob {
+  animation: faro-bob 3.4s ease-in-out infinite alternate;
+}
+@keyframes faro-bob {
+  from {
+    transform: translateY(-1.5px);
+  }
+  to {
+    transform: translateY(2px);
+  }
+}
+
+/* Las boyas marcan el camino; cada tramo prende una */
+.faro-buoy-body {
+  fill: var(--faro-buoy);
+}
+.faro-buoy-band {
+  fill: none;
+  stroke: var(--faro-boat-stripe);
+  stroke-width: 1.8;
+}
+.faro-buoy-pole {
+  fill: none;
+  stroke: var(--faro-trim);
+  stroke-width: 1.6;
+}
+.faro-buoy-light {
+  fill: var(--faro-lamp);
+  transition: fill 0.6s ease;
+}
+.faro-buoy-glow {
+  opacity: 0;
+  transition: opacity 0.8s ease;
+}
+.faro-buoy.on .faro-buoy-light {
+  fill: var(--hole-glow);
+}
+.faro-buoy.on .faro-buoy-glow {
+  opacity: 1;
+}
+.faro-buoy.new :is(.faro-buoy-light, .faro-buoy-glow) {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: faro-pop 0.7s cubic-bezier(0.2, 0.9, 0.3, 1.4) both;
+}
+@keyframes faro-pop {
+  from {
+    transform: scale(0.2);
+  }
+}
+
+/* Cada «¿y si…?» acomodado vuela a su frasco y ahí se queda, como un papelito */
+.faro-worry {
+  transition: transform 1.1s cubic-bezier(0.45, 0, 0.25, 1), opacity 0.5s ease 0.8s;
+}
+.faro-worry.gone {
+  opacity: 0;
+}
+.faro-jar-glass {
+  fill: var(--faro-jar);
+  stroke: var(--faro-jar-line);
+  stroke-width: 1.5;
+}
+.faro-jar-lid {
+  fill: var(--faro-lid);
+}
+.faro-jar-label {
+  fill: var(--faro-label);
+}
+.faro-jar-text {
+  fill: var(--faro-label-ink);
+  font-family: var(--hand);
+  font-size: 13px;
+  font-weight: 700;
+  text-anchor: middle;
+}
+.faro-note {
+  fill: var(--faro-note-mine);
+  animation: faro-note-in 0.5s ease 0.9s both;
+}
+.faro-jar.not-mine .faro-note {
+  fill: var(--faro-note-not);
+}
+@keyframes faro-note-in {
+  from {
+    opacity: 0;
+  }
+}
+
+/* ---------- Los faroles ---------- */
+/* Para los días de soledad: una calle de pueblo de noche. Cada farol que se prende abre la
+   oscuridad a su alrededor, le da color al papel picado y trae a alguien más. */
+:root {
+  --farol-house-1: #f0b44c;
+  --farol-house-2: #e27d90;
+  --farol-house-3: #5fa8ad;
+  --farol-house-4: #e88b58;
+  --farol-cornice: #fbf1df;
+  --farol-door: #6b4a32;
+  --farol-window: #3b4160;
+  --farol-sidewalk: #cdbfa9;
+  --farol-street: #93877a;
+  --farol-cobble: #a89b8a;
+  --farol-iron: #3c434b;
+  --farol-glass: #8f98aa;
+  --farol-string: #6b5a48;
+  --farol-note: #fff4d6;
+  --farol-papel-0: #e8637f;
+  --farol-papel-1: #f39a3d;
+  --farol-papel-2: #f5d15a;
+  --farol-papel-3: #62bd93;
+  --farol-papel-4: #58a0dc;
+  --farol-papel-5: #9b7fd1;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --farol-house-1: #a77a2f;
+    --farol-house-2: #9c5263;
+    --farol-house-3: #3f7479;
+    --farol-house-4: #9e5c39;
+    --farol-cornice: #c8bca8;
+    --farol-door: #3e2b1d;
+    --farol-window: #232842;
+    --farol-sidewalk: #5d554a;
+    --farol-street: #3b3530;
+    --farol-cobble: #4a433c;
+    --farol-iron: #59616b;
+    --farol-glass: #6d7588;
+    --farol-string: #a89a88;
+    --farol-papel-0: #d65a75;
+    --farol-papel-1: #d9862f;
+    --farol-papel-2: #d8b748;
+    --farol-papel-3: #4ea37b;
+    --farol-papel-4: #4886bd;
+    --farol-papel-5: #8569b8;
+  }
+}
+.faroles-scene {
+  background: var(--farol-street);
+}
+.farol-house.t1 {
+  fill: var(--farol-house-1);
+}
+.farol-house.t2 {
+  fill: var(--farol-house-2);
+}
+.farol-house.t3 {
+  fill: var(--farol-house-3);
+}
+.farol-house.t4 {
+  fill: var(--farol-house-4);
+}
+.farol-cornice {
+  fill: var(--farol-cornice);
+}
+.farol-door {
+  fill: var(--farol-door);
+}
+.farol-window {
+  fill: var(--farol-window);
+  transition: fill 0.9s ease 0.3s;
+}
+.farol-window.on {
+  fill: var(--hole-glow);
+}
+.farol-sidewalk {
+  fill: var(--farol-sidewalk);
+}
+.farol-street {
+  fill: var(--farol-street);
+}
+.farol-cobbles {
+  fill: var(--farol-cobble);
+}
+
+/* El papel picado: se llena de color con cada farol y, en la verbena, se mece */
+.farol-papel {
+  opacity: var(--papel);
+  transition: opacity 1.2s ease;
+}
+.farol-string {
+  fill: none;
+  stroke: var(--farol-string);
+  stroke-width: 1;
+}
+.farol-flag.p0 {
+  fill: var(--farol-papel-0);
+}
+.farol-flag.p1 {
+  fill: var(--farol-papel-1);
+}
+.farol-flag.p2 {
+  fill: var(--farol-papel-2);
+}
+.farol-flag.p3 {
+  fill: var(--farol-papel-3);
+}
+.farol-flag.p4 {
+  fill: var(--farol-papel-4);
+}
+.farol-flag.p5 {
+  fill: var(--farol-papel-5);
+}
+.farol-cut {
+  fill: var(--hole-sky-noche);
+  opacity: 0.6;
+}
+.faroles-scene.out .farol-flag {
+  transform-box: fill-box;
+  transform-origin: top center;
+  animation: farol-sway 2.6s ease-in-out infinite alternate;
+}
+.faroles-scene.out .farol-flag:nth-child(odd) {
+  animation-delay: -1.3s;
+}
+@keyframes farol-sway {
+  from {
+    transform: rotate(-5deg);
+  }
+  to {
+    transform: rotate(5deg);
+  }
+}
+
+/* Los faroles: siempre se ven (el camino ya está ahí), y prendidos alumbran */
+.farol-post,
+.farol-cap {
+  fill: var(--farol-iron);
+}
+.farol-frame {
+  fill: none;
+  stroke: var(--farol-iron);
+  stroke-width: 1.6;
+}
+.farol-glass {
+  fill: var(--farol-glass);
+  transition: fill 0.8s ease;
+}
+.farol.on .farol-glass {
+  fill: var(--hole-glow);
+}
+.farol-glow {
+  opacity: 0;
+  transition: opacity 1s ease;
+}
+.farol.on .farol-glow {
+  opacity: 1;
+}
+/* La flama tiembla un poquito; se anima el tamaño para no pelear con el encendido. */
+.farol.on .farol-glow,
+.farol-hand-glow {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: farol-flicker 3.2s ease-in-out infinite alternate;
+}
+.farol-hand-glow {
+  animation-duration: 2.6s;
+}
+@keyframes farol-flicker {
+  from {
+    transform: scale(0.93);
+  }
+  to {
+    transform: scale(1.05);
+  }
+}
+/* En la máscara de la noche: alrededor de cada farol prendido ya se ve */
+.farol-spot {
+  opacity: 0;
+  transition: opacity 1.2s ease;
+}
+.farol-spot.on {
+  opacity: 1;
+}
+.farol-people .hole-person {
+  opacity: 0;
+  transition: opacity 1s ease 0.4s;
+}
+.farol-people .hole-person.on {
+  opacity: 1;
+}
+.farol-hand {
+  fill: var(--hole-glow);
+  stroke: var(--farol-iron);
+  stroke-width: 1.2;
+}
+.farol-hand-line {
+  fill: none;
+  stroke: var(--farol-iron);
+  stroke-width: 1.6;
+  stroke-linecap: round;
+}
+
+/* La verbena: foquitos, música y la mascota que baila */
+.farol-bulb {
+  fill: var(--hole-glow);
+  animation: farol-twinkle 1.8s ease-in-out infinite alternate;
+}
+.farol-bulb:nth-child(3n + 1) {
+  animation-delay: -0.6s;
+}
+.farol-bulb:nth-child(3n + 2) {
+  animation-delay: -1.2s;
+}
+@keyframes farol-twinkle {
+  from {
+    opacity: 0.55;
+  }
+}
+.farol-note {
+  fill: var(--farol-note);
+  stroke: var(--farol-iron);
+  stroke-width: 3;
+  paint-order: stroke;
+  font-size: 18px;
+  font-weight: 700;
+  animation: farol-note 2.8s ease-in-out infinite;
+}
+.farol-note.n1 {
+  animation-delay: -0.9s;
+}
+.farol-note.n2 {
+  animation-delay: -1.8s;
+}
+@keyframes farol-note {
+  0% {
+    transform: translateY(4px);
+    opacity: 0;
+  }
+  30% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-14px);
+    opacity: 0;
+  }
+}
+.farol-dance {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+  animation: farol-dance 1s ease-in-out infinite alternate;
+}
+@keyframes farol-dance {
+  from {
+    transform: rotate(-5deg);
+  }
+  to {
+    transform: translateY(-3px) rotate(5deg);
+  }
 }
