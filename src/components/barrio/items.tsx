@@ -116,6 +116,18 @@ export const ITEM_ART: Record<ItemId, ReactNode> = {
       </g>
     </>
   ),
+  // El rebozo de Doña Chayo, colgado en su perchero de madera, con rayas y flecos.
+  rebozo: (
+    <>
+      <path d="M-14 0 V-40 M14 0 V-40" stroke="#8a5f3d" strokeWidth="3" strokeLinecap="round" />
+      <path d="M-17 0 h7 M10 0 h7" stroke="#6e4c33" strokeWidth="3" strokeLinecap="round" />
+      <path d="M-17 -40 h34" stroke="#6e4c33" strokeWidth="3.5" strokeLinecap="round" />
+      <path d="M-11 -40 Q-13 -24 -10 -12 L10 -12 Q13 -24 11 -40Z" fill="#b8406f" />
+      <path d="M-12 -33 h24 M-12.4 -27 h24.8 M-11.8 -19 h23.6" stroke="#f2c14e" strokeWidth="1.4" />
+      <path d="M-12 -30 h24 M-11.6 -22 h23.2" stroke="#fdfcfa" strokeWidth=".8" opacity=".8" />
+      <path d="M-9 -12 v5 M-5.5 -12 v6 M-2 -12 v5 M1.5 -12 v6 M5 -12 v5 M8.5 -12 v6" stroke="#b8406f" strokeWidth="1.2" strokeLinecap="round" />
+    </>
+  ),
   bugambilia: (
     <>
       <path d="M-10 -12 h20 l-3 12 h-14z" fill="#b86b45" />

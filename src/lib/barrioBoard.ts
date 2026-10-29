@@ -12,7 +12,8 @@ import { localDate, today } from './storage'
 // 1. Riesgo (contó hace poco que ha pensado en hacerse daño, o lo que escribió suena a eso):
 //    primero la ayuda, y solo lo más suave: respirar en el kiosco, un vaso de agua y Salir del
 //    hueco (que ya trae su botón de ayuda). Nada de exposición ni de pensamientos difíciles.
-// 2. De noche (de 22 a 6 h): algo para descansar, el kiosco y el agua.
+// 2. De noche (de 22 a 6 h): algo para descansar, el kiosco, el agua y desenredar con Doña
+//    Chayo (Hilos sueltos tiene su modo noche).
 // 3. Día pesado (ánimo de hoy bajo o la mascota triste, apagada, nerviosa o cansada): solo
 //    misiones chiquitas (`small`).
 // 4. Lo que salió en sus registros va primero: con nervios, respirar y las cinco cosas (y la
@@ -34,7 +35,7 @@ import { localDate, today } from './storage'
 
 const NIGHT = (hour: number) => hour >= 22 || hour < 6
 const GENTLE: MissionId[] = ['kiosco', 'agua', 'hueco']
-const REST: MissionId[] = ['kiosco', 'agua']
+const REST: MissionId[] = ['kiosco', 'agua', 'desenredar']
 const MAX = 3
 
 /** Pesos: lo que contestó hoy pesa más que lo que hizo otros días; los rumbos y lo nuevo, poquito. */

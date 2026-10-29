@@ -21,6 +21,9 @@ export type Technique =
   | 'autocompasion'
   | 'bondad'
   | 'hueco'
+  /** Una actividad tranquila que ocupa los ojos y las manos (el juego «Hilos sueltos»): un
+   * descanso para la cabeza, sin reloj ni puntos. No es una técnica para «resolver» nada. */
+  | 'calma'
 
 export const MISSIONS = [
   { id: 'mandado', npc: 'tere', title: 'Un mandado de verdad', technique: 'activacion', values: ['disfrutar', 'cuerpo', 'familia'], small: true, real: true, reward: 'papel' },
@@ -32,6 +35,7 @@ export const MISSIONS = [
   { id: 'banca', npc: 'rosa', title: 'La banca de la plaza', technique: 'autocompasion', values: ['familia'], small: true, real: false, reward: 'cojin' },
   { id: 'carta', npc: 'memo', title: 'Una carta de bondad', technique: 'bondad', values: ['comunidad', 'familia'], small: true, real: false, reward: 'jarro' },
   { id: 'hueco', npc: 'lumi', title: 'Salir del hueco', technique: 'hueco', values: ['cuerpo', 'familia'], small: false, real: false, reward: 'cuerda' },
+  { id: 'desenredar', npc: 'chayo', title: 'Desenredar', technique: 'calma', values: ['disfrutar'], small: true, real: false, reward: 'rebozo' },
 ] as const satisfies readonly {
   id: string
   npc: string
@@ -57,6 +61,7 @@ export const NEIGHBORS = [
   { id: 'ramiro', name: 'Don Ramiro', role: 'el carpintero' },
   { id: 'rosa', name: 'Rosa', role: 'la vecina de la banca' },
   { id: 'memo', name: 'Memo', role: 'el cartero' },
+  { id: 'chayo', name: 'Doña Chayo', role: 'la tejedora del mercado' },
 ] as const
 export type NeighborId = (typeof NEIGHBORS)[number]['id']
 
@@ -77,6 +82,7 @@ export const ITEMS = [
   { id: 'banquito', label: 'Banquito de madera', from: { mission: 'taller' } },
   { id: 'cojin', label: 'Cojín bordado', from: { mission: 'banca' } },
   { id: 'jarro', label: 'Jarro de barro', from: { mission: 'carta' } },
+  { id: 'rebozo', label: 'Rebozo', from: { mission: 'desenredar' } },
   { id: 'bugambilia', label: 'Bugambilia', from: { values: 1 } },
   { id: 'nopal', label: 'Nopal en maceta', from: { values: 3 } },
   { id: 'comal', label: 'Comal', from: { missions: 4 } },

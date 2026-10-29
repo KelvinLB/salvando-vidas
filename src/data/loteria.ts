@@ -79,6 +79,13 @@ export const LOTERIA: LoteriaCard[] = [
     saying: 'Gota a gota se llena el cántaro.',
     idea: 'Lo básico (un vaso de agua, comer algo, descansar) se junta poquito a poquito, y también cuida cómo te sientes.',
   },
+  {
+    mission: 'desenredar',
+    number: 48,
+    name: 'El Rebozo',
+    saying: 'Más vale maña que fuerza.',
+    idea: 'Los hilos no se desenredan a jalones: con calma y una pieza a la vez. Algo tranquilo para los ojos y las manos también le da un respiro a la cabeza.',
+  },
 ]
 
 export const cardOf = (mission: MissionId) => LOTERIA.find((c) => c.mission === mission)!

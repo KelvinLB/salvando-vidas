@@ -191,6 +191,7 @@ const CLINICAL: Record<MissionId, string> = {
   banca: 'autocompasión',
   carta: 'actos de bondad',
   hueco: 'el juego «Salir del hueco»',
+  desenredar: 'una actividad tranquila para descansar la cabeza (el juego «Hilos sueltos»)',
 }
 
 const times = (n: number) => `${n} ${n === 1 ? 'vez' : 'veces'}`

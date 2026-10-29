@@ -4,6 +4,7 @@ import Agua from './Agua'
 import Banca from './Banca'
 import Carta from './Carta'
 import Cinco from './Cinco'
+import Desenredar from './Desenredar'
 import HuecoMision from './HuecoMision'
 import Kiosco from './Kiosco'
 import Mandado from './Mandado'
@@ -21,4 +22,5 @@ export const FLOWS: Record<MissionId, MissionFlow> = {
   banca: Banca,
   carta: Carta,
   hueco: HuecoMision,
+  desenredar: Desenredar,
 }

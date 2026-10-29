@@ -35,6 +35,7 @@ const NAMES: Record<string, string> = {
   '/juegos/burbujas': 'burbujas',
   '/juegos/pizarra': 'la pizarra',
   '/juegos/hueco': 'salir del hueco',
+  '/juegos/hilos': 'hilos sueltos',
   '/responder': 'responderle',
   '/mascota': 'tu mascota',
   '/mi-dia': 'Mi día',

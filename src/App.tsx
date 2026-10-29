@@ -31,6 +31,7 @@ import Burbujas from './pages/juegos/Burbujas'
 import Pizarra from './pages/juegos/Pizarra'
 import Hueco from './pages/juegos/Hueco'
 import Acomodar from './pages/juegos/Acomodar'
+import Hilos from './pages/juegos/Hilos'
 import Barrio from './pages/Barrio'
 
 export default function App() {
@@ -54,6 +55,7 @@ export default function App() {
         <Route path="juegos/pizarra" element={<Pizarra />} />
         <Route path="juegos/hueco" element={<Hueco />} />
         <Route path="juegos/acomodar" element={<Acomodar />} />
+        <Route path="juegos/hilos" element={<Hilos />} />
         <Route path="barrio" element={<Barrio />} />
         <Route path="mi-espacio" element={<MiEspacio />} />
         <Route path="mi-espacio/plan" element={<PlanDeSeguridad />} />

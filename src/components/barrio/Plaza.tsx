@@ -2,6 +2,7 @@ import type { ReactNode, Ref } from 'react'
 import { MISSIONS, type MissionId, NEIGHBORS, type NeighborId } from '../../data/barrio'
 import type { CompanionLook, CompanionMood } from '../../data/companion'
 import type { House } from '../../lib/barrio'
+import { usePatches } from '../../lib/hilos'
 import type { Season } from '../../lib/barrioSeason'
 import {
   Banca,
@@ -30,6 +31,7 @@ import {
   Puesto,
   Tablero,
   Taller,
+  Telar,
   Tiendita,
   Toldo,
 } from './drawings'
@@ -56,6 +58,7 @@ const PLACE_OF: Partial<Record<PlazaSpot, NeighborId>> = {
   mercado: 'beto',
   taller: 'ramiro',
   buzon: 'memo',
+  telar: 'chayo',
 }
 
 const MARK_Y: Partial<Record<NeighborId, number>> = { nico: -56, rosa: -66 }
@@ -126,6 +129,8 @@ type Props = {
 type Hanging = Thing & { walkable: true }
 
 export default function Plaza({ house, values, board, talking, glow, season, pet, start, onNeighbor, onSpot, view, onStep, ref }: Props) {
+  // El bordado más nuevo de «Hilos sueltos» cuelga en el puesto de Doña Chayo.
+  const [patches] = usePatches()
   const waiting = new Set(board.map((id) => MISSIONS.find((m) => m.id === id)!.npc as string))
   const S = WORLD_SPOTS
 
@@ -186,6 +191,7 @@ export default function Plaza({ house, values, board, talking, glow, season, pet
     // El mercado
     place('mercado', <Mercado />, 'El puesto del mercado de Don Beto'),
     place('puesto', <Puesto />, 'El puesto de aguas frescas de Doña Lupe'),
+    place('telar', <Telar patch={patches[0]} />, `El puesto de rebozos de Doña Chayo${patches.length ? ', con tu bordado colgado' : ''}`),
     // La alameda
     { ...spot('fuente', <Fuente />, 'La fuente de la alameda'), span: true },
     place('buzon', <Buzon />, 'El buzón de Memo, el cartero'),

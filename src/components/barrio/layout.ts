@@ -22,7 +22,7 @@ export type ZoneId = 'plaza' | 'mercado' | 'oficios' | 'alameda' | 'micalle' | '
 /** Los rumbos del barrio. `door` es un cuadrito libre para llegar a cada uno. */
 export const ZONES: { id: ZoneId; name: string; hint: string; r0: number; c0: number; r1: number; c1: number; door: Tile }[] = [
   { id: 'plaza', name: 'La plaza', hint: 'El corazón del barrio: el kiosco, el tablero y Nico contando palomas.', r0: 11, c0: 11, r1: 19, c1: 19, door: [18, 15] },
-  { id: 'mercado', name: 'El mercado', hint: 'Toldos de colores, fruta fresca y las aguas de Doña Lupe.', r0: 11, c0: 21, r1: 19, c1: 29, door: [16, 21] },
+  { id: 'mercado', name: 'El mercado', hint: 'Toldos de colores, fruta fresca, las aguas de Doña Lupe y los rebozos de Doña Chayo.', r0: 11, c0: 21, r1: 19, c1: 29, door: [16, 21] },
   { id: 'oficios', name: 'La calle de los oficios', hint: 'Aquí las cosas se hacen con las manos, poco a poco.', r0: 1, c0: 11, r1: 9, c1: 19, door: [7, 15] },
   { id: 'alameda', name: 'La alameda', hint: 'Árboles, bancas y sombrita para andar despacio.', r0: 21, c0: 11, r1: 29, c1: 29, door: [22, 20] },
   { id: 'micalle', name: 'Mi calle', hint: 'Tu casa, tus vecinos y la casita de los juegos.', r0: 11, c0: 1, r1: 29, c1: 9, door: [16, 5] },
@@ -129,6 +129,8 @@ export const WORLD_SPOTS = {
   // El mercado
   mercado: { r: 14, c: 22 },
   puesto: { r: 14, c: 25 },
+  /** El puesto de rebozos de Doña Chayo, al fondo del mercado. */
+  telar: { r: 12, c: 26 },
   // La alameda
   fuente: { r: 25, c: 20, span: true },
   buzon: { r: 23, c: 27 },
@@ -146,6 +148,7 @@ export const WORLD_SPOTS = {
   lupe: { r: 13, c: 25 },
   rosa: { r: 23, c: 14 },
   memo: { r: 23, c: 26 },
+  chayo: { r: 11, c: 26 },
 } satisfies Record<string, { r: number; c: number; span?: boolean }>
 
 export type PlazaSpot = keyof typeof WORLD_SPOTS

@@ -17,7 +17,7 @@ import { buzz, pick, useStored } from '../lib/storage'
 const SIZE = 68
 const GAP = 10
 const PEEK = 26
-const NOT_ON = ['/mascota', '/panico', '/ayuda', '/mi-espacio/ajustes', '/juegos/hueco', '/barrio']
+const NOT_ON = ['/mascota', '/panico', '/ayuda', '/mi-espacio/ajustes', '/juegos/hueco', '/barrio', '/juegos/hilos']
 
 /** De qué lado vive y a qué altura, como fracción del alto de la pantalla. */
 type Spot = { side: 'left' | 'right'; y: number }

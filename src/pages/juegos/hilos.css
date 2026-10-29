@@ -1,0 +1,161 @@
+/* ---------- Hilos sueltos ----------
+   Los colores de las piezas y los hilos viven en components/hilos/threads.css. */
+
+.card.h-card {
+  gap: 14px;
+  padding: 14px;
+}
+
+/* Los tres tamaños, en un renglón aunque el teléfono sea angosto. */
+.h-sizes {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+}
+.h-sizes .chip {
+  padding: 4px 6px;
+  border-radius: 14px;
+  font-size: 0.9rem;
+  line-height: 1.2;
+}
+
+/* El tablero: al respirar, el bordado crece sin salirse de su tarjeta. */
+.h-board {
+  display: grid;
+  place-items: center;
+  padding: 8px;
+  border-radius: 16px;
+  background: var(--surface-soft);
+  overflow: hidden;
+  transition: filter 0.4s;
+}
+.h-board.h-night {
+  filter: saturate(0.6) brightness(0.92);
+}
+.h-board svg {
+  display: block;
+  width: 100%;
+  max-width: 520px;
+  height: auto;
+  overflow: visible;
+  touch-action: manipulation;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.h-hex {
+  cursor: pointer;
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.h-hex.h-empty {
+  cursor: default;
+}
+.h-bg {
+  fill: var(--h-tile);
+  stroke: transparent;
+  stroke-width: 3;
+  transition: fill 0.3s;
+}
+@media (hover: hover) {
+  .h-hex:not(.h-empty, .h-colored):hover .h-bg {
+    fill: var(--h-tile-on);
+  }
+}
+.h-hex:focus-visible .h-bg {
+  stroke: var(--accent);
+}
+.h-spin {
+  transition: transform 0.28s cubic-bezier(0.3, 0.7, 0.3, 1);
+}
+.h-hex .h-th {
+  transition: stroke 0.4s;
+}
+.h-hex .h-knot {
+  transition: fill 0.4s;
+}
+.h-hex.h-ok .h-th {
+  stroke: var(--h-thread);
+}
+.h-hex.h-ok .h-knot {
+  fill: var(--h-thread);
+}
+.h-done .h-bg {
+  fill: transparent;
+}
+
+.h-weave {
+  transform-box: fill-box;
+  transform-origin: center;
+  transition: transform 4s ease-in-out;
+}
+.h-weave.in {
+  transform: scale(1.06);
+}
+.h-weave.out {
+  transform: scale(1);
+  transition-duration: 6s;
+}
+
+.row.h-acts {
+  gap: 8px;
+}
+.btn.h-night-btn.on {
+  border-color: var(--primary);
+  background: var(--primary-soft);
+}
+.row.h-breath {
+  gap: 8px;
+}
+
+.h-patches {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+.h-patch {
+  display: grid;
+  place-items: center;
+  aspect-ratio: 1;
+  border: 1px dashed var(--border);
+  border-radius: 12px;
+  background: var(--surface-soft);
+}
+.h-patch.got {
+  border-style: solid;
+  border-color: var(--warm-border);
+  background: var(--warm);
+}
+.h-patch svg {
+  width: 88%;
+  height: 88%;
+}
+
+.h-how ul {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding-left: 20px;
+  color: var(--text-2);
+}
+
+@media (min-width: 600px) {
+  .h-board {
+    padding: 16px;
+  }
+}
+
+/* Sin movimiento: las piezas cambian de lugar sin girar y al respirar solo se cuenta. */
+@media (prefers-reduced-motion: reduce) {
+  .h-board,
+  .h-bg,
+  .h-spin,
+  .h-hex .h-th,
+  .h-hex .h-knot,
+  .h-weave {
+    transition: none !important;
+  }
+  .h-weave.in {
+    transform: none;
+  }
+}

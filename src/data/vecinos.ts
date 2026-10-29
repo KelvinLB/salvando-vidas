@@ -160,4 +160,22 @@ export const STORIES: Record<NeighborId, Chapter[]> = {
       text: 'La soledad no se me quitó de un día para otro. Pero ahora, cuando me siento solo, sé que puedo tocar una puerta.',
     },
   ],
+  chayo: [
+    {
+      unlock: { always: true },
+      text: 'Hubo un tiempo en que la cabeza se me hacía bolas, como estambre que se cae al piso. Una preocupación jalaba a otra y ya no sabía ni por dónde empezar.',
+    },
+    {
+      unlock: { own: true },
+      text: 'Mi abuela, que me enseñó a tejer, decía: «Los nudos no se sacan a jalones; uno por uno y con calma». Volví a tejer, nomás un ratito en las tardes.',
+    },
+    {
+      unlock: { missions: 3 },
+      text: 'Tejer no me quitaba las preocupaciones, pero me daba un descanso. También platiqué con la enfermera del centro de salud, y me ayudó a ver qué sí estaba en mis manos.',
+    },
+    {
+      unlock: { weeks: 3 },
+      text: 'Todavía hay días enredados. Esos días tejo algo chiquito, una pieza nomás. Cada rebozo de mi puesto empezó con un hilo suelto.',
+    },
+  ],
 }

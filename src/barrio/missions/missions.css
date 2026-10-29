@@ -31,6 +31,7 @@
 .bm-npc-ramiro { --npc: var(--tone-estres); }
 .bm-npc-rosa { --npc: var(--tone-mania); }
 .bm-npc-memo { --npc: var(--tone-animo); }
+.bm-npc-chayo { --npc: var(--tone-mania); }
 
 .bm-face {
   display: grid;
@@ -464,4 +465,28 @@ button.bm-step {
   .bm-dot {
     transition: none;
   }
+}
+
+/* ---------- Desenredar: el bordado de la persona, colgado con Doña Chayo ---------- */
+
+.bm-patch {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0;
+  padding: 8px 12px;
+  border-radius: 14px;
+  background: var(--surface-soft);
+}
+.bm-patch-art {
+  flex: none;
+  width: 64px;
+  height: 64px;
+  padding: 4px;
+  border: 1.5px dashed color-mix(in srgb, var(--npc, var(--tone-mania)) 60%, transparent);
+  border-radius: 10px;
+  background: var(--surface);
+}
+.bm-patch figcaption {
+  margin: 0;
 }

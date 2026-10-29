@@ -1,5 +1,7 @@
 import type { ReactNode } from 'react'
 import type { NeighborId } from '../../data/barrio'
+import type { Patch } from '../../lib/hilos'
+import { PatchArt } from '../hilos/Threads'
 
 // Los dibujos de la plaza, con los pies (o la base) en 0,0 del cuadrito donde van. Los colores
 // de la plaza salen de barrio.css para que se vean bien de día y en modo oscuro; los de las
@@ -150,6 +152,36 @@ export const NEIGHBOR_LOOK: Record<NeighborId, PersonLook> = {
       </>
     ),
   },
+  chayo: {
+    legs: '#3b2f3a',
+    shirt: '#f3efe6',
+    skin: '#a8775a',
+    over: (
+      <>
+        {/* La falda de añil, la blusa bordada y su rebozo rosa con flecos. */}
+        <path d="M-10 -16 L-13 -2 Q0 1 13 -2 L10 -16z" fill="#3f4f8a" />
+        <g>
+          <circle cx="-5" cy="-34" r="1.5" fill="#e46a8f" />
+          <circle cx="0" cy="-33" r="1.5" fill="#f2c14e" />
+          <circle cx="5" cy="-34" r="1.5" fill="#6fae7d" />
+        </g>
+        <path d="M-12 -39 Q0 -32 12 -39 L13 -19 h-6 L7 -31 Q0 -28 -11 -32Z" fill="#b8406f" />
+        <path d="M-11 -35 Q0 -29 11 -35 M8.5 -30 L9.5 -20 M11.5 -32 L12.4 -20" stroke="#f2c14e" strokeWidth=".9" fill="none" />
+        <path d="M7.5 -19 v3.5 M9.5 -19 v4 M11.5 -19 v3.5 M13 -19 v3" stroke="#b8406f" strokeWidth="1" strokeLinecap="round" />
+      </>
+    ),
+    head: (
+      <>
+        <path d="M-9 -48 a9 9 0 0 1 18 0 l-1 1.5 h-16z" fill="#6b6460" />
+        <path d="M0 -56 v5" stroke="#8a827c" strokeWidth="1" />
+        {/* Sus dos trenzas, con listones de colores. */}
+        <path d="M-8.5 -45 q-3 6 -1.5 14 M8.5 -45 q3 6 1.5 14" stroke="#6b6460" strokeWidth="3.4" fill="none" strokeLinecap="round" />
+        <path d="M-8.5 -45 q-3 6 -1.5 14 M8.5 -45 q3 6 1.5 14" stroke="#8a827c" strokeWidth="1.4" strokeDasharray="1.6 2.2" fill="none" />
+        <circle cx="-10" cy="-30" r="2" fill="#f2c14e" />
+        <circle cx="10" cy="-30" r="2" fill="#6fae7d" />
+      </>
+    ),
+  },
 }
 
 export function Neighbor({ id }: { id: NeighborId }) {
@@ -273,6 +305,56 @@ export function Taller() {
       <path d="M8 -44 l14 0 l0 6 l-14 4z" fill="#c8beb0" />
       <rect x="4" y="-46" width="6" height="8" rx="2" fill="#6e4c33" />
       <path d="M-26 0 l6 -18 h4 l-6 18z" fill="#d9b26a" />
+    </>
+  )
+}
+
+/** Un rebozo colgado del mecate, con sus rayas y sus flecos. */
+function Rebozo({ x, fill, stripe }: { x: number; fill: string; stripe: string }) {
+  return (
+    <g>
+      <rect x={x} y="-43" width="10" height="16" rx="1" fill={fill} />
+      <path d={`M${x} -38 h10 M${x} -33 h10`} stroke={stripe} strokeWidth="1.2" />
+      <path d={`M${x + 1.5} -27 v3 M${x + 4} -27 v3.5 M${x + 6.5} -27 v3 M${x + 9} -27 v3.5`} stroke={fill} strokeWidth="1" strokeLinecap="round" />
+    </g>
+  )
+}
+
+/**
+ * El puesto de rebozos de Doña Chayo: toldo morado, rebozos colgados, madejas y rebozos
+ * doblados en el mostrador. Si la persona ya tejió algo en «Hilos sueltos», su bordado más
+ * nuevo cuelga en medio, como un rebozo más; si no, ahí va uno amarillo.
+ */
+export function Telar({ patch }: { patch?: Patch | null }) {
+  return (
+    <>
+      <path d="M-26 -54 V-14 M26 -54 V-14" stroke="var(--b-wood-2)" strokeWidth="3" />
+      <path d="M-32 -58 h64 v10 h-64z" fill="#7a5aa6" />
+      <path d="M-32 -48 q4 4 8 0 q4 4 8 0 q4 4 8 0 q4 4 8 0 q4 4 8 0 q4 4 8 0 q4 4 8 0 q4 4 8 0z" fill="#7a5aa6" />
+      <text y="-50.5" textAnchor="middle" fontSize="6.5" fontWeight="700" textLength="36" lengthAdjust="spacingAndGlyphs" fill="#fdfcfa" className="b-label-plain">
+        REBOZOS
+      </text>
+      <path d="M-25 -44 Q0 -41 25 -44" stroke="var(--b-iron)" strokeWidth=".8" fill="none" />
+      <Rebozo x={-22} fill="#c0504a" stripe="#f2c14e" />
+      <Rebozo x={12} fill="#4c6fb5" stripe="#fdfcfa" />
+      {patch ? (
+        <g>
+          <rect x="-8" y="-43" width="16" height="16" rx="1.5" fill="#fdfcfa" stroke="var(--b-wood-2)" strokeWidth=".8" />
+          <svg x="-7" y="-42" width="14" height="14" overflow="hidden">
+            <PatchArt patch={patch} className="b-patch" />
+          </svg>
+        </g>
+      ) : (
+        <Rebozo x={-5} fill="#f2c14e" stripe="#e46a8f" />
+      )}
+      <rect x="-28" y="-16" width="56" height="16" fill="var(--b-wood)" />
+      <path d="M-28 -8 h56" stroke="var(--b-wood-2)" />
+      <circle cx="-19" cy="-20" r="4" fill="#e46a8f" />
+      <circle cx="-10" cy="-20" r="4" fill="#6fae7d" />
+      <path d="M-21 -21 q2 -2 4 0 M-12 -21 q2 -2 4 0 M-6 -18 q4 4 8 0" stroke="#fdfcfa" strokeWidth=".8" fill="none" opacity=".7" />
+      <rect x="6" y="-20" width="18" height="4" rx="1" fill="#c0504a" />
+      <rect x="7" y="-24" width="16" height="4" rx="1" fill="#4c6fb5" />
+      <rect x="8" y="-27.5" width="14" height="3.5" rx="1" fill="#f2c14e" />
     </>
   )
 }

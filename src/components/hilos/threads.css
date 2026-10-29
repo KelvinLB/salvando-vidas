@@ -1,0 +1,48 @@
+/* ---------- Hilos sueltos: los hilos y sus colores ----------
+   Aquí van los colores del bordado, de día y de noche, para que un tejido se vea igual en el
+   juego, en el rebozo y en el puesto de Doña Chayo. */
+
+:root {
+  --h-tile: #efe7db;
+  --h-tile-on: #e9dfd0;
+  --h-thread-loose: #b9ad9c;
+  --h-thread: #8a5f3d;
+  --h-c1: #e46a8f;
+  --h-c2: #4c6fb5;
+  --h-c3: #e0a93a;
+  --h-c4: #5f9e82;
+  --h-c5: #d9733b;
+  --h-c6: #8f6bb8;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --h-tile: #26231f;
+    --h-tile-on: #2c2925;
+    --h-thread-loose: #5d554b;
+    --h-thread: #c9a27d;
+    --h-c1: #f08aa8;
+    --h-c2: #7f9fe0;
+    --h-c3: #f0c25a;
+    --h-c4: #7dbb9f;
+    --h-c5: #f0915c;
+    --h-c6: #b394dd;
+  }
+}
+
+.h-th {
+  fill: none;
+  stroke: var(--h-thread-loose);
+  stroke-linecap: round;
+}
+.h-knot {
+  fill: var(--h-thread-loose);
+}
+
+/* Un tejido terminado: cada pieza con el color de su anillo. */
+.h-colored .h-th {
+  stroke: var(--h-tc);
+}
+.h-colored .h-knot {
+  fill: var(--h-tc);
+}

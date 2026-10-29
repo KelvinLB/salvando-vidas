@@ -11,6 +11,7 @@ const GAMES = [
   { to: '/juegos/burbujas', emoji: '🫧', title: 'Burbujas', text: 'Revienta burbujas, una por una' },
   { to: '/juegos/pizarra', emoji: '🖌️', title: 'Pizarra zen', text: 'Dibuja trazos que se desvanecen' },
   { to: '/juegos/acomodar', emoji: '🧱', title: 'Despeja la mente', text: 'Acomoda piezas, una pausa para la cabeza' },
+  { to: '/juegos/hilos', emoji: '🧵', title: 'Hilos sueltos', text: 'Junta los hilos, sin prisa' },
 ]
 
 const MEDIA = [

@@ -92,6 +92,15 @@ const ART: Record<MissionId, ReactNode> = {
       <path className="bi-f-accent" d="M46 10 L47.6 14 L52 14.4 L48.6 17 L49.8 21.4 L46 19 L42.2 21.4 L43.4 17 L40 14.4 L44.4 14 Z" />
     </>
   ),
+  desenredar: (
+    <>
+      <path className="bi-ink" d="M10 12 Q32 16 54 12" />
+      <path className="bi-f-warm" d="M20 13.5 H44 V38 H20 Z" />
+      <path className="bi-ink" d="M20 21 H44 M20 29 H44 M22 38 V43 M27 38 V44 M32 38 V43 M37 38 V44 M42 38 V43" />
+      <circle className="bi-f-accent" cx="18" cy="50" r="6" />
+      <path className="bi-ink" d="M14 48 Q18 46 22 49 M15 53 Q19 51 22 53 M24 50 Q34 46 38 52 Q42 58 50 54" />
+    </>
+  ),
 }
 
 /** El frente de una carta: número, dibujo, nombre y, si cabe, su dicho. */
