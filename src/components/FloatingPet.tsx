@@ -10,13 +10,14 @@ import { buzz, pick, useStored } from '../lib/storage'
 
 // La mascota vive en toda la app, flotando en una orilla como las mascotas de escritorio:
 // te sigue con la mirada, se arrastra a donde estorbe menos y, al tocarla, ofrece cosas
-// pequeñas para hacer juntos. En las pantallas de crisis no sale, para no distraer, ni en
-// Ajustes, donde taparía los interruptores (entre ellos el que la apaga).
+// pequeñas para hacer juntos. En las pantallas de crisis no sale, para no distraer; tampoco en
+// Ajustes, donde taparía los interruptores (entre ellos el que la apaga), ni en Salir del
+// hueco, donde ya está dentro del juego.
 
 const SIZE = 68
 const GAP = 10
 const PEEK = 26
-const NOT_ON = ['/mascota', '/panico', '/ayuda', '/mi-espacio/ajustes']
+const NOT_ON = ['/mascota', '/panico', '/ayuda', '/mi-espacio/ajustes', '/juegos/hueco']
 
 /** De qué lado vive y a qué altura, como fracción del alto de la pantalla. */
 type Spot = { side: 'left' | 'right'; y: number }

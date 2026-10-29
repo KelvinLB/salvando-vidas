@@ -21,6 +21,7 @@ const SPARK_AT: Partial<Record<MomentId, [number, number]>> = {
   'mi-dia': [212, 24],
   platica: [292, 176],
   especialista: [110, 74],
+  hueco: [300, 126],
 }
 
 const STAR_COLORS = ['#f2c46d', '#f5b7c5', '#a9c8f0', '#b9dd8f', '#c7b5ee']
@@ -269,6 +270,20 @@ export default function PetRoom({ name, got, reasons, period, fresh, gift, child
             <path d="M124 113 Q132 106 140 113 L141 154 L134 152 L132 118 L130 152 L123 154 Z" className="room-scarf" />
             <path d="M123.5 124 L130.5 124 M123.5 134 L130.5 134 M123.5 144 L130.5 144 M133.5 124 L140.5 124 M133.5 134 L140.5 134 M133.5 144 L140.5 144" className="room-scarf-stripes" />
             <path d="M124 154 L124 159 M127 153 L127 158 M130 153 L130 158 M134 153 L134 158 M137 153 L137 158 M140 154 L140 159" className="room-fringe" />
+          </g>
+        )}
+
+        {/* La cuerda tejida de la primera vez que salieron del hueco, en un gancho bajo la repisa */}
+        {has('hueco') && (
+          <g>
+            <circle cx="288" cy="118" r="2.4" className="room-hook" />
+            <path d="M288 120 L288 124" className="room-rope" />
+            <ellipse cx="288" cy="138" rx="10" ry="14" className="room-rope" />
+            <ellipse cx="288" cy="139" rx="6.5" ry="10.5" className="room-rope" />
+            <ellipse cx="288" cy="138" rx="10" ry="14" className="room-rope-twist" />
+            <ellipse cx="288" cy="139" rx="6.5" ry="10.5" className="room-rope-twist" />
+            <rect x="282" y="123" width="12" height="5" rx="2" className="room-rope-tie" />
+            <path d="M285 151 Q283 157 284 162 M291 151 Q293 157 292 162" className="room-rope" />
           </g>
         )}
 

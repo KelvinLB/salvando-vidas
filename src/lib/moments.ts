@@ -2,6 +2,7 @@ import type { BodyRecord } from './bodyCheck'
 import type { Review } from './companion'
 import { type DayPlan, planDone } from './dayplan'
 import { listThoughts } from './db'
+import { EXITS_KEY, type HoleExit } from './hueco'
 import { type JournalEntry, type Letter, localDate, read, store, today, useStored } from './storage'
 
 // Los momentos que la persona vive con su mascota. Cada uno deja algo en el rincón de la
@@ -20,6 +21,7 @@ export type MomentId =
   | 'mi-dia'
   | 'platica'
   | 'especialista'
+  | 'hueco'
 
 export type Moment = { id: MomentId; emoji: string; title: string; text: string; item: string }
 
@@ -102,6 +104,13 @@ export const MOMENTS: Moment[] = [
     text: 'Buscar ayuda es de las cosas más valientes que hay.',
     item: 'una brújula para el camino',
   },
+  {
+    id: 'hueco',
+    emoji: '🪢',
+    title: 'Salimos del hueco',
+    text: 'Un escalón a la vez, y salimos. Ahora ya conoces el camino.',
+    item: 'una cuerda tejida, colgada en la pared',
+  },
 ]
 
 /** La fecha de cada momento vivido. */
@@ -156,6 +165,9 @@ export async function syncMoments() {
   const steps = read<Record<string, boolean>>('camino', {})
   on('especialista', Object.values(steps).some(Boolean))
 
+  const exits = read<HoleExit[]>(EXITS_KEY, [])
+  on('hueco', exits.length > 0, earliest(exits.map((e) => e.date)))
+
   const body = read<BodyRecord[]>('cuerpo-registros', [])
   const breathed = body.filter((r) => r.after !== null)
   on('respirar', breathed.length > 0, earliest(breathed.map((r) => r.date)))
@@ -184,6 +196,7 @@ export const MOMENT_SOURCES = new Set([
   'mascota-revisiones',
   'camino',
   'cuerpo-registros',
+  EXITS_KEY,
 ])
 
 /** Qué tan grande va la plantita: de 0 (un brote) a 4 (con flor). */

@@ -29,6 +29,7 @@ import Memorama from './pages/juegos/Memorama'
 import Deslizante from './pages/juegos/Deslizante'
 import Burbujas from './pages/juegos/Burbujas'
 import Pizarra from './pages/juegos/Pizarra'
+import Hueco from './pages/juegos/Hueco'
 
 export default function App() {
   const { pathname, hash } = useLocation()
@@ -49,6 +50,7 @@ export default function App() {
         <Route path="juegos/deslizante" element={<Deslizante />} />
         <Route path="juegos/burbujas" element={<Burbujas />} />
         <Route path="juegos/pizarra" element={<Pizarra />} />
+        <Route path="juegos/hueco" element={<Hueco />} />
         <Route path="mi-espacio" element={<MiEspacio />} />
         <Route path="mi-espacio/plan" element={<PlanDeSeguridad />} />
         <Route path="mi-espacio/caja" element={<Caja />} />

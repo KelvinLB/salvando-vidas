@@ -1,6 +1,9 @@
 import { Link } from 'react-router-dom'
+import CompanionView from '../components/Companion'
 import PageHeader from '../components/PageHeader'
+import { DEFAULT_COMPANION, companionName } from '../data/companion'
 import { WHAT_HELPED } from '../data/content'
+import { useCompanion } from '../lib/companion'
 
 const GAMES = [
   { to: '/juegos/memorama', emoji: '🧩', title: 'Memorama', text: 'Encuentra las parejas, sin reloj' },
@@ -15,6 +18,7 @@ const MEDIA = [
 ]
 
 export default function Distraer() {
+  const { companion, mood } = useCompanion()
   return (
     <div className="stack">
       <PageHeader
@@ -29,6 +33,19 @@ export default function Distraer() {
         </p>
       </div>
       <h2 className="section-title">Juegos tranquilos</h2>
+      {/* Salir del hueco va primero: su mascota es quien juega, y el hueco se parece a su día. */}
+      <Link to="/juegos/hueco" className="tile hole-tile">
+        <span className="hole-tile-pet" aria-hidden="true">
+          <CompanionView look={companion ?? DEFAULT_COMPANION} mood={mood} size={64} />
+        </span>
+        <span className="hole-tile-text">
+          <strong>Salir del hueco</strong>
+          <small>
+            {companion ? `${companionName(companion)} y tú salen` : 'Tu mascota y tú salen'} de un hueco que se parece a tu
+            día, un escalón a la vez.
+          </small>
+        </span>
+      </Link>
       <div className="grid">
         {GAMES.map((g) => (
           <Link key={g.to} to={g.to} className="tile">

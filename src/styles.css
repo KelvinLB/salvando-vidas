@@ -4431,6 +4431,8 @@ html.diary-open {
   --room-cushion: #f3d9c6;
   --room-rug: #f5d6b4;
   --room-rug-line: #e07a5f;
+  --room-rope: #d2a466;
+  --room-rope-dark: #a9783f;
 }
 @media (prefers-color-scheme: dark) {
   :root {
@@ -4444,6 +4446,8 @@ html.diary-open {
     --room-cushion: #c9ab95;
     --room-rug: #4a3a30;
     --room-rug-line: #b9654f;
+    --room-rope: #b48a52;
+    --room-rope-dark: #7f5b30;
   }
 }
 
@@ -4614,6 +4618,22 @@ html.diary-open {
   stroke: #e07a5f;
   stroke-width: 1.6;
   stroke-linecap: round;
+}
+/* La cuerda tejida de Salir del hueco: un rollo colgado, con su trenzado encima. */
+.room-rope {
+  fill: none;
+  stroke: var(--room-rope);
+  stroke-width: 3.4;
+  stroke-linecap: round;
+}
+.room-rope-twist {
+  fill: none;
+  stroke: var(--room-rope-dark);
+  stroke-width: 3.4;
+  stroke-dasharray: 1.6 2.6;
+}
+.room-rope-tie {
+  fill: var(--room-rope-dark);
 }
 .room-lamp-base {
   fill: #6f5a4a;
@@ -4907,4 +4927,636 @@ html.diary-open {
 }
 .room-news p {
   margin: 4px 0 0;
+}
+
+/* ---------- Salir del hueco ---------- */
+/* El juego de Distraer: la mascota sube de un hueco que se parece al día de la persona. El
+   clima sale de sus registros y se aligera con cada escalón; lo hondo nunca cambia. Los
+   valores del clima (de 0 a 1) llegan como variables desde el componente. */
+:root {
+  --hole-sky-gris: #c3cad1;
+  --hole-sky-bruma: #dfe3e4;
+  --hole-sky-noche: #222b4d;
+  --hole-sky-alba: #f2cfae;
+  --hole-sky-dia: #bfe0f2;
+  --hole-cloud: #ffffff;
+  --hole-cloud-gray: #98a2ac;
+  --hole-moon: #f8f0cf;
+  --hole-soil: #caa27c;
+  --hole-soil-2: #b88f69;
+  --hole-soil-line: #a47b56;
+  --hole-grass: #8cbf73;
+  --hole-grass-2: #6ea85a;
+  --hole-shaft-top: #6b5240;
+  --hole-shaft-bottom: #2e231b;
+  --hole-floor: #4a3a2d;
+  --hole-slab: #e9dfd0;
+  --hole-slab-line: #b9a990;
+  --hole-slab-ink: #4a3d2e;
+  --hole-rope: #c99a5b;
+  --hole-star: #f2c46d;
+  --hole-glow: #ffd98a;
+  --hole-fog: #f1f4f6;
+  --hole-wind: #ffffff;
+  --hole-rain: #a9c6e8;
+  --hole-veil: #0d1020;
+  --hole-thought: #fdfcfa;
+  --hole-thought-line: #d9d0c3;
+  --hole-thought-ink: #47504c;
+  --hole-leaf: #8cc06f;
+  --hole-leaf-2: #6ea85a;
+  --hole-person-2: #c4744a;
+  --hole-heart: #e8637f;
+  --hole-soledad: #7f86b8;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --hole-sky-gris: #59616a;
+    --hole-sky-bruma: #6b7174;
+    --hole-sky-noche: #0f1530;
+    --hole-sky-alba: #6a5878;
+    --hole-sky-dia: #5f8fb0;
+    --hole-cloud: #dfe3e7;
+    --hole-cloud-gray: #79838d;
+    --hole-soil: #6f5643;
+    --hole-soil-2: #604a39;
+    --hole-soil-line: #503d2f;
+    --hole-grass: #5f8f4e;
+    --hole-grass-2: #4c7a3e;
+    --hole-shaft-top: #3a2d23;
+    --hole-shaft-bottom: #140f0b;
+    --hole-floor: #2a2119;
+    --hole-slab: #5a5148;
+    --hole-slab-line: #7a6e60;
+    --hole-slab-ink: #f1ece5;
+    --hole-rope: #b88a4f;
+    --hole-fog: #a3abb3;
+    --hole-wind: #dfe3e7;
+    --hole-rain: #8aa6dc;
+    --hole-veil: #05070f;
+    --hole-thought: #2a2826;
+    --hole-thought-line: #4a453f;
+    --hole-thought-ink: #e8e2d9;
+    --hole-leaf: #7fb365;
+    --hole-leaf-2: #5f9a4e;
+    --hole-person-2: #d98b5f;
+    --hole-heart: #ef7f97;
+    --hole-soledad: #9da3d6;
+  }
+}
+
+/* En Distraer, el juego va primero y con su mascota */
+.hole-tile {
+  flex-direction: row;
+  align-items: center;
+  gap: 14px;
+  border-color: var(--warm-border);
+  background: var(--warm);
+}
+.hole-tile-pet {
+  flex: none;
+  line-height: 0;
+}
+.hole-tile-text {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.hole-card {
+  gap: 14px;
+  padding: 16px;
+}
+/* En teléfonos bajitos el hueco se achica, para que la mascota no quede detrás de la barra de abajo. */
+.hole-wait {
+  width: 100%;
+  max-width: 420px;
+  max-width: min(420px, max(240px, (100svh - 420px) * 320 / 420));
+  aspect-ratio: 320 / 420;
+  margin-inline: auto;
+  border-radius: 16px;
+  background: var(--surface-soft);
+}
+
+/* ¿Así te sientes hoy? Lo que dicen sus registros, y ella lo puede cambiar */
+.hole-today {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 10px;
+}
+.hole-today > span {
+  color: var(--text-2);
+  font-size: 0.95rem;
+}
+.hole-place {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 36px;
+  padding: 4px 10px 4px 12px;
+  font-weight: 650;
+}
+.hole-chevron {
+  flex: none;
+  color: var(--muted);
+  transition: transform 0.2s;
+}
+.hole-place[aria-expanded='true'] .hole-chevron {
+  transform: rotate(180deg);
+}
+.hole-places .chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.hole-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--tone-animo);
+}
+.hole-dot.nervios {
+  background: var(--tone-estres);
+}
+.hole-dot.soledad {
+  background: var(--hole-soledad);
+}
+.hole-dot.mezcla {
+  background: linear-gradient(90deg, var(--tone-animo) 50%, var(--tone-estres) 50%);
+}
+.chip.selected .hole-dot {
+  box-shadow: 0 0 0 2px var(--primary-ink);
+}
+.hole-auto {
+  font-size: 0.75rem;
+  opacity: 0.8;
+}
+
+/* La escena */
+.hole-scene {
+  display: block;
+  width: 100%;
+  max-width: 420px;
+  max-width: min(420px, max(240px, (100svh - 420px) * 320 / 420));
+  height: auto;
+  margin-inline: auto;
+  border-radius: 16px;
+  background: var(--hole-shaft-bottom);
+}
+.hole-sky {
+  fill: var(--hole-sky-gris);
+  transition: fill 1.2s ease;
+}
+.hole-scene[data-sky='bruma'] .hole-sky {
+  fill: var(--hole-sky-bruma);
+}
+.hole-scene[data-sky='noche'] .hole-sky {
+  fill: var(--hole-sky-noche);
+}
+.hole-scene[data-sky='alba'] .hole-sky {
+  fill: var(--hole-sky-alba);
+}
+.hole-scene[data-sky='dia'] .hole-sky {
+  fill: var(--hole-sky-dia);
+}
+.hole-sun {
+  fill: var(--hole-star);
+  opacity: 0;
+  transition: opacity 1s ease;
+}
+.hole-scene:is([data-sky='alba'], [data-sky='dia']) .hole-sun {
+  opacity: 1;
+}
+.hole-cloud {
+  fill: var(--hole-cloud-gray);
+  transition: fill 1s ease, opacity 1s ease;
+}
+.hole-scene:is([data-sky='bruma'], [data-sky='alba'], [data-sky='dia']) .hole-cloud {
+  fill: var(--hole-cloud);
+}
+.hole-scene[data-sky='noche'] .hole-cloud {
+  opacity: 0;
+}
+.hole-night {
+  fill: #fff;
+  opacity: 0;
+  transition: opacity 1s ease;
+}
+.hole-scene[data-sky='noche'] .hole-night {
+  opacity: 1;
+}
+.hole-moon {
+  fill: var(--hole-moon);
+}
+.hole-soil {
+  fill: var(--hole-soil);
+}
+.hole-soil-lines {
+  fill: none;
+  stroke: var(--hole-soil-line);
+  stroke-width: 1.5;
+  opacity: 0.7;
+}
+.hole-pebbles {
+  fill: var(--hole-soil-2);
+}
+.hole-grass {
+  fill: var(--hole-grass);
+}
+.hole-tufts {
+  fill: none;
+  stroke: var(--hole-grass-2);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.hole-shaft-top {
+  stop-color: var(--hole-shaft-top);
+}
+.hole-shaft-bottom {
+  stop-color: var(--hole-shaft-bottom);
+}
+.hole-glow-stop {
+  stop-color: var(--hole-glow);
+}
+.hole-wall-edge {
+  stroke: var(--hole-soil-line);
+  stroke-width: 3;
+}
+.hole-floor {
+  fill: var(--hole-floor);
+}
+.hole-floor-pebbles {
+  fill: var(--hole-soil-line);
+}
+.hole-light {
+  opacity: var(--light);
+  transition: opacity 1.2s ease;
+}
+.hole-sprout {
+  opacity: 0;
+  transition: opacity 0.8s ease 0.4s;
+}
+.hole-sprout.on {
+  opacity: 1;
+}
+.hole-stem {
+  fill: none;
+  stroke: var(--hole-leaf-2);
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+.hole-leaf {
+  fill: var(--hole-leaf);
+}
+.hole-bud {
+  fill: var(--hole-glow);
+}
+
+/* Los escalones, con lo que los hizo escrito a mano */
+.hole-slab {
+  fill: var(--hole-slab);
+  stroke: var(--hole-slab-line);
+  stroke-width: 1.5;
+}
+.hole-slab-label {
+  fill: var(--hole-slab-ink);
+  font-family: var(--hand);
+  font-size: 16px;
+  font-weight: 700;
+  text-anchor: middle;
+}
+.hole-ledge.new {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: hole-ledge-in 0.6s cubic-bezier(0.2, 0.9, 0.3, 1.3) both;
+}
+@keyframes hole-ledge-in {
+  from {
+    transform: scale(0.2, 0.6);
+    opacity: 0;
+  }
+}
+
+/* Su razón, la cuerda y lo de afuera */
+.hole-star,
+.hole-rope,
+.hole-outside {
+  opacity: 0;
+  transition: opacity 0.9s ease;
+}
+.hole-outside {
+  transition-delay: 0.7s;
+}
+:is(.hole-star, .hole-rope, .hole-outside).on {
+  opacity: 1;
+}
+.hole-star-shape {
+  fill: var(--hole-star);
+}
+.hole-rope-line {
+  fill: none;
+  stroke: var(--hole-rope);
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-dasharray: 5 3;
+}
+.hole-person {
+  fill: var(--primary);
+}
+.hole-person.warm {
+  fill: var(--hole-person-2);
+}
+.hole-heart,
+.hole-flower {
+  fill: var(--hole-heart);
+}
+.hole-flower-mid {
+  fill: var(--hole-star);
+}
+
+/* El clima: lluvia, niebla, viento, pensamientos, oscuridad y eco */
+.hole-rain {
+  opacity: var(--rain);
+  transition: opacity 1.2s ease;
+}
+.hole-rain path {
+  fill: none;
+  stroke: var(--hole-rain);
+  stroke-width: 1.6;
+  stroke-linecap: round;
+}
+.hole-rain-a,
+.hole-rain-b {
+  animation: hole-fall 0.8s linear infinite;
+}
+.hole-rain-b {
+  animation-delay: -0.4s;
+}
+@keyframes hole-fall {
+  from {
+    transform: translate(4px, -30px);
+  }
+  to {
+    transform: translate(-4px, 30px);
+  }
+}
+.hole-fog {
+  opacity: var(--fog);
+  transition: opacity 1.4s ease;
+}
+.hole-fog ellipse {
+  fill: var(--hole-fog);
+  opacity: 0.5;
+  animation: hole-drift 12s ease-in-out infinite alternate;
+}
+.hole-fog ellipse:nth-child(even) {
+  animation-duration: 15s;
+  animation-direction: alternate-reverse;
+}
+@keyframes hole-drift {
+  from {
+    transform: translateX(-26px);
+  }
+  to {
+    transform: translateX(26px);
+  }
+}
+.hole-wind {
+  opacity: var(--wind);
+  transition: opacity 1.2s ease;
+}
+.hole-wind path {
+  fill: none;
+  stroke: var(--hole-wind);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-dasharray: 28 180;
+  animation: hole-gust 2.2s linear infinite;
+}
+.hole-wind path:nth-child(2) {
+  animation-delay: -0.8s;
+}
+.hole-wind path:nth-child(3) {
+  animation-delay: -1.5s;
+}
+@keyframes hole-gust {
+  from {
+    stroke-dashoffset: 208;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+.hole-thoughts {
+  opacity: var(--thoughts);
+  transition: opacity 0.9s ease;
+}
+.hole-thoughts rect {
+  fill: var(--hole-thought);
+  stroke: var(--hole-thought-line);
+}
+.hole-thoughts text {
+  fill: var(--hole-thought-ink);
+  font-family: var(--font-body);
+  font-size: 11px;
+  font-weight: 600;
+  text-anchor: middle;
+}
+.hole-drift {
+  animation: hole-bob 4.6s ease-in-out infinite alternate;
+}
+.hole-drift.d1 {
+  animation-duration: 5.4s;
+  animation-delay: -1.2s;
+}
+.hole-drift.d2 {
+  animation-duration: 6.2s;
+  animation-delay: -2.4s;
+}
+@keyframes hole-bob {
+  from {
+    transform: translate(-3px, -4px);
+  }
+  to {
+    transform: translate(4px, 4px);
+  }
+}
+.hole-veil {
+  fill: var(--hole-veil);
+  opacity: var(--dark);
+  transition: opacity 1.4s ease;
+}
+.hole-echo {
+  opacity: var(--echo);
+  transition: opacity 1s ease;
+}
+.hole-echo circle {
+  fill: none;
+  stroke: var(--hole-soledad);
+  stroke-width: 1.5;
+  opacity: 0;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: hole-echo 3.9s ease-out infinite;
+}
+.hole-echo circle:nth-child(2) {
+  animation-delay: 1.3s;
+}
+.hole-echo circle:nth-child(3) {
+  animation-delay: 2.6s;
+}
+@keyframes hole-echo {
+  from {
+    transform: scale(0.6);
+    opacity: 0.9;
+  }
+  to {
+    transform: scale(2.3);
+    opacity: 0;
+  }
+}
+
+/* La mascota sube, y su aro de respiración crece al tomar aire y baja al soltarlo */
+.hole-mover {
+  transition: transform 1s cubic-bezier(0.35, 0.1, 0.25, 1);
+}
+.hole-ring {
+  fill: none;
+  stroke: var(--tone-calma);
+  stroke-width: 3;
+  opacity: 0;
+  transform-box: fill-box;
+  transform-origin: center;
+  transform: scale(0.75);
+  transition: transform 4s ease-in-out, opacity 0.4s ease;
+}
+.hole-scene.breath-in .hole-ring {
+  opacity: 0.95;
+  transform: scale(1.2);
+}
+.hole-scene.breath-out .hole-ring {
+  opacity: 0.95;
+  transform: scale(0.75);
+  transition-duration: 6s, 0.4s;
+}
+@media (prefers-reduced-motion: reduce) {
+  /* El aro guía la respiración, así que sigue creciendo y bajando despacio. */
+  .hole-scene.breath-in .hole-ring {
+    transition-duration: 4s, 0.4s !important;
+  }
+  .hole-scene.breath-out .hole-ring {
+    transition-duration: 6s, 0.4s !important;
+  }
+}
+
+/* Lo que dice la mascota y lo que se puede hacer */
+.hole-breath {
+  gap: 8px 12px;
+}
+.hole-feelings .chip {
+  min-height: 36px;
+  padding: 4px 14px;
+}
+.hole-reason {
+  padding: 6px 12px 8px;
+  border: 1px solid var(--warm-border);
+  border-radius: 6px;
+  background: var(--warm);
+  font-family: var(--hand);
+  font-size: 1.5rem;
+  line-height: 1.15;
+  transform: rotate(-0.8deg);
+}
+.hole-help .btn {
+  align-self: flex-start;
+}
+.hole-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.hole-act {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 52px;
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  font-size: 0.92rem;
+  font-weight: 600;
+  line-height: 1.2;
+  text-align: left;
+  cursor: pointer;
+}
+.hole-act.active {
+  border-color: var(--primary);
+}
+.hole-act:disabled {
+  cursor: default;
+  opacity: 0.45;
+}
+.hole-act.done {
+  border-color: transparent;
+  background: var(--primary-soft);
+  opacity: 1;
+}
+.hole-act.done::after {
+  content: '✓';
+  margin-left: auto;
+  color: var(--tone-calma);
+  font-weight: 700;
+}
+.hole-ico {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--primary-soft);
+  color: var(--primary);
+}
+.hole-act.done .hole-ico {
+  background: var(--surface);
+}
+.hole-foot {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.hole-steps {
+  display: flex;
+  gap: 6px;
+}
+.hole-steps i {
+  width: 10px;
+  height: 10px;
+  border: 1.5px solid var(--primary);
+  border-radius: 50%;
+  transition: background 0.4s ease;
+}
+.hole-steps i.on {
+  background: var(--primary);
+}
+
+/* ¿Por qué se ve así? */
+.hole-why {
+  display: block;
+}
+.hole-why summary {
+  font-weight: 620;
+  cursor: pointer;
+}
+.hole-why ul {
+  display: grid;
+  gap: 6px;
+  margin: 12px 0 8px;
+  padding-left: 20px;
+  color: var(--text-2);
 }
