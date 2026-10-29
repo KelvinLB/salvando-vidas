@@ -1141,6 +1141,109 @@ audio {
   font-size: 1.25rem;
   line-height: 1.55;
 }
+/* Los dos caminos: botones grandes, uno debajo del otro, para tocarlos sin pensar. */
+.panic-paths {
+  display: grid;
+  gap: 12px;
+}
+.panic-path {
+  display: grid;
+  gap: 4px;
+  min-height: 84px;
+  padding: 16px 20px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--text);
+  text-align: left;
+  font: inherit;
+  font-size: 1.05rem;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+}
+.panic-path strong {
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  line-height: 1.2;
+}
+.panic-path span {
+  color: var(--text-2);
+}
+.panic-path:hover,
+.panic-path:focus-visible {
+  border-color: var(--primary);
+  background: var(--primary-soft);
+}
+.panic-nudge {
+  margin: 0;
+  text-align: center;
+  color: var(--text-2);
+}
+.panic-wave {
+  position: relative;
+  width: 100%;
+  height: 80px;
+  border-radius: 16px;
+  background: var(--surface-soft);
+  overflow: hidden;
+}
+.panic-wave svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.panic-wave path {
+  fill: color-mix(in srgb, var(--tone-animo) 30%, transparent);
+  stroke: var(--tone-animo);
+  stroke-width: 2;
+  vector-effect: non-scaling-stroke;
+}
+.panic-wave-dot {
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  margin: -7px 0 0 -7px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+.panic-chips {
+  justify-content: center;
+}
+.panic .card:not(.center) .panic-chips {
+  justify-content: flex-start;
+}
+.panic-chips .chip {
+  min-height: 48px;
+  font-size: 1.05rem;
+}
+.panic-q {
+  margin: 8px 0 0;
+  font-size: 1.25rem;
+}
+.panic-says {
+  width: 100%;
+  text-align: left;
+}
+.panic-fears {
+  font-size: 1.15rem;
+  line-height: 1.5;
+}
+.panic-moves {
+  justify-content: center;
+}
+.panic-later {
+  display: grid;
+  gap: 8px;
+  justify-items: center;
+  text-align: center;
+}
+.panic-later p {
+  margin: 0;
+}
+.panic-later .row {
+  justify-content: center;
+}
 
 .relax-step {
   font-size: 1.3rem;

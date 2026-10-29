@@ -196,8 +196,16 @@ export default function Calma() {
         <p className="muted">Te guiamos paso a paso para atravesarlo.</p>
       </Link>
       <Breathing />
+      <Link to="/nervios" className="card link-card">
+        <h2>Entender mis nervios</h2>
+        <p className="muted">Seis lecciones cortas: qué es el pánico y por qué no es peligroso.</p>
+      </Link>
       <BodyEntry />
       <Grounding />
+      <Link to="/nervios/practicar" className="card link-card">
+        <h2>Practicar con el cuerpo</h2>
+        <p className="muted">Ejercicios cortos para perderle el miedo a lo que el pánico hace sentir.</p>
+      </Link>
       <Link to="/enojo" className="card link-card">
         <h2>¿Es enojo lo que no se va?</h2>
         <p className="muted">Escríbelo, rómpelo y bájale al cuerpo la alerta.</p>

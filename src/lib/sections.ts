@@ -5,7 +5,7 @@ import { useLocation, useNavigate } from 'react-router-dom'
 // de salida cuando alguien llega directo a una pantalla, sin nada atrás.
 export const SECTIONS = [
   { to: '/', label: 'Inicio', also: [] },
-  { to: '/calma', label: 'Calma', also: ['/cuerpo', '/panico', '/enojo', '/noche'] },
+  { to: '/calma', label: 'Calma', also: ['/cuerpo', '/panico', '/enojo', '/noche', '/nervios'] },
   { to: '/distraer', label: 'Distraer', also: ['/juegos', '/musica', '/videos'] },
   { to: '/diario', label: 'Mi diario', also: ['/responder'] },
   { to: '/mi-espacio', label: 'Mi espacio', also: ['/mi-espacio/', '/mi-dia', '/especialista', '/mascota', '/redes', '/opinion'] },
@@ -28,6 +28,8 @@ const NAMES: Record<string, string> = {
   '/panico': 'pánico',
   '/enojo': 'enojo',
   '/noche': 'la noche',
+  '/nervios': 'tus nervios',
+  '/nervios/practicar': 'practicar con el cuerpo',
   '/musica': 'música',
   '/videos': 'videos',
   '/juegos/memorama': 'el memorama',
@@ -36,6 +38,7 @@ const NAMES: Record<string, string> = {
   '/juegos/pizarra': 'la pizarra',
   '/juegos/hueco': 'salir del hueco',
   '/juegos/hilos': 'hilos sueltos',
+  '/juegos/desde-afuera': 'desde afuera',
   '/responder': 'responderle',
   '/mascota': 'tu mascota',
   '/mi-dia': 'Mi día',

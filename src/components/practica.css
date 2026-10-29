@@ -1,0 +1,297 @@
+/* ---------- Practicar con el cuerpo ----------
+   El ejercicio, su anillo y el filtro de salud. Todo se mueve dentro de su tarjeta. */
+
+.card.pr-card {
+  gap: 14px;
+}
+.pr-card h2:focus {
+  outline: none;
+}
+.pr-head {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.pr-head .pr-art {
+  flex: none;
+  width: 76px;
+  height: 76px;
+  border-radius: 18px;
+  background: var(--surface-soft);
+}
+.pr-how {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0;
+  padding-left: 22px;
+}
+
+/* La escala del miedo: palabras en los extremos, el número y su palabra al centro. */
+.pr-fear {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 12px 14px;
+  border-radius: 16px;
+  background: var(--surface-soft);
+}
+.pr-fear-label {
+  font-weight: 650;
+}
+.pr-fear input[type='range'] {
+  min-height: 32px;
+}
+.pr-fear-scale {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+.pr-fear-scale b {
+  color: var(--text);
+  font-weight: 650;
+  text-align: center;
+}
+
+.pr-q {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+.pr-q legend {
+  margin-bottom: 8px;
+  padding: 0;
+  font-weight: 650;
+}
+
+/* El anillo dura lo que dura el ejercicio. */
+.pr-ring {
+  position: relative;
+  width: min(200px, 62vw);
+  aspect-ratio: 1;
+  margin: 4px auto;
+}
+.pr-ring > svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+.pr-ring-track,
+.pr-ring-fill {
+  fill: none;
+  stroke-width: 9;
+}
+.pr-ring-track {
+  stroke: var(--surface-soft);
+}
+.pr-ring-fill {
+  stroke: var(--tone-calma);
+  stroke-linecap: round;
+  transition: stroke-dashoffset 0.25s linear;
+}
+.pr-ring-in {
+  position: absolute;
+  inset: 18%;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border-radius: 50%;
+  background: var(--surface-soft);
+}
+.pr-ring-in .pr-art {
+  width: 86%;
+  height: 86%;
+}
+
+/* Los dibujos de los ejercicios. */
+.pr-art {
+  display: block;
+  overflow: hidden;
+}
+.pr-skin {
+  fill: var(--skin-light);
+  stroke: var(--skin-shade);
+  stroke-width: 2;
+}
+.pr-body {
+  fill: var(--primary-soft);
+  stroke: var(--primary);
+  stroke-width: 2;
+}
+.pr-eye,
+.pr-mouth {
+  fill: var(--text-2);
+}
+.pr-line,
+.pr-arrow {
+  fill: none;
+  stroke: var(--text-2);
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.pr-arrow {
+  stroke: var(--tone-calma);
+}
+.pr-cheek {
+  fill: var(--orb-peach);
+}
+.pr-accent {
+  fill: var(--tone-calma);
+}
+.pr-heart {
+  fill: var(--organ-heart);
+}
+.pr-straw {
+  fill: var(--mix-blue);
+}
+.pr-air {
+  fill: var(--mix-blue);
+  opacity: 0.6;
+}
+.pr-wall {
+  fill: var(--stone);
+}
+.pr-orbit {
+  fill: none;
+  stroke: var(--tone-calma);
+  stroke-width: 2.5;
+  stroke-dasharray: 5 6;
+}
+
+.pr-sway,
+.pr-turn,
+.pr-leg-a,
+.pr-leg-b,
+.pr-puff,
+.pr-breath {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+.pr-sway {
+  transform-origin: 50% 100%;
+}
+.pr-moving .pr-sway {
+  animation: pr-sway 1.2s ease-in-out infinite alternate;
+}
+.pr-moving .pr-turn {
+  animation: pr-turn 2.4s ease-in-out infinite;
+}
+.pr-moving .pr-leg-a {
+  animation: pr-step 0.6s ease-in-out infinite alternate;
+}
+.pr-moving .pr-leg-b {
+  animation: pr-step 0.6s ease-in-out infinite alternate-reverse;
+}
+.pr-moving .pr-puff {
+  animation: pr-puff 2.6s ease-in-out infinite alternate;
+}
+.pr-moving .pr-breath {
+  animation: pr-air 1.8s ease-in-out infinite;
+}
+@keyframes pr-sway {
+  from {
+    transform: rotate(-14deg);
+  }
+  to {
+    transform: rotate(14deg);
+  }
+}
+@keyframes pr-turn {
+  0%,
+  100% {
+    transform: scaleX(1);
+  }
+  50% {
+    transform: scaleX(-1);
+  }
+}
+@keyframes pr-step {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(-10px);
+  }
+}
+@keyframes pr-puff {
+  from {
+    transform: scale(1);
+  }
+  to {
+    transform: scale(1.18);
+  }
+}
+@keyframes pr-air {
+  0% {
+    opacity: 0;
+    transform: translate(-6px, 6px);
+  }
+  50% {
+    opacity: 0.7;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(4px, -6px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pr-ring-fill {
+    transition: none;
+  }
+  .pr-moving * {
+    animation: none !important;
+  }
+}
+
+/* Cómo va bajando el miedo de antes: barras chiquitas, sin ejes ni metas. */
+.pr-history {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0;
+}
+.pr-bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+  height: 64px;
+  padding: 8px 10px 0;
+  border-radius: 14px;
+  background: var(--surface-soft);
+}
+.pr-bars span {
+  flex: 1;
+  max-width: 28px;
+  border-radius: 6px 6px 0 0;
+  background: var(--tone-calma);
+  opacity: 0.55;
+}
+.pr-bars span:last-child {
+  opacity: 1;
+}
+
+.pr-health {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.pr-health-item {
+  font-weight: 520;
+  line-height: 1.35;
+}
+
+.pr-safety ul {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0;
+  padding-left: 20px;
+}

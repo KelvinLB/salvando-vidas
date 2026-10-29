@@ -29,6 +29,7 @@ export default defineConfig({
           { src: 'maskable-icon-512x512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
         ],
         shortcuts: [
+          { name: 'Tengo pánico', short_name: 'Pánico', url: '/panico' },
           { name: 'Necesito ayuda ahora', short_name: 'Ayuda', url: '/ayuda' },
           { name: 'Respirar', short_name: 'Respirar', url: '/calma' },
         ],

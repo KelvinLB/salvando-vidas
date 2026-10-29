@@ -21,12 +21,13 @@ import { NeighborStory } from '../barrio/Vecinos'
 import { ITEMS, type ItemId, MISSIONS, type MissionId, NEIGHBORS, type NeighborId, missionById } from '../data/barrio'
 import { DEFAULT_COMPANION, companionName } from '../data/companion'
 import { DEFAULT_HOUSE, type House, emptyBarrio, finishMission, missionLater, readBarrio, updateBarrio, useBarrio, visit } from '../lib/barrio'
-import { pickBoard } from '../lib/barrioBoard'
+import { canOffer, pickBoard } from '../lib/barrioBoard'
 import { currentSeason } from '../lib/barrioSeason'
 import { useCompanion } from '../lib/companion'
 import { type HoleReading, readHole } from '../lib/hueco'
 import { useMoments } from '../lib/moments'
 import { still } from '../lib/petfx'
+import { useHealthOk } from '../lib/practica'
 import { localDate, today, useAddress } from '../lib/storage'
 
 // El barrio de su mascota: un mundo abierto para pasear (la plaza, el mercado, la alameda, su
@@ -49,7 +50,7 @@ type Talk =
 /** Lo que dice cada vecino cuando hoy no tiene misión para la persona. */
 const NPC_LINES: Record<NeighborId, (pet: string, address: ReturnType<typeof useAddress>) => string> = {
   tere: (pet) => `¡Hola, ${pet}! Hoy no te tengo encargo, pero aquí ando por si se te ofrece algo.`,
-  chema: () => 'Buenas. El kiosco aquí sigue, para cuando quieras respirar un rato.',
+  chema: () => 'Buenas. El kiosco aquí sigue, para cuando quieras respirar un rato o practicar tantito.',
   nico: (pet) => `¡${pet}! Estoy contando palomas. Llevo tres… o cuatro. Ya me hice bolas.`,
   lupe: (_, address) => `${address('Pásale, mija.', 'Pásale, mijo.', 'Pásale.')} Hoy hay de jamaica y de horchata, de mentiritas pero bien fresquitas.`,
   beto: () => '¡Qué tal, marchante! Hoy el mercado está tranquilo. Aquí andamos.',
@@ -92,7 +93,8 @@ const POSES: { id: Pose; label: string; says: string }[] = [
 ]
 
 const neighborName = (id: string) => NEIGHBORS.find((n) => n.id === id)?.name
-const missionOf = (npc: NeighborId) => MISSIONS.find((m) => m.npc === npc)
+// Don Chema tiene dos misiones; el tablero pone una sola por vecino.
+const missionsOf = (npc: NeighborId) => MISSIONS.filter((m) => m.npc === npc)
 const flowOf = (id: MissionId): MissionFlow | undefined => (FLOWS as Partial<Record<MissionId, MissionFlow>>)[id]
 
 export default function Barrio() {
@@ -226,10 +228,12 @@ export default function Barrio() {
   const shownSeason = season && !barrio.hiddenSeasons.includes(season) && barrio.seasonsSeen.includes(season) ? season : null
 
   const hour = new Date().getHours()
+  const health = useHealthOk()
+  const practiceNo = health.checked && !health.ok
   const board = useMemo(() => {
-    const b = pickBoard(barrio, { reading, hour })
+    const b = pickBoard(barrio, { reading, hour, practiceNo })
     return { missions: b.missions.slice(0, 3), why: b.why }
-  }, [barrio, reading, hour])
+  }, [barrio, reading, hour, practiceNo])
   const stock = useMemo(() => inventory(barrio, got), [barrio, got])
 
   const risk = !!reading?.risk
@@ -275,8 +279,8 @@ export default function Barrio() {
   }
 
   const onNeighbor = (npc: NeighborId) => {
-    const m = missionOf(npc)
-    if (m && board.missions.includes(m.id)) return openMission(m.id)
+    const m = missionsOf(npc).find((mm) => board.missions.includes(mm.id))
+    if (m) return openMission(m.id)
     setReveal(null)
     setTalk({ kind: 'npc', npc })
   }
@@ -401,14 +405,17 @@ export default function Barrio() {
       )
     }
     if (talk.kind === 'npc') {
-      const m = missionOf(talk.npc)
+      // Lo que ofrece fuera del tablero; con riesgo o de noche, la práctica del kiosco no.
+      const own = missionsOf(talk.npc).filter((mm) => canOffer(mm.id, { reading, hour }))
+      const label = (mm: (typeof own)[number]) =>
+        barrio.done[mm.id] ? `Hacer «${mm.title}» otra vez` : own.length > 1 ? mm.title : 'Hacerla de todos modos'
       return (
         <>
           <Says who={talk.npc}>
             <p>{NPC_LINES[talk.npc](name, address)}</p>
           </Says>
           {actions([
-            ...(m ? [{ label: barrio.done[m.id] ? `Hacer «${m.title}» otra vez` : 'Hacerla de todos modos', onClick: () => openMission(m.id) }] : []),
+            ...own.map((mm) => ({ label: label(mm), onClick: () => openMission(mm.id) })),
             { label: '¿Cómo te ha ido?', onClick: () => setTalk({ kind: 'story', npc: talk.npc }) },
           ])}
         </>

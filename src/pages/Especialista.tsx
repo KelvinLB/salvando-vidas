@@ -11,6 +11,7 @@ import { type BodyRecord, sensationById } from '../lib/bodyCheck'
 import { GAD_CLINICAL, GAD_MAX, PHQ_CLINICAL, PHQ_MAX, type Review, gadLevel, phqLevel, scores } from '../lib/companion'
 import { type Thought, listThoughts } from '../lib/db'
 import { useDiaryLock } from '../lib/lock'
+import { type PanicEntry, fearSummary, usePanicLog } from '../lib/panico'
 import { firstName, usePeople, whatsappOf } from '../lib/people'
 import {
   type JournalEntry,
@@ -52,9 +53,11 @@ type SummaryInput = {
   includeNotes: boolean
   /** Lo del barrio que la persona dejó tal cual (sin lo corregido ni lo borrado), si eligió incluirlo. */
   barrio: string[]
+  /** Lo que anotó al terminar la guía de pánico, si eligió incluirlo. */
+  panic: PanicEntry[]
 }
 
-function buildSummary({ moods, thoughts, meds, taken, changes, reviews, body, treatment, questions, includeNotes, barrio }: SummaryInput) {
+function buildSummary({ moods, thoughts, meds, taken, changes, reviews, body, treatment, questions, includeNotes, barrio, panic }: SummaryInput) {
   const since = new Date()
   since.setDate(since.getDate() - DAYS)
   const sinceDate = localDate(since)
@@ -136,6 +139,13 @@ function buildSummary({ moods, thoughts, meds, taken, changes, reviews, body, tr
     recentChanges.forEach((c) => lines.push(`[${new Date(c.date + 'T12:00').toLocaleDateString('es')}] ${c.text}`))
   }
 
+  const recentPanic = panic.filter((e) => e.date >= sinceDate)
+  if (recentPanic.length) {
+    lines.push('', 'ATAQUES DE PÁNICO (anotados en la app)')
+    lines.push(`Anoté ${recentPanic.length} ${recentPanic.length === 1 ? 'vez' : 'veces'} qué temía y si pasó.`)
+    fearSummary(recentPanic, 'yo').forEach((l) => lines.push(`- ${l.text}`))
+  }
+
   // El barrio va como contexto que la persona misma registró, nunca como diagnóstico.
   if (barrio.length) {
     lines.push('', SUMMARY_TITLE)
@@ -174,6 +184,8 @@ export default function Especialista() {
   const [body] = useStored<BodyRecord[]>('cuerpo-registros', [])
   const { barrio, patch: patchBarrio } = useBarrio()
   const barrioLines = summaryLines(barrio)
+  const panicLog = usePanicLog()
+  const [includePanic, setIncludePanic] = useStored('consulta-incluir-panico', false)
   const [thoughts, setThoughts] = useState<Thought[]>([])
   const [copied, setCopied] = useState<string | null>(null)
   // Si el diario tiene clave, sus notas entran al resumen solo después de escribirla.
@@ -184,7 +196,7 @@ export default function Especialista() {
     listThoughts().then(setThoughts)
   }, [])
 
-  const summary = buildSummary({ moods, thoughts, meds, taken, changes, reviews, body, treatment, questions, includeNotes: includeNotes && !locked, barrio: barrio.inSummary ? barrioLines : [] })
+  const summary = buildSummary({ moods, thoughts, meds, taken, changes, reviews, body, treatment, questions, includeNotes: includeNotes && !locked, barrio: barrio.inSummary ? barrioLines : [], panic: includePanic ? panicLog : [] })
 
   const copy = async (key: string, text: string) => {
     try {
@@ -314,6 +326,12 @@ export default function Especialista() {
             <label className="toggle">
               <input type="checkbox" role="switch" checked={barrio.inSummary} onChange={(e) => patchBarrio({ inSummary: e.target.checked })} />
               Incluir lo del barrio (contexto, no diagnóstico)
+            </label>
+          )}
+          {panicLog.length > 0 && (
+            <label className="toggle">
+              <input type="checkbox" role="switch" checked={includePanic} onChange={(e) => setIncludePanic(e.target.checked)} />
+              Incluir lo que temí en mis ataques de pánico y si pasó
             </label>
           )}
           <pre className="summary printable">{summary}</pre>

@@ -101,6 +101,15 @@ const ART: Record<MissionId, ReactNode> = {
       <path className="bi-ink" d="M14 48 Q18 46 22 49 M15 53 Q19 51 22 53 M24 50 Q34 46 38 52 Q42 58 50 54" />
     </>
   ),
+  practicar: (
+    <>
+      <path className="bi-ink" d="M9 38 Q11 46 18 49 M55 38 Q53 46 46 49 M22 55 Q32 60 42 55" />
+      <rect className="bi-f-calma" x="29" y="8" width="6" height="9" rx="2" />
+      <path className="bi-f-warm" d="M32 16 C46 16 50 24 48 30 L34 50 H30 L16 30 C14 24 18 16 32 16 Z" />
+      <path className="bi-f-accent" d="M16.5 26 Q32 30 47.5 26 L46 31 Q32 35 18 31 Z" />
+      <path className="bi-ink" d="M22 38 Q32 41 42 38 M30 50 L32 55 L34 50" />
+    </>
+  ),
 }
 
 /** El frente de una carta: número, dibujo, nombre y, si cabe, su dicho. */

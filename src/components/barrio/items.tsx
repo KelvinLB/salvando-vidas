@@ -128,6 +128,18 @@ export const ITEM_ART: Record<ItemId, ReactNode> = {
       <path d="M-9 -12 v5 M-5.5 -12 v6 M-2 -12 v5 M1.5 -12 v6 M5 -12 v5 M8.5 -12 v6" stroke="#b8406f" strokeWidth="1.2" strokeLinecap="round" />
     </>
   ),
+  // El trompo de Don Chema, de madera pintada, parado en su punta y con su cordón enrollado.
+  trompo: (
+    <>
+      <ellipse cy="-1" rx="10" ry="3" fill="#000" opacity=".12" />
+      <path d="M0 0 V-6" stroke="#8a8f96" strokeWidth="1.8" strokeLinecap="round" />
+      <rect x="-2.5" y="-35" width="5" height="6" rx="1.5" fill="#8a5f3d" />
+      <path d="M0 -30 C10 -30 13 -24 12 -20 L2 -5 H-2 L-12 -20 C-13 -24 -10 -30 0 -30Z" fill="#c8714a" />
+      <path d="M-12.4 -23 Q0 -20 12.4 -23 L11.5 -19 Q0 -16 -11.5 -19Z" fill="#4c6fb5" />
+      <path d="M-7.5 -14 Q0 -12 7.5 -14" stroke="#f2c14e" strokeWidth="1.4" fill="none" />
+      <path d="M9 -2 q8 2 12 -3 q3 -4 -2 -5 q-6 0 -4 4" stroke="#e9c79b" strokeWidth="1.5" fill="none" strokeLinecap="round" />
+    </>
+  ),
   bugambilia: (
     <>
       <path d="M-10 -12 h20 l-3 12 h-14z" fill="#b86b45" />

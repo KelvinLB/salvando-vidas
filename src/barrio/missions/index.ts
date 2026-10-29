@@ -9,6 +9,7 @@ import HuecoMision from './HuecoMision'
 import Kiosco from './Kiosco'
 import Mandado from './Mandado'
 import Mercado from './Mercado'
+import Practicar from './Practicar'
 import Taller from './Taller'
 
 // Cada misión del barrio con su plática. La página la pone dentro del panel, debajo del mundo.
@@ -23,4 +24,5 @@ export const FLOWS: Record<MissionId, MissionFlow> = {
   carta: Carta,
   hueco: HuecoMision,
   desenredar: Desenredar,
+  practicar: Practicar,
 }

@@ -24,6 +24,11 @@ export type Technique =
   /** Una actividad tranquila que ocupa los ojos y las manos (el juego «Hilos sueltos»): un
    * descanso para la cabeza, sin reloj ni puntos. No es una técnica para «resolver» nada. */
   | 'calma'
+  /** Practicar con el cuerpo con Don Chema: sentir a propósito, poquito y con cuidado, algo
+   * parecido a las sensaciones del pánico (mareo, corazón rápido, falta de aire) para que dejen
+   * de asustar. Pasa antes por el filtro de salud y nunca sale con riesgo, de noche ni en un
+   * día pesado. Pendiente de revisar con un psicólogo y un médico. */
+  | 'exposicion-interoceptiva'
 
 export const MISSIONS = [
   { id: 'mandado', npc: 'tere', title: 'Un mandado de verdad', technique: 'activacion', values: ['disfrutar', 'cuerpo', 'familia'], small: true, real: true, reward: 'papel' },
@@ -36,6 +41,7 @@ export const MISSIONS = [
   { id: 'carta', npc: 'memo', title: 'Una carta de bondad', technique: 'bondad', values: ['comunidad', 'familia'], small: true, real: false, reward: 'jarro' },
   { id: 'hueco', npc: 'lumi', title: 'Salir del hueco', technique: 'hueco', values: ['cuerpo', 'familia'], small: false, real: false, reward: 'cuerda' },
   { id: 'desenredar', npc: 'chayo', title: 'Desenredar', technique: 'calma', values: ['disfrutar'], small: true, real: false, reward: 'rebozo' },
+  { id: 'practicar', npc: 'chema', title: 'Practicar en el kiosco', technique: 'exposicion-interoceptiva', values: ['cuerpo'], small: false, real: false, reward: 'trompo' },
 ] as const satisfies readonly {
   id: string
   npc: string
@@ -83,6 +89,7 @@ export const ITEMS = [
   { id: 'cojin', label: 'Cojín bordado', from: { mission: 'banca' } },
   { id: 'jarro', label: 'Jarro de barro', from: { mission: 'carta' } },
   { id: 'rebozo', label: 'Rebozo', from: { mission: 'desenredar' } },
+  { id: 'trompo', label: 'Trompo', from: { mission: 'practicar' } },
   { id: 'bugambilia', label: 'Bugambilia', from: { values: 1 } },
   { id: 'nopal', label: 'Nopal en maceta', from: { values: 3 } },
   { id: 'comal', label: 'Comal', from: { missions: 4 } },

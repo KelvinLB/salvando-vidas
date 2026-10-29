@@ -25,7 +25,12 @@ export type MissionFlow = ComponentType<FlowProps>
 /** Lo que el tablero ofrece hoy (como mucho tres) y por qué, en palabras sencillas. */
 export type Board = { missions: MissionId[]; why: string[] }
 
-export type BoardInput = { reading: HoleReading | null; hour: number }
+export type BoardInput = {
+  reading: HoleReading | null
+  hour: number
+  /** En el filtro de salud de Practicar con el cuerpo marcó algo: la práctica no sale en el tablero. */
+  practiceNo?: boolean
+}
 
 /** Una cosa que su mascota notó: lo que vio (descriptivo) y qué cambia por eso. */
 export type Noticed = { id: string; saw: string; then: string }

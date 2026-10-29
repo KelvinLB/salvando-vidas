@@ -86,6 +86,13 @@ export const LOTERIA: LoteriaCard[] = [
     saying: 'Más vale maña que fuerza.',
     idea: 'Los hilos no se desenredan a jalones: con calma y una pieza a la vez. Algo tranquilo para los ojos y las manos también le da un respiro a la cabeza.',
   },
+  {
+    mission: 'practicar',
+    number: 30,
+    name: 'El Trompo',
+    saying: 'No es tan fiero el león como lo pintan.',
+    idea: 'El mareo, el corazón rápido o la falta de aire asustan mucho. Sentirlos a propósito, poquito y con cuidado, le enseña al cuerpo que son incómodos y que se van solos.',
+  },
 ]
 
 export const cardOf = (mission: MissionId) => LOTERIA.find((c) => c.mission === mission)!

@@ -9,6 +9,7 @@ import type { BodyRecord } from '../../lib/bodyCheck'
 import { GAD_MAX, PHQ_MAX, REVIEW_EVERY_DAYS, daysSince, scores, useCompanion } from '../../lib/companion'
 import { type DayPlan, planDone } from '../../lib/dayplan'
 import { listThoughts } from '../../lib/db'
+import { fearSummary, usePanicLog } from '../../lib/panico'
 import { dayOf, dayTitle } from '../../lib/diary'
 import { type Move, type Trend, TREND_WORDS, agoWords, lastDays, moodTrend, reviewChange } from '../../lib/progress'
 import { type Medication, type MoodEntry, localDate, useStored } from '../../lib/storage'
@@ -297,6 +298,30 @@ function Care() {
   )
 }
 
+/** Lo que temía en cada crisis y si pasó: su propia evidencia contra el miedo. */
+function PanicFears() {
+  const entries = usePanicLog()
+  const lines = fearSummary(entries)
+  if (!lines.length) return null
+  const happened = lines.some((l) => l.si > 0)
+  return (
+    <section className="card">
+      <h2>Lo que temías y lo que pasó</h2>
+      <p className="muted small">Lo que anotaste al terminar la guía de pánico.</p>
+      <ul className="plain">
+        {lines.map((l) => (
+          <li key={l.id}>{l.text}</li>
+        ))}
+      </ul>
+      {happened ? (
+        <p className="small">Si pasó algo en tu cuerpo, cuéntaselo a tu médico. Y si te asustó, aquí seguimos.</p>
+      ) : (
+        <p className="small">El miedo se siente muy real, pero tu cuerpo te ha ido demostrando otra cosa.</p>
+      )}
+    </section>
+  )
+}
+
 export default function ComoVoy() {
   const [moods] = useStored<MoodEntry[]>('moods', [])
   const recent = moods.filter((m) => m.date >= lastDays(28)[0]).length
@@ -311,6 +336,7 @@ export default function ComoVoy() {
       <Reviews />
       <Treatment />
       <Care />
+      <PanicFears />
       {recent < 21 && (
         <ReminderCard
           kind="animo"

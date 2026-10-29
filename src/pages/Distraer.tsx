@@ -12,6 +12,7 @@ const GAMES = [
   { to: '/juegos/pizarra', emoji: '🖌️', title: 'Pizarra zen', text: 'Dibuja trazos que se desvanecen' },
   { to: '/juegos/acomodar', emoji: '🧱', title: 'Despeja la mente', text: 'Acomoda piezas, una pausa para la cabeza' },
   { to: '/juegos/hilos', emoji: '🧵', title: 'Hilos sueltos', text: 'Junta los hilos, sin prisa' },
+  { to: '/juegos/desde-afuera', emoji: '🌊', title: 'Desde afuera', text: 'Ayúdate a atravesar la ola, desde afuera' },
 ]
 
 const MEDIA = [

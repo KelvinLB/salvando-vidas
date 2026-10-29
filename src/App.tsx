@@ -25,6 +25,8 @@ import MiDia from './pages/MiDia'
 import Enojo from './pages/Enojo'
 import Redes from './pages/Redes'
 import Cuerpo from './pages/Cuerpo'
+import Nervios from './pages/Nervios'
+import Practicar from './pages/Practicar'
 import Memorama from './pages/juegos/Memorama'
 import Deslizante from './pages/juegos/Deslizante'
 import Burbujas from './pages/juegos/Burbujas'
@@ -32,6 +34,7 @@ import Pizarra from './pages/juegos/Pizarra'
 import Hueco from './pages/juegos/Hueco'
 import Acomodar from './pages/juegos/Acomodar'
 import Hilos from './pages/juegos/Hilos'
+import DesdeAfuera from './pages/juegos/DesdeAfuera'
 import Barrio from './pages/Barrio'
 
 export default function App() {
@@ -56,6 +59,7 @@ export default function App() {
         <Route path="juegos/hueco" element={<Hueco />} />
         <Route path="juegos/acomodar" element={<Acomodar />} />
         <Route path="juegos/hilos" element={<Hilos />} />
+        <Route path="juegos/desde-afuera" element={<DesdeAfuera />} />
         <Route path="barrio" element={<Barrio />} />
         <Route path="mi-espacio" element={<MiEspacio />} />
         <Route path="mi-espacio/plan" element={<PlanDeSeguridad />} />
@@ -78,6 +82,8 @@ export default function App() {
         <Route path="enojo" element={<Enojo />} />
         <Route path="redes" element={<Redes />} />
         <Route path="cuerpo" element={<Cuerpo />} />
+        <Route path="nervios" element={<Nervios />} />
+        <Route path="nervios/practicar" element={<Practicar />} />
         <Route path="*" element={<Inicio />} />
       </Route>
     </Routes>

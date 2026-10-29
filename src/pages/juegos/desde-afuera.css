@@ -1,0 +1,705 @@
+/* ---------- Desde afuera ----------
+   Los colores de la escena cambian en modo oscuro; todo se mueve dentro de su tarjeta. */
+
+.da-game {
+  --da-wall: #ece5d9;
+  --da-wall2: #e1ebe4;
+  --da-floor: #d3c9ba;
+  --da-floor2: #c2b7a6;
+  --da-metal: #a2aab0;
+  --da-glass: #d4e2e7;
+  --da-window: #2e3944;
+  --da-sky: #1c2444;
+  --da-seat: #e48a3e;
+  --da-wood: #b98a5e;
+  --da-night: #3a4672;
+  --da-ppl: #b8aea0;
+  --da-ppl2: #9ca7b6;
+  --da-line: #3a332e;
+  --da-bub: #3b4153;
+  --da-bub-ink: #f5f1ea;
+  --da-rep: #fffaf2;
+  --da-rep-ink: #1d2422;
+  --da-tense: #ea8a6e;
+  --da-help: #a73d32;
+  --da-ov: rgb(246 243 238 / 0.94);
+  --da-thread: #8a5f3d;
+  --da-c1: #e46a8f;
+  --da-c2: #4c6fb5;
+  --da-c3: #e0a93a;
+  --da-c4: #5f9e82;
+  --da-c5: #d9733b;
+  --da-c6: #8f6bb8;
+}
+@media (prefers-color-scheme: dark) {
+  .da-game {
+    --da-wall: #2b2925;
+    --da-wall2: #232d29;
+    --da-floor: #3a352f;
+    --da-floor2: #302c27;
+    --da-metal: #7a838a;
+    --da-glass: #3d4c54;
+    --da-window: #0f1418;
+    --da-sky: #0d1124;
+    --da-seat: #b9672c;
+    --da-wood: #7b5a3d;
+    --da-night: #1f2747;
+    --da-ppl: #58534b;
+    --da-ppl2: #4a5263;
+    --da-line: #0d0c0b;
+    --da-bub: #5a6178;
+    --da-rep: #f3ece0;
+    --da-tense: #d9735e;
+    --da-help: #f08a7e;
+    --da-ov: rgb(20 19 18 / 0.94);
+    --da-thread: #c9a27d;
+    --da-c1: #f08aa8;
+    --da-c2: #7f9fe0;
+    --da-c3: #f0c25a;
+    --da-c4: #7dbb9f;
+    --da-c5: #f0915c;
+    --da-c6: #b394dd;
+  }
+}
+
+.da-k-wall { fill: var(--da-wall); }
+.da-k-wall2 { fill: var(--da-wall2); }
+.da-k-floor { fill: var(--da-floor); }
+.da-k-floor2 { fill: var(--da-floor2); }
+.da-k-metal { fill: var(--da-metal); }
+.da-k-glass { fill: var(--da-glass); }
+.da-k-window { fill: var(--da-window); }
+.da-k-sky { fill: var(--da-sky); }
+.da-k-seat { fill: var(--da-seat); }
+.da-k-wood { fill: var(--da-wood); }
+.da-k-night { fill: var(--da-night); }
+.da-k-ppl { fill: var(--da-ppl); }
+.da-k-ppl2 { fill: var(--da-ppl2); }
+.da-k-rep { fill: var(--da-rep); }
+
+.card.da-game {
+  position: relative;
+  gap: 12px;
+  padding: 14px;
+  overflow: hidden;
+  container-type: inline-size;
+}
+.da-game .da-off {
+  display: none;
+}
+
+.da-bar {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 6px 10px;
+}
+.da-bar p {
+  margin: 0;
+}
+.da-title {
+  font: 600 1.15rem/1.2 var(--font-display);
+  font-variation-settings: 'SOFT' 100;
+}
+.da-where {
+  margin-left: 8px;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+.da-helpbtn {
+  min-height: 40px;
+  padding: 8px 2px;
+  border: 0;
+  background: none;
+  color: var(--da-help);
+  font: 600 0.9rem/1 var(--font-body);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+.da-helpbtn:focus-visible,
+.da-sw:focus-visible,
+.da-sc:focus-visible,
+.da-bubin:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* Una columna en el teléfono; escena y lado a lado cuando la tarjeta es ancha. */
+.da-cols {
+  display: grid;
+  gap: 14px;
+  align-items: start;
+}
+@container (min-width: 540px) {
+  .da-cols {
+    grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
+  }
+  .da-cols.da-setup {
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.3fr);
+  }
+}
+
+.da-scene {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  border-radius: 14px;
+  overflow: hidden;
+  background: var(--surface-soft);
+  user-select: none;
+  -webkit-user-select: none;
+}
+.da-scene:focus {
+  outline: none;
+}
+.da-scene > svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.da-ov {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.da-ov > * {
+  pointer-events: auto;
+}
+.da-side {
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+}
+.da-say .pet-says-bubble p {
+  font-size: 0.95rem;
+  line-height: 1.4;
+}
+.da-say.da-talk .pet-says-pet {
+  animation: da-hop 0.5s ease-out;
+}
+@keyframes da-hop {
+  30% { transform: translateY(-5px) rotate(-4deg); }
+  60% { transform: translateY(0) rotate(2deg); }
+}
+
+.da-card {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--surface-soft);
+}
+.da-card h3 {
+  font-size: 1rem;
+  line-height: 1.25;
+}
+.da-card h3:focus {
+  outline: none;
+}
+.da-card p {
+  margin: 0;
+  color: var(--text-2);
+  font-size: 0.9rem;
+  line-height: 1.45;
+}
+.da-card.da-info {
+  border-left: 4px solid var(--tone-calma);
+}
+.da-replies {
+  display: grid;
+  gap: 8px;
+}
+.da-replies .btn {
+  justify-content: flex-start;
+  min-height: 44px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  line-height: 1.35;
+  text-align: left;
+  white-space: normal;
+}
+.da-ideas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.da-ideas li {
+  padding: 5px 10px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--text-2);
+  font-size: 0.8rem;
+}
+.da-ideas li.da-done {
+  border-color: var(--tone-calma);
+  background: color-mix(in srgb, var(--tone-calma) 20%, var(--surface));
+  color: var(--text);
+}
+.da-ideas li.da-done::before {
+  content: '✓ ';
+  color: var(--tone-calma);
+  font-weight: 700;
+}
+
+.da-acts {
+  display: grid;
+  gap: 8px;
+}
+.da-acts .muted {
+  margin: 0;
+}
+.da-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+/* Respirar: se deja presionado al tomar aire y se suelta para soltarlo. */
+.btn.da-breath {
+  position: relative;
+  display: grid;
+  place-items: center;
+  gap: 3px;
+  min-height: 52px;
+  overflow: hidden;
+  border-color: var(--primary);
+  border-radius: 16px;
+  background: var(--primary-soft);
+  color: var(--text);
+  text-align: center;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
+.da-breath i {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: calc(var(--p, 0) * 100%);
+  background: color-mix(in srgb, var(--tone-animo) 30%, transparent);
+  pointer-events: none;
+}
+.da-breath span {
+  position: relative;
+}
+.da-breath small {
+  position: relative;
+  color: var(--muted);
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+.da-guide {
+  min-height: 1.4em;
+  margin: 0;
+  color: var(--text-2);
+  font-size: 0.85rem;
+}
+
+/* Los «¿y si…?», nubes oscuras que se vuelven claras al contestarles. */
+.da-bub {
+  position: absolute;
+  top: 0;
+  left: 0;
+  max-width: min(44%, 210px);
+  transition: opacity 0.5s ease;
+}
+.da-bubin {
+  position: relative;
+  display: block;
+  width: 100%;
+  padding: 8px 12px;
+  border: 0;
+  border-radius: 18px;
+  background: var(--da-bub);
+  color: var(--da-bub-ink);
+  font: 600 0.8rem/1.3 var(--font-body);
+  text-align: center;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgb(20 20 40 / 0.22);
+  animation: da-bob 3.4s ease-in-out infinite;
+}
+.da-bubin::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: -9px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: inherit;
+  transform: translateX(-50%);
+}
+.da-bub:nth-child(2n) .da-bubin {
+  animation-delay: -1.7s;
+}
+.da-bubin.da-light {
+  background: var(--da-rep);
+  color: var(--da-rep-ink);
+  font-weight: 500;
+  font-size: 0.78rem;
+  cursor: default;
+  box-shadow: 0 0 0 1px var(--tone-calma), 0 4px 14px rgb(20 40 30 / 0.18);
+  animation: none;
+}
+.da-bubin.da-flip {
+  animation: da-flip 0.5s ease-in-out;
+}
+.da-bub.da-in {
+  animation: da-pop 0.45s ease-out;
+}
+.da-bub.da-lt {
+  z-index: 2;
+  max-width: min(72%, 330px);
+}
+.da-sm .da-bubin,
+.da-sm .da-bubin.da-light {
+  padding: 6px 10px;
+  font-size: 0.75rem;
+}
+.da-bub.da-away {
+  opacity: 0;
+  translate: 0 -36px;
+  transition: opacity 1.5s ease, translate 1.5s ease;
+}
+@keyframes da-bob {
+  50% { transform: translateY(-5px); }
+}
+@keyframes da-flip {
+  50% { transform: rotateY(90deg); }
+}
+@keyframes da-pop {
+  0% { opacity: 0; transform: scale(0.4); }
+  70% { opacity: 1; transform: scale(1.06); }
+  100% { transform: scale(1); }
+}
+.da-lbl {
+  position: absolute;
+  padding: 4px 8px;
+  border: 1px solid var(--tone-calma);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--text);
+  font: 600 0.72rem/1 var(--font-body);
+  white-space: nowrap;
+  pointer-events: none;
+  transform: translate(-50%, -100%);
+  transition: opacity 0.8s;
+  box-shadow: 0 2px 8px rgb(0 0 0 / 0.12);
+}
+.da-lbl.da-gone {
+  opacity: 0;
+}
+
+/* Lo que se toca dentro de la escena. */
+.da-popw {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+.da-crit.da-pop .da-popw {
+  animation: da-pop 0.5s ease-out;
+}
+.da-crit,
+.da-feet,
+.da-seekring {
+  cursor: pointer;
+}
+/* Solo el vaso se arrastra: el resto de la escena deja hacer scroll. */
+.da-glass {
+  cursor: grab;
+  touch-action: none;
+}
+.da-glass.da-held {
+  cursor: default;
+}
+.da-game svg [tabindex]:focus {
+  outline: none;
+}
+.da-ring {
+  fill: transparent;
+  stroke: transparent;
+  stroke-width: 2.5;
+}
+.da-game svg [tabindex]:focus-visible .da-ring {
+  stroke: var(--accent);
+}
+.da-seekring {
+  fill: color-mix(in srgb, var(--accent) 22%, transparent);
+  stroke: var(--accent);
+  stroke-width: 2.6;
+  stroke-dasharray: 4 3;
+  animation: da-glow 1.8s ease-in-out infinite;
+}
+.da-seekring:focus-visible {
+  stroke: var(--primary);
+  stroke-width: 3.5;
+}
+.da-seekring.da-found {
+  fill: color-mix(in srgb, var(--tone-calma) 32%, transparent);
+  stroke: var(--tone-calma);
+  stroke-dasharray: none;
+  animation: none;
+}
+@keyframes da-glow {
+  50% { opacity: 0.5; }
+}
+.da-roots path {
+  fill: none;
+  stroke: var(--da-thread);
+  stroke-width: 2.6;
+  stroke-linecap: round;
+  stroke-dasharray: 1 1;
+  stroke-dashoffset: 1;
+  opacity: 0;
+  transition: stroke-dashoffset 1.8s ease-out, opacity 0.2s;
+}
+.da-roots.da-grow path {
+  stroke-dashoffset: 0;
+  opacity: 1;
+}
+.da-roots .da-leaf {
+  fill: var(--tone-calma);
+  opacity: 0;
+  transition: opacity 0.6s ease 1.3s;
+}
+.da-roots.da-grow .da-leaf {
+  opacity: 1;
+}
+.da-streak {
+  animation: da-streak 1.5s linear infinite;
+}
+@keyframes da-streak {
+  from { transform: translateX(70px); }
+  to { transform: translateX(-70px); }
+}
+.da-tw {
+  animation: da-tw 2.6s ease-in-out infinite;
+}
+.da-tw:nth-child(3n) {
+  animation-delay: -0.9s;
+}
+.da-tw:nth-child(3n + 1) {
+  animation-delay: -1.7s;
+}
+@keyframes da-tw {
+  50% { opacity: 0.25; }
+}
+.da-game.da-paused * {
+  animation-play-state: paused !important;
+}
+
+/* Hazte tú */
+.da-prev {
+  display: grid;
+  place-items: center;
+  padding: 8px;
+  border-radius: 14px;
+  background: var(--surface-soft);
+}
+.da-prev svg {
+  display: block;
+  width: 100%;
+  max-width: 210px;
+  height: auto;
+}
+@container (min-width: 540px) {
+  .da-prev svg {
+    max-width: 300px;
+  }
+}
+.da-opts {
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+}
+.da-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+.da-opts > p {
+  margin: 0;
+}
+.da-g {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+}
+.da-lab {
+  color: var(--text-2);
+  font: 600 0.82rem/1.3 var(--font-body);
+}
+.da-sw {
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: 2px solid var(--surface);
+  border-radius: 50%;
+  box-shadow: 0 0 0 1px var(--border);
+  cursor: pointer;
+}
+.da-sw[aria-pressed='true'] {
+  box-shadow: 0 0 0 3px var(--primary);
+}
+.da-row .chip {
+  min-height: 36px;
+  padding: 6px 12px;
+  font-size: 0.9rem;
+}
+.da-input {
+  width: 100%;
+  max-width: 300px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+  color: var(--text);
+  font: 1rem/1.3 var(--font-body);
+}
+.da-scenes {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+.da-sc {
+  display: grid;
+  justify-items: center;
+  gap: 4px;
+  padding: 8px 6px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--surface-soft);
+  color: var(--text);
+  font: 500 0.8rem/1.25 var(--font-body);
+  text-align: center;
+  cursor: pointer;
+}
+.da-sc svg {
+  width: 52px;
+  height: 52px;
+}
+.da-sc[aria-pressed='true'] {
+  border-color: var(--primary);
+  background: var(--primary-soft);
+  box-shadow: 0 0 0 1px var(--primary) inset;
+}
+.da-go {
+  justify-self: start;
+}
+
+/* La ayuda tapa el juego, que se queda en pausa. */
+.da-help {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  display: grid;
+  align-items: start;
+  justify-items: center;
+  padding: 56px 14px 14px;
+  background: var(--da-ov);
+}
+.da-help .da-card {
+  width: 100%;
+  max-width: 400px;
+  background: var(--surface);
+  box-shadow: 0 10px 30px rgb(0 0 0 / 0.18);
+}
+.da-help .da-row .btn {
+  flex: 1 1 200px;
+}
+
+/* El final */
+.da-end h3 {
+  font-size: 1.2rem;
+}
+.da-recap {
+  display: grid;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+}
+.da-rr {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  padding: 8px 10px;
+  border-top: 1px solid var(--border);
+  color: var(--text-2);
+  font-size: 0.85rem;
+}
+.da-rr.da-rh {
+  border-top: 0;
+  color: var(--muted);
+  font: 600 0.72rem/1.2 var(--font-body);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.da-rr span:last-child {
+  color: var(--text);
+}
+.da-card .da-nada {
+  padding: 8px 10px;
+  border-top: 1px solid var(--border);
+  color: var(--primary);
+  font-family: var(--hand);
+  font-size: 1.3rem;
+}
+.da-stk {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.da-stk svg {
+  flex: none;
+  width: 68px;
+  height: 68px;
+}
+.da-stks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.da-stks svg {
+  display: block;
+  width: 34px;
+  height: 34px;
+}
+.da-stk-new {
+  animation: da-pop 0.6s ease-out;
+}
+.da-stks-t {
+  margin: 0 0 6px;
+}
+.da-end > .btn,
+.da-help .da-card > .btn {
+  justify-self: start;
+}
+
+.da-why ul {
+  margin: 0;
+  padding-left: 1.1rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .da-game *,
+  .da-game *::before,
+  .da-game *::after {
+    animation: none !important;
+    transition-property: opacity !important;
+  }
+  .da-bub.da-away {
+    translate: none;
+  }
+}

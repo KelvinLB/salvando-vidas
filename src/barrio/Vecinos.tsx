@@ -8,15 +8,13 @@ import './insights.css'
 // La historia de cada vecino: se abre un capítulo a la vez con lo que la persona hace en el
 // barrio, y lo que ya se abrió se queda abierto aunque pase el tiempo (advanceChapter solo sube).
 
-const missionOf = (npc: NeighborId) => MISSIONS.find((m) => m.npc === npc)?.id
+// Don Chema tiene dos misiones: con cualquiera de las suyas se abre su capítulo.
+const missionsOf = (npc: NeighborId) => MISSIONS.filter((m) => m.npc === npc).map((m) => m.id)
 
 function met(unlock: Unlock, npc: NeighborId, barrio: Barrio) {
   const done = barrio.done ?? {}
   if ('always' in unlock) return true
-  if ('own' in unlock) {
-    const id = missionOf(npc)
-    return !!id && !!done[id]
-  }
+  if ('own' in unlock) return missionsOf(npc).some((id) => !!done[id])
   if ('missions' in unlock) return Object.keys(done).length >= unlock.missions
   return daysSince(barrio.since) >= unlock.weeks * 7
 }

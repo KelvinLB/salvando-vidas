@@ -27,16 +27,26 @@ import { localDate, today } from './storage'
 // 6. Sus rumbos (valores) suben las misiones que comparten alguno.
 // 7. Las que todavía no hace van un poco antes, pero las hechas se pueden repetir. Las
 //    chiquitas también van un poco antes: empezar fácil es parte de la activación conductual.
+// 8. Practicar en el kiosco con Don Chema (exposición interoceptiva) nunca sale con riesgo ni de
+//    noche (tampoco se ofrece al platicar con él), ni en un día pesado (no es chiquita), ni si
+//    en el filtro de salud marcó algo. Con nervios sube poquito, como la ruta del mercado.
+// 9. Cada vecino ofrece una sola cosa a la vez: si dos de Don Chema quedan arriba, va la que
+//    sumó más y la otra deja su lugar a la siguiente.
 //
 // Para que el tablero no cambie a cada rato durante el día, lo que hace en el barrio se toma
 // como estaba al empezar el día; lo único que lo cambia en el momento es la lectura de sus
 // registros (si marca algo nuevo), la noche y sus rumbos. Los empates se rompen con la fecha:
 // el mismo día da el mismo tablero.
 
-const NIGHT = (hour: number) => hour >= 22 || hour < 6
+export const isNight = (hour: number) => hour >= 22 || hour < 6
 const GENTLE: MissionId[] = ['kiosco', 'agua', 'hueco']
 const REST: MissionId[] = ['kiosco', 'agua', 'desenredar']
 const MAX = 3
+
+/** Lo que no se ofrece con señales de riesgo ni de noche, ni en el tablero ni al platicar. */
+const NOT_NOW: MissionId[] = ['practicar']
+export const canOffer = (id: MissionId, { reading, hour }: BoardInput) =>
+  !NOT_NOW.includes(id) || (!reading?.risk && !isNight(hour))
 
 /** Pesos: lo que contestó hoy pesa más que lo que hizo otros días; los rumbos y lo nuevo, poquito. */
 const W = {
@@ -75,7 +85,7 @@ function asOfMorning(barrio: Barrio): Barrio {
   }
 }
 
-export function pickBoard(barrio: Barrio, { reading, hour }: BoardInput): Board {
+export function pickBoard(barrio: Barrio, { reading, hour, practiceNo }: BoardInput): Board {
   const why: string[] = []
 
   if (reading?.risk) {
@@ -89,7 +99,7 @@ export function pickBoard(barrio: Barrio, { reading, hour }: BoardInput): Board 
   }
 
   const heavy = !!reading?.heavy
-  const night = NIGHT(hour)
+  const night = isNight(hour)
   const morning = asOfMorning(barrio)
   const patterns = new Set(standing(morning).map((p) => p.id))
   const repeats = new Set(standing(morning).flatMap((p) => (p.kind === 'repite' ? [p.mission] : [])))
@@ -102,6 +112,7 @@ export function pickBoard(barrio: Barrio, { reading, hour }: BoardInput): Board 
     pool = pool.filter((id) => missionById(id).small)
     why.push('Por lo que marcaste hoy, el tablero trae solo misiones chiquitas.')
   }
+  if (practiceNo) pool = pool.filter((id) => id !== 'practicar')
 
   // Cada misión junta puntos y, con ellos, la razón en palabras sencillas.
   const scored = pool.map((id) => {
@@ -118,6 +129,7 @@ export function pickBoard(barrio: Barrio, { reading, hour }: BoardInput): Board 
       if (id === 'kiosco') add(W.state, 'Como en tus registros salieron nervios, primero va respirar con Don Chema.')
       if (id === 'cinco') add(W.stateSecond)
       if (id === 'mercado' && !heavy && state === 'nervios') add(W.stateFar)
+      if (id === 'practicar' && !heavy && state === 'nervios') add(W.stateFar)
     }
     if (state === 'soledad' && id === 'carta') add(W.state, 'Como en tus registros salió la soledad, Memo te propone una carta.')
     if (state === 'animo' && id === 'mandado') add(W.state, 'Como en tus registros el ánimo anda bajo, Tere te propone un mandado chiquito.')
@@ -143,7 +155,17 @@ export function pickBoard(barrio: Barrio, { reading, hour }: BoardInput): Board 
     return { id, score: score + tieBreak(today(), id), reasons }
   })
 
-  const chosen = scored.sort((a, b) => b.score - a.score).slice(0, MAX)
+  // Una sola cosa por vecino.
+  const npcs = new Set<string>()
+  const chosen = scored
+    .sort((a, b) => b.score - a.score)
+    .filter((c) => {
+      const npc = missionById(c.id).npc
+      if (npcs.has(npc)) return false
+      npcs.add(npc)
+      return true
+    })
+    .slice(0, MAX)
 
   // Las razones de lo que sí quedó, de la más fuerte a la más suave, sin repetir.
   const reasons = chosen

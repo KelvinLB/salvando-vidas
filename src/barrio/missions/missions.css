@@ -490,3 +490,23 @@ button.bm-step {
 .bm-patch figcaption {
   margin: 0;
 }
+
+/* ---------- Practicar en el kiosco: el ejercicio de Practicar con el cuerpo, dentro del panel ---------- */
+
+.bm-practice {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.bm-practice .card.pr-card {
+  padding: 16px;
+}
+.bm-practice .pr-card .bm-says {
+  text-align: left;
+}
+/* Los cuidados, sobre el fondo del panel: en su tarjetita y en letra más chica. */
+.bm-flow .pr-safety {
+  background: var(--surface);
+  border-color: var(--border);
+  font-size: 0.92rem;
+}
