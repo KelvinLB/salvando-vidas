@@ -5,6 +5,8 @@ import PinPad from '../components/PinPad'
 import { ANSWERS } from '../data/companion'
 import { MOODS } from '../data/content'
 import { feelingLabel } from '../data/feelings'
+import { useBarrio } from '../lib/barrio'
+import { SUMMARY_TITLE, summaryLines } from '../lib/barrioNoticed'
 import { type BodyRecord, sensationById } from '../lib/bodyCheck'
 import { GAD_CLINICAL, GAD_MAX, PHQ_CLINICAL, PHQ_MAX, type Review, gadLevel, phqLevel, scores } from '../lib/companion'
 import { type Thought, listThoughts } from '../lib/db'
@@ -48,9 +50,11 @@ type SummaryInput = {
   treatment: string
   questions: string
   includeNotes: boolean
+  /** Lo del barrio que la persona dejó tal cual (sin lo corregido ni lo borrado), si eligió incluirlo. */
+  barrio: string[]
 }
 
-function buildSummary({ moods, thoughts, meds, taken, changes, reviews, body, treatment, questions, includeNotes }: SummaryInput) {
+function buildSummary({ moods, thoughts, meds, taken, changes, reviews, body, treatment, questions, includeNotes, barrio }: SummaryInput) {
   const since = new Date()
   since.setDate(since.getDate() - DAYS)
   const sinceDate = localDate(since)
@@ -132,6 +136,12 @@ function buildSummary({ moods, thoughts, meds, taken, changes, reviews, body, tr
     recentChanges.forEach((c) => lines.push(`[${new Date(c.date + 'T12:00').toLocaleDateString('es')}] ${c.text}`))
   }
 
+  // El barrio va como contexto que la persona misma registró, nunca como diagnóstico.
+  if (barrio.length) {
+    lines.push('', SUMMARY_TITLE)
+    barrio.forEach((l) => lines.push(`- ${l}`))
+  }
+
   if (treatment.trim()) lines.push('', 'SOBRE MI TRATAMIENTO', treatment.trim())
   if (questions.trim()) lines.push('', 'MIS PREGUNTAS', questions.trim())
 
@@ -162,6 +172,8 @@ export default function Especialista() {
   const [changes] = useStored<JournalEntry[]>('meds-cambios', [])
   const [reviews] = useStored<Review[]>('mascota-revisiones', [])
   const [body] = useStored<BodyRecord[]>('cuerpo-registros', [])
+  const { barrio, patch: patchBarrio } = useBarrio()
+  const barrioLines = summaryLines(barrio)
   const [thoughts, setThoughts] = useState<Thought[]>([])
   const [copied, setCopied] = useState<string | null>(null)
   // Si el diario tiene clave, sus notas entran al resumen solo después de escribirla.
@@ -172,7 +184,7 @@ export default function Especialista() {
     listThoughts().then(setThoughts)
   }, [])
 
-  const summary = buildSummary({ moods, thoughts, meds, taken, changes, reviews, body, treatment, questions, includeNotes: includeNotes && !locked })
+  const summary = buildSummary({ moods, thoughts, meds, taken, changes, reviews, body, treatment, questions, includeNotes: includeNotes && !locked, barrio: barrio.inSummary ? barrioLines : [] })
 
   const copy = async (key: string, text: string) => {
     try {
@@ -298,6 +310,12 @@ export default function Especialista() {
                 </button>
               </div>
             ))}
+          {barrioLines.length > 0 && (
+            <label className="toggle">
+              <input type="checkbox" role="switch" checked={barrio.inSummary} onChange={(e) => patchBarrio({ inSummary: e.target.checked })} />
+              Incluir lo del barrio (contexto, no diagnóstico)
+            </label>
+          )}
           <pre className="summary printable">{summary}</pre>
           <div className="row no-print">
             <button className="btn" onClick={share}>{copied === 'resumen' ? '¡Copiado!' : 'Compartir'}</button>

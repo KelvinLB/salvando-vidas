@@ -30,6 +30,8 @@ import Deslizante from './pages/juegos/Deslizante'
 import Burbujas from './pages/juegos/Burbujas'
 import Pizarra from './pages/juegos/Pizarra'
 import Hueco from './pages/juegos/Hueco'
+import Acomodar from './pages/juegos/Acomodar'
+import Barrio from './pages/Barrio'
 
 export default function App() {
   const { pathname, hash } = useLocation()
@@ -51,6 +53,8 @@ export default function App() {
         <Route path="juegos/burbujas" element={<Burbujas />} />
         <Route path="juegos/pizarra" element={<Pizarra />} />
         <Route path="juegos/hueco" element={<Hueco />} />
+        <Route path="juegos/acomodar" element={<Acomodar />} />
+        <Route path="barrio" element={<Barrio />} />
         <Route path="mi-espacio" element={<MiEspacio />} />
         <Route path="mi-espacio/plan" element={<PlanDeSeguridad />} />
         <Route path="mi-espacio/caja" element={<Caja />} />

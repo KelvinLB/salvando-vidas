@@ -1,0 +1,859 @@
+/* El barrio: la plaza, el cuarto y sus paneles. Los colores de la plaza se adaptan al modo
+   oscuro; lo pintado (fachadas, toldos, fruta) se queda igual. Todo se mueve dentro de su
+   tarjeta y se queda quieto si la persona pidió menos movimiento. */
+
+.barrio {
+  --b-sky: #eef3ef;
+  --b-tile-a: #e9e0d2;
+  --b-tile-b: #e2d7c6;
+  --b-tile-edge: #d3c6b2;
+  --b-grass: #cfe0c4;
+  --b-grass-b: #c3d8b6;
+  --b-wall: #efe6da;
+  --b-wall-2: #e4d8c8;
+  --b-wood: #a7764f;
+  --b-wood-2: #8a5f3d;
+  --b-iron: #3b3f3e;
+  --b-bulb-off: #d9d3c8;
+  --b-bulb-on: #ffd36b;
+  --b-cloud: #ffffff;
+  --b-rain: #7ea6cf;
+  /* El mapita: un color por terreno. */
+  --b-m-camino: #d8c8ae;
+  --b-m-mercado: #ebb77c;
+  --b-m-agua: #93bfe3;
+  --b-m-arena: #efdeb2;
+  --b-m-milpa: #cdd27c;
+  --b-m-jardin: #a8cf96;
+  /* El mundo abierto: agua, caminos, mercado, arena, milpa, jardín y lo que crece. */
+  --b-water: #9cc9e0;
+  --b-water-b: #93c1da;
+  --b-path: #d8ccb8;
+  --b-path-b: #cec0a8;
+  --b-market: #e8cfb5;
+  --b-market-b: #dfc2a4;
+  --b-sand: #eee0bb;
+  --b-sand-b: #e6d6ad;
+  --b-milpa: #c9a57c;
+  --b-milpa-b: #bb966c;
+  --b-garden: #c2dbb0;
+  --b-garden-b: #b7d3a3;
+  --b-leaf: #6fa86a;
+  --b-leaf-2: #4f8a55;
+  --b-leaf-3: #8cbf7a;
+  --b-corn: #7fa85a;
+  --b-tassel: #d9b84a;
+  --b-maguey: #7fa88f;
+  --b-maguey-2: #5f8f78;
+  --b-nopal: #6e9e58;
+  --b-rock: #b7b1a6;
+  --b-cerro: #b8cdb2;
+  --b-cerro-far: #d6e2d6;
+  /* La plaza del mundo y las líneas finas entre cuadritos. */
+  --b-plaza: #e9e0d2;
+  --b-plaza-b: #e2d7c6;
+  --b-tile-line: #0000001a;
+  --b-glass: color-mix(in srgb, var(--surface) 92%, transparent);
+}
+@media (prefers-color-scheme: dark) {
+  .barrio {
+    --b-sky: #181c1a;
+    --b-tile-a: #2f2b26;
+    --b-tile-b: #29261f;
+    --b-tile-edge: #3a352e;
+    --b-grass: #2c3b30;
+    --b-grass-b: #283629;
+    --b-wall: #2a2622;
+    --b-wall-2: #24201c;
+    --b-wood: #8a6243;
+    --b-wood-2: #6e4c33;
+    --b-iron: #cfc8bf;
+    --b-bulb-off: #4a453e;
+    --b-cloud: #3a3f45;
+    --b-rain: #8fb3d9;
+    --b-m-camino: #4a4236;
+    --b-m-mercado: #6e5233;
+    --b-m-agua: #2f4c66;
+    --b-m-arena: #5a4f3a;
+    --b-m-milpa: #4b5130;
+    --b-m-jardin: #2f4a33;
+    --b-plaza: #4d463c;
+    --b-plaza-b: #474036;
+    --b-tile-line: #00000040;
+    --b-water: #24465c;
+    --b-water-b: #214055;
+    --b-path: #463f35;
+    --b-path-b: #403a31;
+    --b-market: #52402f;
+    --b-market-b: #4b3a2b;
+    --b-sand: #4a4230;
+    --b-sand-b: #443c2b;
+    --b-milpa: #4a3828;
+    --b-milpa-b: #423223;
+    --b-garden: #30443a;
+    --b-garden-b: #2c3f35;
+    --b-leaf: #3f6e48;
+    --b-leaf-2: #2f5638;
+    --b-leaf-3: #5a8a5c;
+    --b-corn: #5c7d3e;
+    --b-tassel: #a08a3a;
+    --b-maguey: #4f7262;
+    --b-maguey-2: #3d5c4e;
+    --b-nopal: #4b7040;
+    --b-rock: #5a554e;
+    --b-cerro: #26332b;
+    --b-cerro-far: #1f2a24;
+  }
+}
+
+/* ---------- El mundo ---------- */
+
+.b-world {
+  gap: 0;
+  padding: 0;
+  overflow: hidden;
+}
+.b-top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 56px;
+  padding: 8px 14px;
+  border-bottom: 1px solid var(--border);
+}
+.b-place {
+  font-family: var(--font-display);
+  font-variation-settings: 'SOFT' 100;
+  font-size: 1.12rem;
+}
+.b-scene {
+  display: block;
+  width: 100%;
+  height: auto;
+  background: var(--b-sky);
+  touch-action: manipulation;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.b-tile {
+  cursor: pointer;
+  stroke: var(--b-tile-line);
+  stroke-width: 0.75;
+}
+.b-thing.tap {
+  cursor: pointer;
+  outline: none;
+}
+.b-thing.tap:focus-visible {
+  filter: drop-shadow(0 0 2px var(--accent)) drop-shadow(0 0 4px var(--accent));
+}
+.b-pet,
+.b-decor,
+.b-front,
+.b-mark {
+  pointer-events: none;
+}
+.b-pet .companion {
+  overflow: visible;
+}
+.b-label {
+  font-family: var(--font-body);
+  fill: var(--text);
+  paint-order: stroke;
+  stroke: var(--surface);
+  stroke-width: 3.5px;
+  stroke-linejoin: round;
+}
+.b-label-plain {
+  font-family: var(--font-body);
+}
+.b-sign {
+  font-family: 'Caveat Variable', 'Segoe Print', cursive;
+  font-weight: 650;
+  fill: #fdfcfa;
+}
+.b-zz {
+  fill: var(--muted);
+  font-family: var(--font-body);
+}
+.b-mark {
+  font-family: var(--font-body);
+  animation: b-bob 2.4s ease-in-out infinite;
+}
+.b-bulb.on {
+  filter: drop-shadow(0 0 3px #ffd36b);
+}
+.b-cloud {
+  fill: var(--b-cloud);
+  opacity: 0.9;
+}
+.b-puddle {
+  fill: color-mix(in srgb, var(--b-rain) 30%, transparent);
+}
+.b-rain path {
+  stroke: var(--b-rain);
+  stroke-width: 1.4;
+  stroke-linecap: round;
+  opacity: 0.55;
+}
+.b-rain {
+  animation: b-fall 1.4s linear infinite;
+}
+.b-sway {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+  animation: b-swing 4s ease-in-out infinite;
+}
+.b-flame {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+  animation: b-flicker 1.6s ease-in-out infinite;
+}
+
+/* Los gestos de la mascota. Caminar se mueve desde el código, sin animación aquí. */
+.b-pose {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+}
+.b-pose.hop {
+  animation: b-hop 0.5s ease;
+}
+.b-pose.dance {
+  animation: b-dance 0.5s ease-in-out 6;
+}
+.b-pose.breathe {
+  animation: b-calm 5s ease-in-out 2;
+}
+.b-pose.sit {
+  transform: scaleY(0.84);
+}
+
+@keyframes b-hop {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-12px);
+  }
+}
+@keyframes b-dance {
+  0%,
+  100% {
+    transform: rotate(-7deg);
+  }
+  50% {
+    transform: rotate(7deg);
+  }
+}
+@keyframes b-calm {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.08);
+  }
+}
+@keyframes b-bob {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-3px);
+  }
+}
+@keyframes b-swing {
+  0%,
+  100% {
+    transform: rotate(-3deg);
+  }
+  50% {
+    transform: rotate(3deg);
+  }
+}
+@keyframes b-flicker {
+  0%,
+  100% {
+    transform: scaleY(1);
+  }
+  50% {
+    transform: scaleY(0.8);
+  }
+}
+@keyframes b-fall {
+  from {
+    transform: translateY(-24px);
+  }
+  to {
+    transform: translateY(24px);
+  }
+}
+
+/* Al poner una cosa, el piso avisa dónde caería. */
+.b-room.placing .b-tile:hover {
+  fill: color-mix(in srgb, var(--accent) 35%, var(--b-tile-a));
+}
+.b-room.placing .b-scene {
+  cursor: copy;
+}
+
+.b-gestures {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 10px 14px;
+  border-top: 1px solid var(--border);
+}
+.b-talk {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-height: 96px;
+  padding: 14px;
+  border-top: 1px solid var(--border);
+  background: var(--surface-soft);
+}
+.b-acts {
+  margin-top: 8px;
+}
+.b-acts .btn.small {
+  min-height: 40px;
+}
+
+/* ---------- El mundo abierto: la cámara, el mapa y la pantalla completa ---------- */
+
+.b-top-acts {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-left: auto;
+}
+.b-top-acts .btn.small,
+.b-sos {
+  min-height: 40px;
+}
+.b-full-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.b-sos {
+  padding: 8px 14px;
+}
+
+/* Alto y ancho: casi toda la pantalla del teléfono, sin pasarse en la compu. */
+.b-view {
+  position: relative;
+  height: max(360px, 62vh);
+  height: max(360px, 62svh);
+  overflow: hidden;
+  /* Al traerlo a la vista, que no quede debajo de la barra de arriba ni de la de abajo. */
+  scroll-margin: calc(var(--topbar-h, 64px) + 8px) 0 calc(var(--tabbar-h) + 8px);
+  background: var(--b-sky);
+}
+.b-view.room {
+  height: auto;
+  overflow: visible;
+}
+.b-cam {
+  position: absolute;
+  inset: 0;
+}
+.b-cam .b-scene {
+  width: 100%;
+  height: 100%;
+  touch-action: none;
+  cursor: grab;
+  -webkit-tap-highlight-color: transparent;
+}
+.b-cam .b-scene:active {
+  cursor: grabbing;
+}
+
+/* «Volver a…»: aparece al mirar lejos de la mascota. */
+.b-back {
+  position: absolute;
+  left: 12px;
+  bottom: calc(var(--b-cover, 0px) + 12px);
+  z-index: 2;
+  min-height: 40px;
+  background: var(--b-glass);
+  box-shadow: var(--shadow);
+}
+
+/* El letrero de la zona al llegar. */
+.b-banner {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  right: 12px;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  width: fit-content;
+  max-width: calc(100% - 24px);
+  margin: 0 auto;
+  padding: 8px 18px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--b-glass);
+  box-shadow: var(--shadow);
+  text-align: center;
+  pointer-events: none;
+  animation: b-banner 3.2s ease both;
+}
+.b-banner strong {
+  font-family: var(--font-display);
+  font-variation-settings: 'SOFT' 100;
+  font-size: 1.12rem;
+  font-weight: 560;
+}
+.b-banner span {
+  color: var(--text-2);
+  font-size: 0.86rem;
+  line-height: 1.3;
+}
+@keyframes b-banner {
+  0% {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  12%,
+  82% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+/* El mapita de la esquina y «¿A dónde vamos?». */
+.b-map {
+  position: absolute;
+  right: 12px;
+  bottom: calc(var(--b-cover, 0px) + 12px);
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+  max-width: calc(100% - 24px);
+  max-height: calc(100% - var(--b-cover, 0px) - 24px);
+}
+.b-map-btn {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: 128px;
+  min-height: 40px;
+  padding: 6px 6px 4px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--b-glass);
+  box-shadow: var(--shadow);
+  color: var(--text);
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 600;
+  line-height: 1.2;
+  cursor: pointer;
+}
+.b-map-btn:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+.b-map.open .b-map-btn {
+  border-color: var(--accent);
+}
+.b-map-here {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.b-map-art {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.b-map-art .m-pasto {
+  fill: var(--b-grass);
+}
+.b-map-art .m-camino {
+  fill: var(--b-m-camino);
+}
+.b-map-art .m-plaza {
+  fill: var(--b-tile-a);
+}
+.b-map-art .m-mercado {
+  fill: var(--b-m-mercado);
+}
+.b-map-art .m-agua {
+  fill: var(--b-m-agua);
+}
+.b-map-art .m-arena {
+  fill: var(--b-m-arena);
+}
+.b-map-art .m-milpa {
+  fill: var(--b-m-milpa);
+}
+.b-map-art .m-jardin {
+  fill: var(--b-m-jardin);
+}
+.b-map-art .m-zone {
+  fill: none;
+  stroke: color-mix(in srgb, var(--text) 28%, transparent);
+  stroke-width: 1px;
+  vector-effect: non-scaling-stroke;
+}
+/* Lo que todavía no conocen se ve tenue, nunca cerrado. */
+.b-map-art .m-zone.dim {
+  fill: var(--surface);
+  fill-opacity: 0.55;
+}
+.b-map-art .m-pet {
+  fill: var(--accent);
+  stroke: var(--surface);
+  stroke-width: 0.5;
+}
+.b-map-art .m-name {
+  font-family: var(--font-body);
+  font-size: 2.5px;
+  font-weight: 650;
+  fill: var(--text);
+  paint-order: stroke;
+  stroke: var(--surface);
+  stroke-width: 0.7px;
+  stroke-linejoin: round;
+}
+.b-map-panel {
+  order: -1;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: min(320px, calc(100vw - 56px));
+  max-width: 100%;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+.b-map-panel > * {
+  flex: none;
+}
+.b-map-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.b-map-head h2 {
+  margin: 0;
+  font-size: 1.05rem;
+  outline: none;
+}
+.b-map-head .btn.small {
+  min-height: 40px;
+}
+.b-zones {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.b-zone {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  width: 100%;
+  min-height: 44px;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.b-zone small {
+  color: var(--muted);
+  font-size: 0.8rem;
+  line-height: 1.3;
+}
+.b-zone.here {
+  border-color: var(--accent);
+  background: var(--warm);
+}
+.b-zone:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 1px;
+}
+
+/* Pantalla completa: el mundo tapa todo y la plática va encima, como hoja de abajo. */
+.b-world.full {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  height: 100dvh;
+  margin: 0;
+  border: 0;
+  border-radius: 0;
+}
+.b-world.full .b-top {
+  padding-top: calc(8px + env(safe-area-inset-top));
+  background: var(--surface);
+}
+.b-world.full .b-view {
+  flex: 1 1 auto;
+  height: auto;
+  min-height: 0;
+}
+.b-world.full .b-sheet {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 4;
+  width: min(100%, 720px);
+  max-height: 46%;
+  margin: 0 auto;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding-bottom: env(safe-area-inset-bottom);
+  border: 1px solid var(--border);
+  border-bottom: 0;
+  border-radius: 20px 20px 0 0;
+  background: var(--surface-soft);
+  box-shadow: 0 -10px 28px -16px rgb(0 0 0 / 0.35);
+}
+.b-world.full .b-gestures {
+  border-top: 0;
+  background: var(--surface);
+}
+.b-extras {
+  padding: 0 14px 14px;
+  background: var(--surface-soft);
+}
+@media (max-width: 430px) {
+  .b-world.full .b-place {
+    display: none;
+  }
+}
+
+/* ---------- Avisos ---------- */
+
+.b-help .btn.small,
+.b-ask .btn.small {
+  min-height: 40px;
+}
+.b-ask {
+  border-color: var(--warm-border);
+  background: var(--warm);
+}
+
+/* ---------- El tablero ---------- */
+
+.b-missions {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.b-missions li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+}
+.b-missions li > span {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.b-missions small {
+  color: var(--muted);
+  line-height: 1.3;
+}
+.b-missions .btn.small {
+  flex: none;
+  min-height: 40px;
+}
+.b-why summary,
+.b-seasons summary {
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+  color: var(--primary);
+  font-weight: 600;
+  cursor: pointer;
+}
+.b-why ul {
+  margin: 4px 0 8px;
+  padding-left: 20px;
+  color: var(--text-2);
+}
+
+/* ---------- Hazlo tuyo ---------- */
+
+.b-panel h3 {
+  margin-bottom: 2px;
+}
+.b-inv {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.b-items {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+  gap: 8px;
+}
+.b-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  min-height: 96px;
+  padding: 8px 6px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--surface);
+  color: var(--text);
+  font-size: 0.86rem;
+  line-height: 1.2;
+  text-align: center;
+  cursor: pointer;
+}
+.b-item.on {
+  border-color: var(--accent);
+  background: var(--warm);
+  box-shadow: 0 0 0 1px var(--accent) inset;
+}
+.b-item:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+.b-item small {
+  color: var(--muted);
+  font-size: 0.75rem;
+}
+.b-thumb {
+  width: 44px;
+  height: 46px;
+  flex: none;
+}
+.b-next-title {
+  margin-top: 6px;
+}
+.b-next {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.b-next li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border: 1px dashed var(--border);
+  border-radius: 14px;
+}
+.b-next li > span:last-child {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.b-next small {
+  color: var(--muted);
+  line-height: 1.3;
+}
+.b-next-thumb {
+  flex: none;
+  opacity: 0.35;
+  filter: grayscale(1);
+}
+.b-opt {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.b-lbl {
+  font-weight: 600;
+}
+.b-swatches {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.b-swatch {
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: 2px solid var(--border);
+  border-radius: 50%;
+  background: repeating-linear-gradient(45deg, var(--b-tile-a) 0 6px, var(--b-tile-b) 6px 12px);
+  cursor: pointer;
+}
+.b-swatch[aria-checked='true'] {
+  outline: 3px solid var(--text);
+  outline-offset: 2px;
+}
+.b-seasons ul {
+  display: grid;
+  gap: 4px;
+  margin: 6px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.b-seasons label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 40px;
+  cursor: pointer;
+}
+.b-seasons input {
+  width: 20px;
+  height: 20px;
+  flex: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .barrio *,
+  .barrio *::before,
+  .barrio *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+.b-note {
+  margin-top: -8px;
+  padding: 0 4px;
+}

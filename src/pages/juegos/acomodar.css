@@ -1,0 +1,176 @@
+/* ---------- Despeja la mente ---------- */
+
+/* En pantallas bajitas el tablero se achica un poco para que las piezas quepan arriba de la
+   barra de abajo y se puedan arrastrar sin desplazar la página. */
+.fit-board,
+.fit-tray {
+  width: min(360px, 100%, max(248px, 100svh - 470px));
+}
+
+.fit-board {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  grid-template-rows: repeat(8, 1fr);
+  gap: 3px;
+  aspect-ratio: 1;
+  margin: 0 auto;
+  padding: 6px;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: var(--surface-soft);
+  overflow: hidden;
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.fit-cell {
+  border-radius: 6px;
+  background: var(--surface);
+  transition: background 0.2s;
+}
+.fit-cell.filled {
+  background: color-mix(in srgb, var(--fit) 72%, var(--surface));
+  box-shadow: inset 0 -3px 0 color-mix(in srgb, var(--fit) 85%, var(--text) 15%);
+}
+.fit-cell.ghost {
+  background: color-mix(in srgb, var(--fit) 38%, var(--surface));
+  outline: 2px dashed color-mix(in srgb, var(--fit) 80%, var(--surface));
+  outline-offset: -2px;
+  transition: none;
+}
+.fit-cell.ghost.blocked {
+  outline-color: color-mix(in srgb, var(--muted) 55%, transparent);
+}
+.fit-cell.ghost.blocked:not(.filled) {
+  background: var(--surface);
+}
+.fit-cell.landed {
+  animation: fit-land 0.28s ease-out;
+}
+
+/* Lo que se despeja se encoge y se desvanece en su lugar, sin salirse del tablero. */
+.fit-fade {
+  z-index: 1;
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--fit) 72%, var(--surface));
+  pointer-events: none;
+  animation: fit-fade 0.6s ease-out forwards;
+}
+
+@keyframes fit-land {
+  from {
+    transform: scale(0.84);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+@keyframes fit-fade {
+  to {
+    opacity: 0;
+    transform: scale(0.55);
+  }
+}
+@keyframes fit-arrive {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+
+.fit-note {
+  min-height: 1.4em;
+  margin: -8px 0 -6px;
+}
+
+.fit-tray {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin: 0 auto;
+}
+.fit-slot {
+  display: grid;
+  place-items: center;
+  min-width: 0;
+  min-height: 84px;
+  padding: 8px;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: var(--surface);
+  color: inherit;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  transition: border-color 0.2s, background 0.2s;
+}
+.fit-slot.selected {
+  border-color: var(--primary);
+  background: var(--primary-soft);
+  box-shadow: inset 0 0 0 1px var(--primary);
+}
+.fit-slot.lifted .fit-piece {
+  opacity: 0.25;
+}
+.fit-slot.empty {
+  border-style: dashed;
+  background: transparent;
+  cursor: default;
+}
+
+.fit-piece {
+  --cell: 16px;
+  display: grid;
+  gap: 3px;
+  animation: fit-arrive 0.4s ease-out;
+}
+.fit-piece i {
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--fit) 72%, var(--surface));
+  box-shadow: inset 0 -2px 0 color-mix(in srgb, var(--fit) 85%, var(--text) 15%);
+}
+
+.fit-float {
+  position: fixed;
+  z-index: 60;
+  pointer-events: none;
+  filter: drop-shadow(0 8px 14px rgb(0 0 0 / 0.18));
+}
+.fit-float .fit-piece {
+  animation: none;
+}
+.fit-float .fit-piece i {
+  border-radius: 6px;
+  box-shadow: inset 0 -3px 0 color-mix(in srgb, var(--fit) 85%, var(--text) 15%);
+}
+
+.fit-rest {
+  padding: 12px 16px;
+  border-radius: var(--radius);
+  background: var(--surface-soft);
+}
+
+.btn.fit-restart {
+  align-self: center;
+  min-height: 40px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fit-cell.landed,
+  .fit-piece {
+    animation: none;
+  }
+  .fit-fade {
+    animation: fit-fade-still 0.3s linear forwards;
+  }
+}
+@keyframes fit-fade-still {
+  to {
+    opacity: 0;
+  }
+}

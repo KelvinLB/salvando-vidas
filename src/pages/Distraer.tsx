@@ -10,6 +10,7 @@ const GAMES = [
   { to: '/juegos/deslizante', emoji: '🔢', title: 'Deslizante', text: 'Ordena las piezas a tu ritmo' },
   { to: '/juegos/burbujas', emoji: '🫧', title: 'Burbujas', text: 'Revienta burbujas, una por una' },
   { to: '/juegos/pizarra', emoji: '🖌️', title: 'Pizarra zen', text: 'Dibuja trazos que se desvanecen' },
+  { to: '/juegos/acomodar', emoji: '🧱', title: 'Despeja la mente', text: 'Acomoda piezas, una pausa para la cabeza' },
 ]
 
 const MEDIA = [
@@ -33,6 +34,19 @@ export default function Distraer() {
         </p>
       </div>
       <h2 className="section-title">Juegos tranquilos</h2>
+      {/* El barrio va primero: su mascota pasea por la plaza, con vecinos y su propia casa. */}
+      <Link to="/barrio" className="tile hole-tile">
+        <span className="hole-tile-pet" aria-hidden="true">
+          <CompanionView look={companion ?? DEFAULT_COMPANION} mood={mood} size={72} />
+        </span>
+        <span className="hole-tile-text">
+          <strong>El barrio</strong>
+          <small>
+            {companion ? `${companionName(companion)} te espera` : 'Tu mascota te espera'} en la plaza: vecinos con
+            cositas chiquitas que ayudan, y una casa que puedes hacer tuya.
+          </small>
+        </span>
+      </Link>
       {/* Salir del hueco va primero: su mascota es quien juega, y el lugar se parece a su día. */}
       <Link to="/juegos/hueco" className="tile hole-tile">
         <span className="hole-tile-pet" aria-hidden="true">
