@@ -149,6 +149,8 @@ export const WORLD_SPOTS = {
   rosa: { r: 23, c: 14 },
   memo: { r: 23, c: 26 },
   chayo: { r: 11, c: 26 },
+  /** Don Fermín, afuera de su panadería. */
+  fermin: { r: 6, c: 17 },
 } satisfies Record<string, { r: number; c: number; span?: boolean }>
 
 export type PlazaSpot = keyof typeof WORLD_SPOTS

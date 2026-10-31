@@ -1,9 +1,15 @@
-import { animate, stagger, svg } from 'animejs'
+import { type JSAnimation, animate, stagger, svg } from 'animejs'
 import type { Fx } from '../data/bodyStories'
 
 // Movimiento de cada efecto del cuerpo, con anime.js. Qué se ve y de qué color lo
 // decide el CSS (atributos data-fx y data-tone); aquí solo va lo que se mueve.
 // Se llaman dentro de un createScope, así que los selectores buscan solo en el cuerpo.
+
+/**
+ * Los efectos de las historias, más los que solo usa la figura: `vagus` es el freno del
+ * cuerpo (el nervio vago se ilumina de azul al soltar el aire y el corazón baja el ritmo).
+ */
+export type BodyFx = Fx | 'vagus'
 
 const pulse = { loop: true, alternate: true, ease: 'inOutSine' } as const
 
@@ -28,7 +34,7 @@ function flow(group: string, path: string, count: number, duration: number) {
   }
 }
 
-export const FX: Record<Fx, () => void> = {
+export const FX: Record<BodyFx, () => void> = {
   'alarm-brain': () => {
     animate('.b-alarm-ring', { scale: [1, 6], opacity: [0.9, 0], duration: 1500, delay: stagger(750), loop: true, ease: 'outQuad' })
     animate('.b-amygdala', { scale: [1, 1.6], duration: 380, ...pulse })
@@ -54,6 +60,8 @@ export const FX: Record<Fx, () => void> = {
     // Inhalar 4 s y soltar 6 s, igual que la respiración de Calma.
     animate('.b-lung', { scale: [{ to: 1.12, duration: 4000 }, { to: 1, duration: 6000 }], loop: true, ease: 'inOutSine' })
     animate('.b-aura', { scale: [{ to: 1.06, duration: 4000 }, { to: 0.97, duration: 6000 }], loop: true, ease: 'inOutSine' })
+    // Todo el cuerpo sube apenas al tomar aire, como una persona de verdad.
+    animate('.b-breathe', { scaleY: [{ to: 1.008, duration: 4000 }, { to: 1, duration: 6000 }], loop: true, ease: 'inOutSine' })
   },
   'stomach-knot': () => {
     animate('.b-stomach', { rotate: [-6, 6], scale: [1, 0.9], duration: 520, ...pulse })
@@ -114,10 +122,48 @@ export const FX: Record<Fx, () => void> = {
   restless: () => {
     animate('.b-legs', { translateX: [-1.2, 1.2], duration: 110, ...pulse })
   },
+  vagus: () => {
+    // Sin la respiración guiada, el freno se enciende al ritmo de 4 s de tomar aire y 6 s de soltarlo.
+    animate('.b-vagus-glow', { opacity: [{ to: 0, duration: 4000 }, { to: 1, duration: 1200 }, { to: 0, duration: 4800 }], loop: true, ease: 'inOutSine' })
+    animate(svg.createDrawable('.b-vagus-pulse'), {
+      draw: [{ to: '0 0', duration: 4000 }, { to: '0 1', duration: 3000 }, { to: '1 1', duration: 3000 }],
+      loop: true,
+      ease: 'inOutSine',
+    })
+    animate('.b-heart', { scale: [1, 1.08], duration: 1000, ...pulse })
+  },
   wave: () => {
     const route = svg.createMotionPath('.b-wave-path')
     if (!route) return
     const { translateX, translateY } = route
     animate('.b-wave-dot', { translateX, translateY, duration: 9000, loop: true, ease: 'linear' })
   },
+}
+
+/**
+ * La respiración guiada, al ritmo del contador de la pantalla: al tomar aire se llenan los
+ * pulmones; al soltarlo, el nervio vago se ilumina de arriba abajo y el corazón late un poco
+ * más despacio. Con cada respiración baja un poco más (calm va de 0 a 1). Devuelve lo que
+ * hay que detener cuando cambie la fase; los valores se quedan donde iban para no brincar.
+ */
+export function breathPhase(phase: 'in' | 'out', calm: number): JSAnimation[] {
+  const inhale = phase === 'in'
+  const time = inhale ? 4000 : 6000
+  // Medio latido: de 0.6 s a casi 0.9 s. Nunca rápido, y cada vez más lento.
+  const beat = Math.round((inhale ? 600 : 700) + 180 * Math.min(1, calm))
+  const list = [
+    animate('.b-lung', { scale: inhale ? 1.12 : 1, duration: time, ease: 'inOutSine' }),
+    animate('.b-breathe', { scaleY: inhale ? 1.008 : 1, duration: time, ease: 'inOutSine' }),
+    animate('.b-aura', { scale: inhale ? 1.06 : 0.97, duration: time, ease: 'inOutSine' }),
+    animate('.b-heart', { scale: [1, 1.07], duration: beat, ...pulse }),
+  ]
+  if (!inhale) {
+    list.push(
+      animate('.b-vagus-glow', { opacity: [{ to: 1, duration: 1200 }, { to: 0.15, duration: 4800 }], ease: 'inOutSine' }),
+      animate(svg.createDrawable('.b-vagus-pulse'), { draw: ['0 0', '0 1', '1 1'], duration: 5600, ease: 'inOutSine' }),
+    )
+  } else {
+    list.push(animate('.b-vagus-glow', { opacity: 0.15, duration: 1500, ease: 'inOutSine' }))
+  }
+  return list
 }

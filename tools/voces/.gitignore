@@ -1,0 +1,5 @@
+# Entorno de Python y modelos (se reconstruyen con el README)
+.venv/
+.modelos/
+# La grabación de quien prestó su voz: dato personal, nunca al repositorio
+voz/

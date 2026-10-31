@@ -1,0 +1,18 @@
+Modelos 3D de «Explorar por dentro» (cuerpo-v*.glb)
+
+Origen: BodyParts3D, Copyright (c) The Database Center for Life Science, licensed under
+CC Attribution-Share Alike 2.1 Japan (texto que traen los archivos OBJ de la versión 4.0).
+https://dbarchive.biosciencedbc.jp/en/bodyparts3d/download.html
+https://creativecommons.org/licenses/by-sa/2.1/jp/
+(En 2025 el DBCLS publicó la base de datos bajo CC BY 4.0, que es más permisiva; aquí se
+mantiene la licencia más exigente que traen los archivos.)
+
+Cambios hechos por Salvando Vidas: se unieron las piezas por órgano, se simplificaron con
+meshoptimizer, se comprimieron (EXT_meshopt_compression), se quitaron colores y vasos, la
+superficie de los pulmones se reconstruyó envolviendo sus bronquios y vasos, y la del corazón
+envolviendo sus aurículas, cavidades y arterias coronarias. El nervio vago se dibuja en el
+código (no viene de BodyParts3D).
+
+Estos archivos modificados se publican bajo CC BY-SA 4.0:
+https://creativecommons.org/licenses/by-sa/4.0/
+El código de la app no es una adaptación de los modelos y no queda bajo esta licencia.

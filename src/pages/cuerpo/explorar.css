@@ -1,0 +1,166 @@
+/* ---------- Explorar por dentro (3D) ----------
+   El lienzo ocupa el escenario; la tarjeta de cada parte aparece abajo, encima del lienzo, y la
+   cámara sube el cuerpo para dejarle espacio. En 2D, la tarjeta va debajo de la lista. */
+
+.ex-stage {
+  position: relative;
+  height: min(68svh, 600px);
+  min-height: 380px;
+  overflow: hidden;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background:
+    radial-gradient(120% 70% at 50% 35%, var(--surface) 0%, transparent 70%),
+    var(--surface-soft);
+}
+.ex-canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  touch-action: none;
+  cursor: grab;
+}
+.ex-canvas:active {
+  cursor: grabbing;
+}
+
+.ex-loading {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  margin: 0;
+  color: var(--muted);
+  font-family: var(--font-display);
+  font-variation-settings: 'SOFT' 100;
+  font-size: 1.1rem;
+  animation: ex-respira 4s ease-in-out infinite;
+}
+@keyframes ex-respira {
+  50% {
+    opacity: 0.45;
+  }
+}
+
+.ex-tools {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  display: flex;
+  gap: 2px;
+  padding: 2px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--surface) 82%, transparent);
+  border: 1px solid var(--border);
+}
+.ex-tools .icon-btn {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  color: var(--text-2);
+}
+
+.ex-overlay {
+  position: absolute;
+  left: 10px;
+  right: 10px;
+  bottom: 10px;
+  pointer-events: none;
+}
+.ex-overlay .ex-card {
+  pointer-events: auto;
+  max-height: calc(min(68svh, 600px) * 0.52);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  box-shadow: var(--shadow);
+  animation: ex-sube 0.35s ease-out;
+}
+@keyframes ex-sube {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+}
+
+.ex-card {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 14px 16px 16px;
+  border-radius: 18px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+}
+.ex-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.ex-card-head .icon-btn {
+  display: grid;
+  place-items: center;
+  margin: -6px -8px -6px 0;
+}
+.ex-card h2 {
+  margin: 0;
+  font-size: 1.2rem;
+}
+.ex-card h3 {
+  margin: 6px 0 0;
+  font-family: var(--font-body);
+  font-size: 0.8rem;
+  font-weight: 650;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.ex-card p {
+  margin: 0;
+  line-height: 1.45;
+}
+.ex-card .btn {
+  align-self: flex-start;
+  margin-top: 8px;
+}
+.ex-partes .ex-card {
+  margin-top: 12px;
+}
+
+.ex-capas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.ex-partes .chips {
+  margin-top: 12px;
+}
+
+.ex-aviso p {
+  margin: 0;
+}
+.ex-aviso-acciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.ex-creditos {
+  margin: 0;
+  font-size: 0.78rem;
+  line-height: 1.45;
+  color: var(--muted);
+  text-align: center;
+}
+.ex-creditos a {
+  color: inherit;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ex-loading,
+  .ex-overlay .ex-card {
+    animation: none;
+  }
+}

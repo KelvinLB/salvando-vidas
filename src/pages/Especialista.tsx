@@ -5,14 +5,17 @@ import PinPad from '../components/PinPad'
 import { ANSWERS } from '../data/companion'
 import { MOODS } from '../data/content'
 import { feelingLabel } from '../data/feelings'
+import { SENSE_CARDS, WORDS } from '../data/sentido'
 import { useBarrio } from '../lib/barrio'
 import { SUMMARY_TITLE, summaryLines } from '../lib/barrioNoticed'
-import { type BodyRecord, sensationById } from '../lib/bodyCheck'
+import { noteWhere } from '../components/cuerpo-siento/TusPalabras'
+import { type BodyNote, type BodyRecord, sensationById, spotLines } from '../lib/bodyCheck'
 import { GAD_CLINICAL, GAD_MAX, PHQ_CLINICAL, PHQ_MAX, type Review, gadLevel, phqLevel, scores } from '../lib/companion'
 import { type Thought, listThoughts } from '../lib/db'
 import { useDiaryLock } from '../lib/lock'
 import { type PanicEntry, fearSummary, usePanicLog } from '../lib/panico'
 import { firstName, usePeople, whatsappOf } from '../lib/people'
+import { type CardAnswer, type Compass, INCLUDE_KEY, type WordsEntry, useCardAnswers, useCompass, useWords } from '../lib/sentido'
 import {
   type JournalEntry,
   type Medication,
@@ -28,7 +31,7 @@ const SCRIPT =
   'Hola, quisiera agendar una cita. Me he sentido muy mal emocionalmente desde hace un tiempo (tristeza, ansiedad, vacío) y me recomendaron buscar ayuda. ¿Qué días tienen disponibles?'
 
 const SUGGESTED_QUESTIONS = [
-  '¿Es normal que con este medicamento ya no pueda llorar?',
+  '¿Que no pueda llorar es parte de la depresión o efecto del medicamento?',
   '¿Cuánto tarda el tratamiento en hacer efecto?',
   '¿Qué hago si un día me siento mucho peor?',
   '¿Me conviene también ir a terapia psicológica?',
@@ -55,9 +58,40 @@ type SummaryInput = {
   barrio: string[]
   /** Lo que anotó al terminar la guía de pánico, si eligió incluirlo. */
   panic: PanicEntry[]
+  /** Sus notas sobre el cuerpo («Tus palabras»), si eligió incluirlas. */
+  bodyNotes: BodyNote[]
+  /** Lo de «Lo que no sale» (palabras, cartas y brújula), si eligió incluirlo. */
+  sentido: { words: WordsEntry[]; cards: CardAnswer[]; compass: Compass } | null
 }
 
-function buildSummary({ moods, thoughts, meds, taken, changes, reviews, body, treatment, questions, includeNotes, barrio, panic }: SummaryInput) {
+// «Lo que no sale» va con sus palabras tal cual: lo que eligió, lo que contestó y lo pequeño
+// que se propuso. Los «hoy no» van como los dijo, sin contarlos ni marcarlos como faltas.
+// Pendiente de revisión con psicóloga.
+function sentidoLines({ words, cards, compass }: NonNullable<SummaryInput['sentido']>, sinceDate: string) {
+  const day = (d: string) => new Date(d + 'T12:00').toLocaleDateString('es')
+  const wordLabel = (id: string) => WORDS.find((w) => w.id === id)?.label ?? id
+  const lines: string[] = []
+  const recentWords = words.filter((w) => w.date >= sinceDate && w.words.length).slice(-5)
+  if (recentWords.length) {
+    lines.push('Las palabras que elegí para lo que siento:')
+    recentWords.forEach((w) => lines.push(`- [${day(w.date)}] ${w.words.map(wordLabel).join(', ')}`))
+  }
+  const recentCards = cards.filter((c) => c.date >= sinceDate).slice(-8)
+  if (recentCards.length) {
+    lines.push('La pregunta de cada día y lo que contesté:')
+    recentCards.forEach((c) => {
+      const answer = c.answer.trim() || (c.pass ? SENSE_CARDS.find((k) => k.path === c.path)?.pass : '') || ''
+      lines.push(`- [${day(c.date)}] ${c.question}${answer ? ` — ${answer}` : ''}`)
+    })
+  }
+  const action = compass.action
+  if (action?.text.trim() && action.date >= sinceDate) {
+    lines.push(`Lo pequeño que me propuse hacer (${day(action.date)}): ${action.text.trim()}${action.done ? '. Lo hice.' : ''}`)
+  }
+  return lines
+}
+
+function buildSummary({ moods, thoughts, meds, taken, changes, reviews, body, treatment, questions, includeNotes, barrio, panic, bodyNotes, sentido }: SummaryInput) {
   const since = new Date()
   since.setDate(since.getDate() - DAYS)
   const sinceDate = localDate(since)
@@ -125,7 +159,23 @@ function buildSummary({ moods, thoughts, meds, taken, changes, reviews, body, tr
           (afters.length ? `; después de respirar un minuto, ${avg(afters.map((r) => r.after!))}.` : '.'),
       )
     }
+    // Dónde exacto, de las últimas veces que lo marcó con el dedo.
+    const marked = recentBody.filter((r) => r.spots?.length).slice(0, 3)
+    if (marked.length) {
+      lines.push('Dónde exacto lo marqué:')
+      marked.forEach((r) =>
+        spotLines(r.spots!).forEach((l) => lines.push(`- [${new Date(r.date + 'T12:00').toLocaleDateString('es')}] ${l}`)),
+      )
+    }
   }
+
+  if (bodyNotes.length) {
+    lines.push('', 'CÓMO LO DIGO YO (notas sobre mi cuerpo)')
+    bodyNotes.forEach((n) => lines.push(`- ${noteWhere(n)}: «${n.text}»`))
+  }
+
+  const notSaid = sentido ? sentidoLines(sentido, sinceDate) : []
+  if (notSaid.length) lines.push('', 'LO QUE NO SALE (con mis palabras)', ...notSaid)
 
   if (meds.length) {
     lines.push('', 'MEDICAMENTOS')
@@ -156,8 +206,9 @@ function buildSummary({ moods, thoughts, meds, taken, changes, reviews, body, tr
   if (questions.trim()) lines.push('', 'MIS PREGUNTAS', questions.trim())
 
   if (includeNotes) {
-    // Los recuerdos del diario son de la persona, no del resumen: solo van lo que siente y lo que pasó.
-    const withText = recentThoughts.filter((t) => t.text && t.kind !== 'recuerdo')
+    // Los recuerdos y las cartas que no se mandan son de la persona, no del resumen: solo van
+    // lo que siente y lo que pasó.
+    const withText = recentThoughts.filter((t) => t.text && t.kind !== 'recuerdo' && t.kind !== 'carta')
     if (withText.length) {
       lines.push('', 'MIS NOTAS')
       withText.forEach((t) =>
@@ -186,6 +237,13 @@ export default function Especialista() {
   const barrioLines = summaryLines(barrio)
   const panicLog = usePanicLog()
   const [includePanic, setIncludePanic] = useStored('consulta-incluir-panico', false)
+  const [bodyNotes] = useStored<BodyNote[]>('cuerpo-notas', [])
+  const [includeBody, setIncludeBody] = useStored('consulta-incluir-cuerpo', false)
+  const [words] = useWords()
+  const [cards] = useCardAnswers()
+  const [compass] = useCompass()
+  const [includeSentido, setIncludeSentido] = useStored(INCLUDE_KEY, false)
+  const hasSentido = words.length > 0 || cards.length > 0 || !!compass.action?.text.trim()
   const [thoughts, setThoughts] = useState<Thought[]>([])
   const [copied, setCopied] = useState<string | null>(null)
   // Si el diario tiene clave, sus notas entran al resumen solo después de escribirla.
@@ -196,7 +254,7 @@ export default function Especialista() {
     listThoughts().then(setThoughts)
   }, [])
 
-  const summary = buildSummary({ moods, thoughts, meds, taken, changes, reviews, body, treatment, questions, includeNotes: includeNotes && !locked, barrio: barrio.inSummary ? barrioLines : [], panic: includePanic ? panicLog : [] })
+  const summary = buildSummary({ moods, thoughts, meds, taken, changes, reviews, body, treatment, questions, includeNotes: includeNotes && !locked, barrio: barrio.inSummary ? barrioLines : [], panic: includePanic ? panicLog : [], bodyNotes: includeBody ? bodyNotes : [], sentido: includeSentido ? { words, cards, compass } : null })
 
   const copy = async (key: string, text: string) => {
     try {
@@ -332,6 +390,18 @@ export default function Especialista() {
             <label className="toggle">
               <input type="checkbox" role="switch" checked={includePanic} onChange={(e) => setIncludePanic(e.target.checked)} />
               Incluir lo que temí en mis ataques de pánico y si pasó
+            </label>
+          )}
+          {bodyNotes.length > 0 && (
+            <label className="toggle">
+              <input type="checkbox" role="switch" checked={includeBody} onChange={(e) => setIncludeBody(e.target.checked)} />
+              Incluir mis notas sobre el cuerpo («Tus palabras»)
+            </label>
+          )}
+          {hasSentido && (
+            <label className="toggle">
+              <input type="checkbox" role="switch" checked={includeSentido} onChange={(e) => setIncludeSentido(e.target.checked)} />
+              Incluir lo de «Lo que no sale» (mis palabras, mis cartas del día y lo que me propuse)
             </label>
           )}
           <pre className="summary printable">{summary}</pre>

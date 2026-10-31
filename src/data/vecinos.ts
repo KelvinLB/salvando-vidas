@@ -178,4 +178,26 @@ export const STORIES: Record<NeighborId, Chapter[]> = {
       text: 'Todavía hay días enredados. Esos días tejo algo chiquito, una pieza nomás. Cada rebozo de mi puesto empezó con un hilo suelto.',
     },
   ],
+  // Don Fermín, el panadero: una temporada gris («ni triste ni contento») y cómo el sentido le
+  // volvió poco a poco al pensar en quién se come su pan (la derreflexión de Frankl). Sin hablar
+  // de muerte ni de legado. Pendiente de revisión con psicóloga. Fuente: Frankl, «El hombre en
+  // busca de sentido» y «Ante el vacío existencial» (Herder).
+  fermin: [
+    {
+      unlock: { always: true },
+      text: 'Hubo una temporada en que todo me sabía igual, hasta el pan. Me levantaba a las cuatro, horneaba y no sentía nada. Ni triste ni contento: nomás gris.',
+    },
+    {
+      unlock: { own: true },
+      text: 'Un día la maestra de la escuela me encargó conchas para el festival de los niños. Me puse a hacerlas pensando en ellos, en qué color le gustaría a cada quien, y por un rato se me olvidó estar pendiente de lo gris.',
+    },
+    {
+      unlock: { missions: 3 },
+      text: 'Le conté a la doctora del centro de salud lo de sentirme gris. Me dijo que eso se puede atender y me mandó con una psicóloga. Me dio pena ir, pero fui, y me ayudó.',
+    },
+    {
+      unlock: { weeks: 3 },
+      text: 'Todavía hay mañanas grises. Esos días pienso en quién se va a comer el pan: el que sale temprano a trabajar, los niños de la escuela, Doña Chayo con su cafecito. Con eso me alcanza para prender el horno.',
+    },
+  ],
 }

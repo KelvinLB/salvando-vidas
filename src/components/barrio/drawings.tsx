@@ -182,6 +182,31 @@ export const NEIGHBOR_LOOK: Record<NeighborId, PersonLook> = {
       </>
     ),
   },
+  fermin: {
+    legs: '#4a4652',
+    shirt: '#e8a462',
+    skin: '#c08a66',
+    over: (
+      <>
+        {/* Su mandil blanco con harina y el trapo al hombro. */}
+        <path d="M-8 -34 h16 v20 q-8 3 -16 0z" fill="#fdfcfa" />
+        <path d="M-8 -34 Q-6 -40 -3 -40 M8 -34 Q6 -40 3 -40" stroke="#fdfcfa" strokeWidth="1.4" fill="none" />
+        <rect x="-4" y="-27" width="8" height="5" rx="1.2" fill="#f3e3b5" />
+        <circle cx="-3" cy="-17" r=".9" fill="#e9dccb" />
+        <circle cx="4" cy="-19" r="1.1" fill="#e9dccb" />
+        <path d="M6 -39 l5 2 v12 l-4 -1z" fill="#c0504a" />
+        <path d="M7 -35 l4 1.5 M7 -31 l4 1.5" stroke="#fdfcfa" strokeWidth=".8" />
+      </>
+    ),
+    head: (
+      <>
+        {/* El bigote y el gorro alto de panadero. */}
+        <path d="M-5 -43 q2.5 -2 5 0 q2.5 -2 5 0" stroke="#4a3a30" strokeWidth="2.2" fill="none" strokeLinecap="round" />
+        <rect x="-8" y="-55" width="16" height="4" rx="1.5" fill="#fdfcfa" />
+        <path d="M-9 -55 q-3 -8 3 -11 q3 -5 7 -1 q5 -3 7 2 q4 4 1 10z" fill="#fdfcfa" stroke="#e2d7c6" strokeWidth=".8" />
+      </>
+    ),
+  },
 }
 
 export function Neighbor({ id }: { id: NeighborId }) {

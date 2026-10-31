@@ -313,6 +313,73 @@
   line-height: 1.35;
 }
 
+/* Las cartas de «Lo que no sale»: la carta a un lado y su dicho con su idea al otro. */
+.bi-paths-title {
+  margin: 8px 0 0;
+  font-size: 1.05rem;
+}
+.bi-paths {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.bi-path {
+  display: grid;
+  grid-template-columns: 104px minmax(0, 1fr);
+  align-items: center;
+  gap: 12px;
+  padding: 8px;
+  border: 1px solid var(--warm-border);
+  border-radius: 16px;
+  background: var(--warm);
+  color: var(--text);
+  text-decoration: none;
+  transition: border-color 0.2s;
+}
+.bi-path:hover {
+  border-color: var(--primary);
+}
+.bi-path:focus-visible {
+  outline: 3px solid var(--primary);
+  outline-offset: 3px;
+}
+.bi-path-card {
+  display: flex;
+}
+.bi-path-card .bi-card {
+  flex: 1;
+  min-height: 150px;
+}
+.bi-path-text {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+  font-size: 0.92rem;
+  line-height: 1.4;
+}
+.bi-path-text .bi-detail-saying {
+  font-size: 1.02rem;
+}
+.bi-path-go {
+  color: var(--primary);
+  font-weight: 600;
+  font-size: 0.86rem;
+}
+.bi-path-go::after {
+  content: ' →';
+}
+
+/* La sugerencia de la brújula en los rumbos. */
+.bi-compass {
+  display: grid;
+  gap: 8px;
+}
+.bi-compass p {
+  margin: 0;
+}
+
 /* La carta que se voltea al ganarla: el giro se queda dentro de su tarjeta. */
 .bi-reveal {
   align-items: center;
@@ -399,7 +466,8 @@
     animation: none;
   }
   .bi-street,
-  .bi-card-btn {
+  .bi-card-btn,
+  .bi-path {
     transition: none;
   }
   .bi-card-btn:active {

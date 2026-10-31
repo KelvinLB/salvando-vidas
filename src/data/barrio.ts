@@ -29,6 +29,11 @@ export type Technique =
    * de asustar. Pasa antes por el filtro de salud y nunca sale con riesgo, de noche ni en un
    * día pesado. Pendiente de revisar con un psicólogo y un médico. */
   | 'exposicion-interoceptiva'
+  /** Derreflexión (Viktor Frankl): llevar la atención hacia afuera, a algo o a alguien más,
+   * en vez de darle vueltas a uno mismo. Aquí, ayudar a Don Fermín a recordar su receta. No se
+   * ofrece con señales de riesgo. Pendiente de revisión con psicóloga. Fuente: Frankl, «Teoría
+   * y terapia de las neurosis» (Herder) y «El hombre en busca de sentido» (Herder). */
+  | 'derreflexion'
 
 export const MISSIONS = [
   { id: 'mandado', npc: 'tere', title: 'Un mandado de verdad', technique: 'activacion', values: ['disfrutar', 'cuerpo', 'familia'], small: true, real: true, reward: 'papel' },
@@ -42,6 +47,7 @@ export const MISSIONS = [
   { id: 'hueco', npc: 'lumi', title: 'Salir del hueco', technique: 'hueco', values: ['cuerpo', 'familia'], small: false, real: false, reward: 'cuerda' },
   { id: 'desenredar', npc: 'chayo', title: 'Desenredar', technique: 'calma', values: ['disfrutar'], small: true, real: false, reward: 'rebozo' },
   { id: 'practicar', npc: 'chema', title: 'Practicar en el kiosco', technique: 'exposicion-interoceptiva', values: ['cuerpo'], small: false, real: false, reward: 'trompo' },
+  { id: 'receta', npc: 'fermin', title: 'La receta de Don Fermín', technique: 'derreflexion', values: ['comunidad', 'disfrutar'], small: true, real: false, reward: 'canasta' },
 ] as const satisfies readonly {
   id: string
   npc: string
@@ -68,6 +74,7 @@ export const NEIGHBORS = [
   { id: 'rosa', name: 'Rosa', role: 'la vecina de la banca' },
   { id: 'memo', name: 'Memo', role: 'el cartero' },
   { id: 'chayo', name: 'Doña Chayo', role: 'la tejedora del mercado' },
+  { id: 'fermin', name: 'Don Fermín', role: 'el panadero' },
 ] as const
 export type NeighborId = (typeof NEIGHBORS)[number]['id']
 
@@ -90,6 +97,7 @@ export const ITEMS = [
   { id: 'jarro', label: 'Jarro de barro', from: { mission: 'carta' } },
   { id: 'rebozo', label: 'Rebozo', from: { mission: 'desenredar' } },
   { id: 'trompo', label: 'Trompo', from: { mission: 'practicar' } },
+  { id: 'canasta', label: 'Canasta de pan dulce', from: { mission: 'receta' } },
   { id: 'bugambilia', label: 'Bugambilia', from: { values: 1 } },
   { id: 'nopal', label: 'Nopal en maceta', from: { values: 3 } },
   { id: 'comal', label: 'Comal', from: { missions: 4 } },

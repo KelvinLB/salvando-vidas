@@ -64,9 +64,16 @@ export function feelingLabel(id: string): string {
 
 // Explicaciones breves para cuando una sensación confunde o asusta.
 // Están revisadas para no diagnosticar: nombran, normalizan y remiten al especialista.
+//
+// «Quiero llorar y no puedo», «Un vacío», «No siento nada» y «Solo existo» se reescribieron
+// el 30-oct-2026 para no dar por hecho que es el medicamento: muchas veces es la depresión
+// misma («sentimiento de falta de sentimiento»), y quien atiende es quien lo distingue.
+// Fuentes: glosario de psiquiatria.com (anestesia afectiva); Goodwin y colegas, 2017
+// (embotamiento emocional, sube con la gravedad de la depresión); Price y colegas, 2009.
+// Pendiente de revisión con psicóloga.
 export const FEELING_NOTES: Record<string, string> = {
   'no-puedo-llorar':
-    'Algunos medicamentos para la depresión o la ansiedad pueden hacer que las emociones se sientan "planas" o que cueste llorar. Se llama aplanamiento emocional, es común y tiene solución: coméntalo con quien te los recetó. No dejes ni cambies el medicamento por tu cuenta.',
+    'Que cueste llorar muchas veces es parte de la depresión: a veces apaga también la tristeza, y duele no poder sentirla. Otras veces es efecto de algún medicamento. Quien te atiende puede distinguirlo; cuéntale cómo lo vives, con tus palabras. No dejes ni cambies el medicamento por tu cuenta.',
   'nada-entretiene':
     'Que nada te entretenga ni te dé gusto tiene nombre: anhedonia. Es un síntoma de la depresión, no un defecto tuyo. Ayuda hacer algo de 2 minutos sin esperar disfrutarlo: a veces el ánimo llega después de la acción, no antes.',
   cuerpo:
@@ -74,9 +81,9 @@ export const FEELING_NOTES: Record<string, string> = {
   paralisis:
     'Saber qué hay que hacer y no poder empezar es parte de la ansiedad, no falta de voluntad. Divide la tarea en el paso más pequeño posible, tan pequeño que parezca ridículo, y empieza solo por ese.',
   vacio:
-    'El vacío es una de las formas más comunes, y más difíciles de explicar, en que se siente la depresión. Ponerle nombre ya es un paso: llévalo a tu consulta tal cual lo sientes.',
+    'El vacío es de lo más difícil de explicar, y es muy común cuando el ánimo lleva tiempo bajo. No quiere decir que nada te importe. Ponerle nombre ya es un paso: llévalo a tu consulta tal cual lo sientes, con tus palabras.',
   'no-siento':
-    'Sentirse desconectado de las emociones puede ser parte de la depresión o un efecto de algún medicamento. Vale la pena contárselo a tu especialista.',
+    'No poder sentir, ni lo bueno ni lo malo, duele aunque no se note por fuera. Muchas veces es parte de la depresión; otras, efecto de algún medicamento. Quien te atiende puede distinguirlo: cuéntale cómo lo vives. No dejes ni cambies el medicamento por tu cuenta.',
   carga:
     'Ese pensamiento lo dice la depresión, no la realidad. Las personas que te quieren prefieren mil veces escucharte a perderte.',
   panico:
@@ -96,25 +103,33 @@ export const FEELING_NOTES: Record<string, string> = {
   'mucho-sueno':
     'Querer dormir todo el día es un síntoma frecuente de la depresión, no flojera. Si además te quedas dormida o dormido sin querer, incluso platicando, díselo a tu médico: puede ser el medicamento, la tiroides, anemia o apnea del sueño, y se revisa con estudios sencillos.',
   'solo-existo':
-    'Cuando llevas meses o años así, puede parecer tu forma de ser, pero no lo es. La depresión que dura mucho tiempo (se llama depresión persistente o distimia) también tiene tratamiento. Que lleve tiempo no quiere decir que sea para siempre.',
+    'Cuando llevas meses o años así, puede parecer tu forma de ser, y no tiene por qué serlo. A veces es una depresión que dura mucho tiempo (se llama depresión persistente o distimia), y también tiene tratamiento. Que lleve tiempo no quiere decir que sea para siempre.',
   irritable:
     'La irritabilidad es muy común en la depresión y la ansiedad, sobre todo en los hombres: a veces la tristeza sale como enojo. No es «mal carácter», y se puede trabajar.',
   cansancio:
     'El cansancio que no se quita durmiendo es parte de la depresión. Si no mejora, pídele al médico que descarte causas físicas como anemia o tiroides. Mientras, hoy basta con lo mínimo.',
 }
 
+export type FeelingLink = { to: string; label: string }
+
+const NO_SALE: FeelingLink = { to: '/lo-que-no-sale', label: 'Ir a «Lo que no sale»' }
+
 // A dónde llevar a la persona cuando elige una sensación que tiene una herramienta propia.
-export const FEELING_LINKS: Record<string, { to: string; label: string }> = {
-  panico: { to: '/panico', label: 'Abrir la guía de pánico' },
-  corazon: { to: '/panico', label: 'Abrir la guía de pánico' },
-  irreal: { to: '/panico', label: 'Abrir la guía de pánico' },
-  nadie: { to: '/ayuda', label: 'Hablar con alguien' },
-  carga: { to: '/responder', label: 'Responderle a ese pensamiento' },
-  'sin-sueno': { to: '/noche', label: 'Ir a «No puedo dormir»' },
-  'mucho-sueno': { to: '/mi-dia', label: 'Lo mínimo de hoy' },
-  cansancio: { to: '/mi-dia', label: 'Lo mínimo de hoy' },
-  'solo-existo': { to: '/especialista', label: 'Dar el primer paso' },
-  irritable: { to: '/enojo', label: 'Soltar el enojo' },
-  cuerpo: { to: '/cuerpo', label: 'Marcar dónde lo siento' },
-  'nada-entretiene': { to: '/cuerpo?ver=depresion', label: 'Por qué nada da gusto' },
+// Caben dos: la primera es la más cercana a lo que siente.
+export const FEELING_LINKS: Record<string, FeelingLink[]> = {
+  panico: [{ to: '/panico', label: 'Abrir la guía de pánico' }],
+  corazon: [{ to: '/panico', label: 'Abrir la guía de pánico' }],
+  irreal: [{ to: '/panico', label: 'Abrir la guía de pánico' }],
+  nadie: [{ to: '/ayuda', label: 'Hablar con alguien' }],
+  carga: [{ to: '/responder', label: 'Responderle a ese pensamiento' }],
+  'sin-sueno': [{ to: '/noche', label: 'Ir a «No puedo dormir»' }],
+  'mucho-sueno': [{ to: '/mi-dia', label: 'Lo mínimo de hoy' }],
+  cansancio: [{ to: '/mi-dia', label: 'Lo mínimo de hoy' }],
+  'no-puedo-llorar': [NO_SALE],
+  vacio: [NO_SALE],
+  'no-siento': [NO_SALE],
+  'solo-existo': [NO_SALE, { to: '/especialista', label: 'Dar el primer paso' }],
+  irritable: [{ to: '/enojo', label: 'Soltar el enojo' }],
+  cuerpo: [{ to: '/cuerpo', label: 'Marcar dónde lo siento' }],
+  'nada-entretiene': [{ to: '/cuerpo?ver=depresion', label: 'Por qué nada da gusto' }],
 }

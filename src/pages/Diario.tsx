@@ -2,7 +2,7 @@ import { Fragment, useEffect, useMemo, useRef, useState } from 'react'
 import { CalendarDays, ChevronLeft, ChevronRight, LifeBuoy, LockKeyhole } from 'lucide-react'
 import { AnimatePresence, MotionConfig, type Variants, motion, useDragControls } from 'motion/react'
 import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom'
-import DiaryComposer, { EMPTY_DRAFT, type Draft, draftHasContent } from '../components/DiaryComposer'
+import DiaryComposer, { EMPTY_DRAFT, type Draft, draftHasContent, draftWords, withFeelings } from '../components/DiaryComposer'
 import DiaryCover from '../components/DiaryCover'
 import PageHeader from '../components/PageHeader'
 import RiskNotice from '../components/RiskNotice'
@@ -80,7 +80,13 @@ function Entry({ entry, index, glow, onRemove }: { entry: Thought; index: number
           ))}
         </div>
       )}
+      {entry.to && <p className="entry-to">Para: {entry.to}</p>}
       {entry.text && <p className="pre entry-text">{entry.text}</p>}
+      {entry.understood && (
+        <p className="pre entry-understood">
+          <strong>Algo que entiendo ahora:</strong> {entry.understood}
+        </p>
+      )}
       {audio && <audio controls src={audio} preload="metadata" />}
     </motion.li>
   )
@@ -182,6 +188,12 @@ export default function Diario() {
   const [day, setDay] = useState(todayKey)
   const [dir, setDir] = useState(0)
   const [kind, setKind] = useState<EntryKind | null>(null)
+  // /diario?escribir=carta: desde otra pantalla (como «Lo que no sale») se llega directo a
+  // escribir. Se guarda aquí porque al abrir el diario la dirección cambia.
+  const [asked] = useState(() => {
+    const want = params.get('escribir')
+    return KINDS.some((k) => k.id === want) ? (want as EntryKind) : null
+  })
   const [draft, setDraft] = useState<Draft>(EMPTY_DRAFT)
   const [saved, setSaved] = useState<Saved | null>(null)
   const [removed, setRemoved] = useState<Thought | null>(null)
@@ -283,20 +295,23 @@ export default function Diario() {
 
   const save = async () => {
     if (!kind || !draftHasContent(draft, kind)) return
+    const letter = kind === 'carta'
     const entry: Thought = {
       id: newId(),
       createdAt: stampOn(day),
       kind,
       text: draft.text.trim(),
-      feelings: kind === 'recuerdo' ? [] : draft.feelings,
-      audio: draft.recording?.blob,
-      seconds: draft.recording?.seconds,
+      feelings: withFeelings(kind) ? draft.feelings : [],
+      // La carta es solo escrita: si quedó un audio de antes de cambiar a carta, no se cuela.
+      audio: letter ? undefined : draft.recording?.blob,
+      seconds: letter ? undefined : draft.recording?.seconds,
       photo: kind === 'recuerdo' ? draft.photo : undefined,
+      ...(letter && { to: draft.to?.trim() || undefined, understood: draft.understood?.trim() || undefined }),
     }
     await saveThought(entry)
     markMoment('diario')
     setEntries((all) => [entry, ...all])
-    const risk = soundsLikeRisk(entry.text)
+    const risk = soundsLikeRisk(draftWords(entry))
     setSaved({ kind, risk })
     setKind(null)
     setDraft(EMPTY_DRAFT)
@@ -360,6 +375,24 @@ export default function Diario() {
     setKind(k)
     setSaved(null)
   }
+
+  // Si llegó pidiendo escribir algo: sin clave, el diario se abre solo; con clave, después
+  // de escribirla en la tapa (con su llave y todo). Ya abierto, empieza directo en lo que pidió.
+  const pending = useRef(asked)
+  useEffect(() => {
+    if (!pending.current) return
+    if (open) {
+      write(pending.current)
+      pending.current = null
+      // Si la página ya tiene cosas, la hoja para escribir queda abajo: se baja hasta ella.
+      setTimeout(() => room.current?.querySelector('.composer')?.scrollIntoView({ block: 'start' }), 450)
+    } else if (entered && !locked) {
+      setMoment('opened')
+      setEntered(true)
+      // Se reemplaza la dirección: al cerrar, el de atrás regresa a donde estaba, no aquí.
+      setParams({ modo: 'abierto' }, { replace: true })
+    }
+  }, [open, entered, locked])
 
   return (
     <MotionConfig reducedMotion="user">
@@ -501,6 +534,10 @@ export default function Diario() {
                     {saved &&
                       (saved.risk ? (
                         <RiskNotice />
+                      ) : saved.kind === 'carta' ? (
+                        <div className="callout info" role="status">
+                          <p>Tu carta se quedó aquí, sin enviarse a nadie. Lo que escribiste ya no se queda sin palabras.</p>
+                        </div>
                       ) : saved.kind === 'recuerdo' ? (
                         <div className="callout info" role="status">
                           <p>Guardado. Cuando un día pese, aquí va a estar.</p>

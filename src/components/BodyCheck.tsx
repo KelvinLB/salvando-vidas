@@ -1,9 +1,14 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Check } from 'lucide-react'
 import BodyFrame, { LevelMeter } from './BodyFrame'
-import BodyModel from './BodyModel'
+import BodyModel, { type CanvasPoint } from './BodyModel'
 import PetSays from './PetSays'
+import MapaEmociones from './cuerpo-siento/MapaEmociones'
+import { MAX_SPOTS, SPOT_MIN, SPOT_START, SpotLayer, SpotTools, clampR, partName } from './cuerpo-siento/Marcas'
+import TusPalabras, { MINE_KEY, NOTES_KEY, NotePins } from './cuerpo-siento/TusPalabras'
+import ViewSwitch from './cuerpo-siento/ViewSwitch'
+import { type View, regionAt, regionCenter } from './cuerpo-siento/figura'
 import {
   AREAS,
   BANDS,
@@ -13,15 +18,27 @@ import {
   PATTERNS,
   RED_FLAGS,
   SENSATIONS,
+  SPOT_AFTER,
   type Area,
   type Pattern,
   type RedFlag,
   type Sensation,
 } from '../data/bodyCheck'
 import type { CompanionMood } from '../data/companion'
+import { YO_KEY, type Yo, cleanYo } from '../data/desdeAfuera'
 import { COUNTRIES, findCountry, guessCountry } from '../data/helplines'
 import type { Region } from '../data/bodyStories'
-import { type BodyNow, type BodyRecord, EMPTY_NOW, bandOf, calmingFx, freshNow, readBody } from '../lib/bodyCheck'
+import {
+  type BodyNote,
+  type BodyNow,
+  type BodyRecord,
+  EMPTY_NOW,
+  type Spot,
+  bandOf,
+  calmingFx,
+  freshNow,
+  readBody,
+} from '../lib/bodyCheck'
 import { markMoment } from '../lib/moments'
 import { firstName, telOf, usePeople, whatsappOf } from '../lib/people'
 import { buzz, newId, today, useStored } from '../lib/storage'
@@ -29,6 +46,10 @@ import { buzz, newId, today, useStored } from '../lib/storage'
 // «Lo que siento»: marcar dónde se siente (en una o en varias partes), ver qué puede
 // estar pasando y bajarle juntos. Nunca obliga: primero calma, y después ofrece ayuda.
 // Las señales de alarma sí se dicen claro, pero sin asustar.
+//
+// La figura se ve de frente, de espalda o de lado; con el dedo se puede marcar dónde exacto y
+// qué tan grande, y después de respirar la persona dice cómo lo siente ahora (la marca solo se
+// achica si ella lo dice). Mientras se respira, el nervio vago se ilumina al soltar el aire.
 
 // Bajarle juntos: un minuto de respiración 4-6, como en Calma.
 const IN = 4
@@ -74,6 +95,9 @@ const calmer = (picked: Sensation[]) => {
   }
   return CALMER[area]
 }
+
+/** Una marca como se puso, sin lo que se dijo después de respirar. */
+const unrated = ({ id, view, x, y, r, region }: Spot): Spot => ({ id, view, x, y, r, region })
 
 /** Al abrir una zona, el cuerpo sube a la vista para que se vea reaccionar. */
 const showBody = (smooth: boolean) =>
@@ -142,10 +166,25 @@ export default function BodyCheck({ still, onStory, initialArea }: Props) {
   const [recordId, setRecordId] = useState<string | null>(null)
   const [relief, setRelief] = useState(0)
   const [loaded] = useState(() => Date.now())
+  const [notes] = useStored<BodyNote[]>(NOTES_KEY, [])
+  const [yoSaved] = useStored<Partial<Yo> | null>(YO_KEY, null)
+  const [mine] = useStored(MINE_KEY, true)
+  const yo = yoSaved && mine ? cleanYo(yoSaved) : null
 
   const now = freshNow(saved, loaded)
   const { ids, intensity, duration, stage } = now
   const update = (patch: Partial<BodyNow>) => setSaved({ ...now, ...patch, at: Date.now() })
+
+  // Marcar con el dedo: mientras se arrastra, la marca vive aquí y se guarda al soltar.
+  const [view, setView] = useState<View>(() => now.spots?.[0]?.view ?? 'frente')
+  const [marking, setMarking] = useState(false)
+  const [sel, setSel] = useState<string | null>(null)
+  const [draft, setDraft] = useState<Spot[] | null>(null)
+  const draftRef = useRef<Spot[] | null>(null)
+  const drag = useRef<{ id: string; r0: number; d0: number; fresh: boolean; moved: boolean } | null>(null)
+  const [said, setSaid] = useState('')
+  const spots = draft ?? now.spots ?? []
+  const selected = spots.find((s) => s.id === sel) ?? null
 
   const reading = readBody(ids, intensity)
   const { red, band, feel } = reading
@@ -199,6 +238,8 @@ export default function BodyCheck({ still, onStory, initialArea }: Props) {
   const restart = () => {
     update({ ...EMPTY_NOW })
     setArea(null)
+    setMarking(false)
+    setSel(null)
     setCalming(null)
     setAskAfter(false)
     setAfter(null)
@@ -206,6 +247,7 @@ export default function BodyCheck({ still, onStory, initialArea }: Props) {
   }
 
   const startCalm = () => {
+    if (spots.some((s) => s.after !== undefined)) update({ spots: spots.map(unrated) })
     setAfter(null)
     setAskAfter(false)
     setCalming(0)
@@ -224,8 +266,91 @@ export default function BodyCheck({ still, onStory, initialArea }: Props) {
     }
   }
 
+  // Después de respirar: la persona dice cómo siente lo que marcó, y la marca cambia a eso.
+  const answerSpots = (scale: number) => {
+    const list = spots.map((s) => ({ ...unrated(s), after: Math.max(4, s.r * scale) }))
+    update({ spots: list })
+    if (recordId) setRecords((all) => all.map((r) => (r.id === recordId ? { ...r, spots: list } : r)))
+    if (!list.some((s) => s.view === view)) setView(list[0].view)
+    showBody(!still)
+  }
+
+  const announce = (s: Spot | undefined) => {
+    if (s) setSaid(`Marca en ${s.region ? partName(s.region, s.view).toLowerCase() : 'la figura'}, ${s.r < 12 ? 'chica' : s.r < 22 ? 'mediana' : 'grande'}.`)
+  }
+  const setDraftBoth = (list: Spot[] | null) => {
+    draftRef.current = list
+    setDraft(list)
+  }
+  const addSpot = (x: number, y: number, r: number, region = regionAt(view, x, y)): [Spot, Spot[]] => {
+    const spot: Spot = { id: newId(), view, x: Math.round(x * 10) / 10, y: Math.round(y * 10) / 10, r, region }
+    return [spot, [...spots.map(unrated), spot].slice(-MAX_SPOTS)]
+  }
+
+  const onCanvas = (type: 'down' | 'move' | 'up', p: CanvasPoint) => {
+    if (type === 'down') {
+      // Si toca una marca que ya está, la agranda o la achica desde donde la tomó.
+      const hit = [...spots].reverse().find((s) => s.view === view && Math.hypot(p.x - s.x, p.y - s.y) <= Math.max(s.r, 10))
+      if (hit) {
+        setSel(hit.id)
+        drag.current = { id: hit.id, r0: hit.r, d0: Math.hypot(p.x - hit.x, p.y - hit.y), fresh: false, moved: false }
+        setDraftBoth(spots.map(unrated))
+        return
+      }
+      const [spot, list] = addSpot(p.x, p.y, SPOT_MIN)
+      setSel(spot.id)
+      drag.current = { id: spot.id, r0: SPOT_MIN, d0: 0, fresh: true, moved: false }
+      setDraftBoth(list)
+      buzz(8)
+      return
+    }
+    const d = drag.current
+    const list = draftRef.current
+    if (!d || !list) return
+    if (type === 'move') {
+      const s = list.find((x) => x.id === d.id)
+      if (!s) return
+      const dist = Math.hypot(p.x - s.x, p.y - s.y)
+      if (Math.abs(dist - d.d0) > 2) d.moved = true
+      if (d.moved) setDraftBoth(list.map((x) => (x.id === d.id ? { ...x, r: clampR(d.r0 + dist - d.d0) } : x)))
+      return
+    }
+    drag.current = null
+    // Un toque sin arrastrar deja una marca mediana.
+    const done = list.map((x) => (x.id === d.id && d.fresh && !d.moved ? { ...x, r: SPOT_START } : x))
+    setDraftBoth(null)
+    update({ spots: done })
+    announce(done.find((x) => x.id === d.id))
+  }
+
+  const placeIn = (region: Region) => {
+    const [x, y] = regionCenter(view, region)
+    const [spot, list] = addSpot(x, y, SPOT_START, region)
+    update({ spots: list })
+    setSel(spot.id)
+    announce(spot)
+  }
+  const resizeSel = (delta: number) => {
+    const list = spots.map((s) => (s.id === sel ? { ...unrated(s), r: clampR(s.r + delta) } : unrated(s)))
+    update({ spots: list })
+    announce(list.find((s) => s.id === sel))
+  }
+  const removeSel = () => {
+    update({ spots: spots.filter((s) => s.id !== sel).map(unrated) })
+    setSel(null)
+    setSaid('Marca quitada.')
+  }
+
   const save = () => {
-    const record: BodyRecord = { id: recordId ?? newId(), date: today(), ids, intensity, after, duration }
+    const record: BodyRecord = {
+      id: recordId ?? newId(),
+      date: today(),
+      ids,
+      intensity,
+      after,
+      duration,
+      ...(spots.length > 0 && { spots }),
+    }
     setRecords((list) => [record, ...list.filter((r) => r.id !== record.id)].slice(0, 60))
     setRecordId(record.id)
   }
@@ -245,6 +370,11 @@ export default function BodyCheck({ still, onStory, initialArea }: Props) {
   const areaLabel = AREAS.find((a) => a.id === area)?.label
   const count = (a: Area) => SENSATIONS.filter((s) => s.area === a && ids.includes(s.id)).length
   const n = ids.length
+  const marks: Partial<Record<View, number>> = {}
+  spots.forEach((s) => (marks[s.view] = (marks[s.view] ?? 0) + 1))
+  const rated = spots.filter((s) => s.after !== undefined)
+  const smaller = rated.some((s) => s.after! < s.r * 0.9)
+  const bigger = rated.some((s) => s.after! > s.r * 1.1)
 
   return (
     <>
@@ -252,8 +382,57 @@ export default function BodyCheck({ still, onStory, initialArea }: Props) {
         <BodyFrame
           title={stage === 'resumen' ? 'Así está tu cuerpo' : 'Tu cuerpo ahora'}
           state={red.length ? 'Atención' : n ? BANDS[shown.band].label : 'En calma'}
-          hint={stage === 'marcar' ? 'Toca donde lo sientes' : calming !== null ? 'Respira con el cuerpo' : undefined}
+          hint={
+            marking
+              ? 'Toca y arrastra donde lo sientes'
+              : stage === 'marcar'
+                ? 'Toca donde lo sientes'
+                : calming !== null
+                  ? 'Respira con el cuerpo'
+                  : undefined
+          }
           readout={n > 0 ? <LevelMeter level={shown.level} band={shown.band} /> : undefined}
+          tools={
+            <div className="body-tools">
+              <ViewSwitch
+                view={view}
+                onChange={(v) => {
+                  setView(v)
+                  setSel(null)
+                }}
+                marks={marks}
+              />
+              {stage === 'marcar' &&
+                (marking ? (
+                  <SpotTools
+                    view={view}
+                    spots={spots}
+                    sel={selected}
+                    onPlace={placeIn}
+                    onResize={resizeSel}
+                    onRemove={removeSel}
+                    onDone={() => {
+                      setMarking(false)
+                      setSel(null)
+                    }}
+                  />
+                ) : (
+                  <button
+                    type="button"
+                    className="btn small ghost"
+                    onClick={() => {
+                      setArea(null)
+                      setMarking(true)
+                    }}
+                  >
+                    {spots.length ? 'Cambiar mis marcas' : 'Marcar dónde exacto'}
+                  </button>
+                ))}
+              <p className="visually-hidden" aria-live="polite">
+                {said}
+              </p>
+            </div>
+          }
         >
           <BodyModel
             fx={calming !== null || askAfter || better ? calmingFx(reading.fx) : n ? reading.fx : ['breath-slow', 'heart-calm']}
@@ -261,10 +440,20 @@ export default function BodyCheck({ still, onStory, initialArea }: Props) {
             focus={isRegion(area) ? area : area === 'mente' ? 'cabeza' : undefined}
             heat={reading.heat}
             calm={calm}
-            tour={stage === 'marcar' && !n && !area}
+            tour={stage === 'marcar' && !n && !area && !spots.length}
             still={still}
             onRegion={stage === 'marcar' ? openArea : undefined}
             relief={better && relief ? { region: reliefRegion, n: relief } : undefined}
+            view={view}
+            phase={phase}
+            yo={yo}
+            layer={
+              <>
+                <SpotLayer spots={spots} view={view} sel={marking ? sel : null} compare={stage === 'resumen'} />
+                <NotePins notes={notes} view={view} />
+              </>
+            }
+            onCanvas={marking && stage === 'marcar' ? onCanvas : undefined}
           />
         </BodyFrame>
 
@@ -396,6 +585,12 @@ export default function BodyCheck({ still, onStory, initialArea }: Props) {
                 <p className="calm-count" aria-hidden="true">
                   {left}
                 </p>
+                {/* Pendiente de revisión con psicóloga y médico. Fuente: Laborde et al. 2022
+                    (Neurosci Biobehav Rev), respiración lenta y tono vagal; Breit et al. 2018. */}
+                <p className="muted small calm-why">
+                  Al soltar el aire, mira la línea azul: es el nervio vago, el freno de tu cuerpo. Le avisa al corazón
+                  que baje el ritmo, poco a poco.
+                </p>
                 <div className="body-progress" aria-hidden="true">
                   <span style={{ animationDuration: `${TOTAL}s` }} />
                 </div>
@@ -416,6 +611,28 @@ export default function BodyCheck({ still, onStory, initialArea }: Props) {
                   ))}
                 </div>
               </>
+            )}
+
+            {after !== null && spots.length > 0 && rated.length === 0 && (
+              <div className="stack tight">
+                <h3>¿Y lo que marcaste? ¿Cómo lo sientes ahora?</h3>
+                <div className="chips">
+                  {SPOT_AFTER.map((o) => (
+                    <button key={o.id} type="button" className="chip" onClick={() => answerSpots(o.scale)}>
+                      {o.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+            {rated.length > 0 && (
+              <p className="muted small spot-note">
+                {smaller
+                  ? 'Mira tu marca: la línea punteada es como lo sentías antes, y el color es como lo sientes ahora.'
+                  : bigger
+                    ? 'Tu marca creció un poco: la línea punteada es como estaba antes. Gracias por decirlo tal cual.'
+                    : 'Tu marca se quedó igual, y está bien: a veces el cuerpo tarda.'}
+              </p>
             )}
 
             {after !== null && (
@@ -520,6 +737,8 @@ export default function BodyCheck({ still, onStory, initialArea }: Props) {
             </section>
           )}
 
+          {usual.length > 0 && <MapaEmociones heat={reading.heat} spots={spots} feel={feel} />}
+
           {reading.helps.length > 0 && (
             <section className="card">
               <p className="eyebrow">Para bajarle ahora</p>
@@ -580,6 +799,8 @@ export default function BodyCheck({ still, onStory, initialArea }: Props) {
             )}
           </section>
 
+          <TusPalabras spots={spots} hasYo={!!yoSaved} />
+
           <div className="row">
             <button className="btn ghost" onClick={() => update({ stage: 'marcar' })}>
               Cambiar lo que marqué
@@ -590,6 +811,8 @@ export default function BodyCheck({ still, onStory, initialArea }: Props) {
           </div>
         </>
       )}
+
+      {stage !== 'resumen' && <TusPalabras spots={spots} hasYo={!!yoSaved} />}
     </>
   )
 }

@@ -13,6 +13,8 @@ import type { Fx, Region } from './bodyStories'
 // dolor en todo el cuerpo.
 
 export type Area = Region | 'mente' | 'todo'
+/** Cómo se ve la figura: de frente, de espalda (para la tensión y la espalda baja) o de lado. */
+export type BodyView = 'frente' | 'espalda' | 'lado'
 export type Pattern = 'ansiedad' | 'panico' | 'estres' | 'depresion' | 'bipolar'
 /** Si la sensación acelera el cuerpo (alerta) o lo apaga. Pinta el cuerpo de cálido o de frío. */
 export type Feel = 'alerta' | 'apagado'
@@ -206,6 +208,21 @@ export const SENSATIONS: Sensation[] = [
     feel: 'alerta',
     weights: { ansiedad: 2, depresion: 1 },
     helps: ['soltar-aire', 'panza'],
+  },
+  // «El nudo» de «Lo que no sale»: el llanto que se atora. Distinto del nudo de arriba (la
+  // alarma de la ansiedad): este es el apagado, y no promete que llorar cure ni lo empuja.
+  // Fuentes: Gračanin, Bylsma y Vingerhoets, 2014 (llorar alivia a muchos, menos en la
+  // depresión); Lieberman y colegas, 2007 (ponerle nombre baja la intensidad).
+  // Pendiente de revisión con psicóloga y médico.
+  {
+    id: 'llanto-atorado',
+    area: 'cuello',
+    label: 'Se me atora el llanto: lo que no sale se me queda en la garganta o el pecho',
+    why: 'Cuando hay ganas de llorar y las lágrimas no salen, el cuerpo aprieta la garganta y el pecho y se queda con el nudo. No es que no te importe: a veces el cuerpo guarda todo bajo llave por un tiempo. No hay que forzar el llanto; soltar el aire despacio y ponerle palabras ayuda a no cargarlo a solas.',
+    fx: ['throat', 'chest-weight'],
+    feel: 'apagado',
+    weights: { depresion: 2, estres: 1 },
+    helps: ['soltar-aire', 'mano-pecho', 'escribir'],
   },
   {
     id: 'hombros',
@@ -633,5 +650,62 @@ export const BANDS: Record<Band, { label: string; text: Record<Feel, string> }> 
       alerta: 'Tu cuerpo está muy alerta. Primero respira conmigo; después, si quieres, buscamos a alguien que te acompañe.',
       apagado: 'Está pesando mucho. No tienes que poder con todo hoy: primero un respiro, y después, si quieres, buscamos a alguien que te acompañe.',
     },
+  },
+}
+
+// ---------- Marca dónde y qué tan grande ----------
+// Pendiente de revisión con psicóloga. Después de respirar se le pregunta a la persona
+// cómo siente lo que marcó: la marca solo se achica si ella lo dice (nunca se da por hecho).
+
+/** Qué tan grande se siente ahora lo que marcó, comparado con antes. */
+export const SPOT_AFTER = [
+  { id: 'casi-nada', label: 'Ya casi no lo siento', scale: 0.35 },
+  { id: 'chica', label: 'Más chico', scale: 0.65 },
+  { id: 'igual', label: 'Igual', scale: 1 },
+  { id: 'grande', label: 'Más grande', scale: 1.25 },
+] as const
+
+/** El tamaño de una marca, dicho en palabras (para el resumen de la consulta). */
+export const spotSize = (r: number) => (r < 12 ? 'chico' : r < 22 ? 'mediano' : 'grande')
+
+// ---------- Así lo pintaron 700 personas ----------
+// Mapas aproximados, dibujados por nosotros, a partir de la figura 2 de Nummenmaa, Glerean,
+// Hari y Hietanen (2014), «Bodily maps of emotions», PNAS 111(2):646-651,
+// https://pmc.ncbi.nlm.nih.gov/articles/PMC3896150/ . 701 personas de Finlandia, Suecia y
+// Taiwán pintaron dónde sentían más actividad (cálido) o menos (frío) con cada emoción.
+// Lo que dice el artículo: casi todas se sienten en la parte alta del pecho y en la cabeza; el
+// enojo se suma en brazos y manos; la tristeza se define por menos actividad en brazos y
+// piernas (la depresión se agrupó con ella); la ansiedad se parece al miedo y se agrupó con
+// la vergüenza. Son sensaciones que la gente reporta, no órganos: sirve para validar, nunca
+// para diagnosticar. Pendiente de revisión con psicóloga.
+
+export type EmotionId = 'miedo' | 'tristeza' | 'enojo' | 'verguenza'
+/** De −1 (mucho menos) a 1 (mucho más), por parte del cuerpo. */
+export type EmotionZone = 'cara' | 'cabeza' | 'garganta' | 'pecho' | 'panza' | 'brazos' | 'manos' | 'piernas'
+
+export const EMOTIONS: Record<EmotionId, { label: string; map: Record<EmotionZone, number>; says: string; where: Region[] }> = {
+  miedo: {
+    label: 'Miedo y ansiedad',
+    map: { cara: 0.5, cabeza: 0.55, garganta: 0.35, pecho: 0.95, panza: 0.45, brazos: 0.2, manos: 0.15, piernas: 0 },
+    says: 'Mucha gente siente el miedo y la ansiedad sobre todo en el pecho y en la cabeza, y a veces en la panza.',
+    where: ['pecho', 'cabeza', 'estomago'],
+  },
+  tristeza: {
+    label: 'Tristeza',
+    map: { cara: 0.45, cabeza: 0.25, garganta: 0.3, pecho: 0.45, panza: 0, brazos: -0.65, manos: -0.55, piernas: -0.8 },
+    says: 'Mucha gente siente la tristeza como brazos y piernas sin fuerza, con algo apretado en el pecho y los ojos.',
+    where: ['brazos', 'piernas', 'pecho'],
+  },
+  enojo: {
+    label: 'Enojo',
+    map: { cara: 0.85, cabeza: 0.8, garganta: 0.45, pecho: 0.8, panza: 0.3, brazos: 0.75, manos: 0.95, piernas: 0.1 },
+    says: 'Mucha gente siente el enojo en la cabeza, el pecho, los brazos y las manos.',
+    where: ['cabeza', 'pecho', 'brazos'],
+  },
+  verguenza: {
+    label: 'Vergüenza',
+    map: { cara: 0.95, cabeza: 0.55, garganta: 0.3, pecho: 0.5, panza: 0.25, brazos: -0.1, manos: 0, piernas: -0.15 },
+    says: 'Mucha gente siente la vergüenza como calor en la cara, y algo en el pecho.',
+    where: ['cabeza', 'pecho'],
   },
 }

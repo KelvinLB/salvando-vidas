@@ -140,6 +140,21 @@ export const ITEM_ART: Record<ItemId, ReactNode> = {
       <path d="M9 -2 q8 2 12 -3 q3 -4 -2 -5 q-6 0 -4 4" stroke="#e9c79b" strokeWidth="1.5" fill="none" strokeLinecap="round" />
     </>
   ),
+  // La canasta de pan dulce de Don Fermín: mimbre, servilleta de cuadritos y tres conchas.
+  canasta: (
+    <>
+      <ellipse cy="-1" rx="16" ry="4" fill="#000" opacity=".12" />
+      <path d="M-14 -24 Q0 -42 14 -24" stroke="#a7764f" strokeWidth="2.4" fill="none" strokeLinecap="round" />
+      <path d="M-11 -22 L11 -16 L13 -26 L-9 -30Z" fill="#fdfcfa" />
+      <path d="M-7 -29 l-2 7 M-2 -28 l-2 7 M3 -27 l-2 7 M8 -25 l-2 7 M-10 -26 l22 6" stroke="#c0504a" strokeWidth="1" opacity=".75" />
+      <path d="M-8 -26 a5.5 4.5 0 0 1 11 0z" fill="#f3e3b5" stroke="#d9b98e" strokeWidth=".8" />
+      <path d="M-4 -26 a5.5 4.5 0 0 1 11 0z" fill="#7a4e33" stroke="#5e3b27" strokeWidth=".8" />
+      <path d="M1 -25 a5.5 4.5 0 0 1 11 0z" fill="#f2a7bd" stroke="#d98aa0" strokeWidth=".8" />
+      <path d="M-15 -24 h30 l-3 22 h-24z" fill="#c98f63" />
+      <path d="M-14.4 -18 h28.8 M-13.7 -12 h27.4 M-13 -6 h26" stroke="#8a5f3d" strokeWidth="1.1" />
+      <path d="M-9 -24 v22 M-3 -24 v22 M3 -24 v22 M9 -24 v22" stroke="#a7764f" strokeWidth=".9" opacity=".8" />
+    </>
+  ),
   bugambilia: (
     <>
       <path d="M-10 -12 h20 l-3 12 h-14z" fill="#b86b45" />

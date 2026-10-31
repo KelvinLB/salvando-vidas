@@ -32,6 +32,7 @@
 .bm-npc-rosa { --npc: var(--tone-mania); }
 .bm-npc-memo { --npc: var(--tone-animo); }
 .bm-npc-chayo { --npc: var(--tone-mania); }
+.bm-npc-fermin { --npc: var(--tone-estres); }
 
 .bm-face {
   display: grid;
@@ -509,4 +510,232 @@ button.bm-step {
   background: var(--surface);
   border-color: var(--border);
   font-size: 0.92rem;
+}
+
+/* ---------- La receta de Don Fermín: la alacena, el tazón, la masa y el horno ---------- */
+
+/* La receta (que se va escribiendo) junto al tazón donde caen los ingredientes. */
+.bm-rc-table {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
+  align-items: center;
+  gap: 10px;
+}
+.bm-rc-recipe {
+  display: grid;
+  gap: 4px;
+  padding: 10px 12px;
+  border: 1px solid var(--warm-border);
+  border-radius: 6px 14px 14px 6px;
+  background: repeating-linear-gradient(var(--warm) 0 21px, var(--warm-border) 21px 22px);
+  color: var(--text);
+  transform: rotate(-1.2deg);
+}
+.bm-rc-recipe-title {
+  font-family: var(--font-display);
+  font-variation-settings: 'SOFT' 100;
+  font-weight: 600;
+  font-size: 0.92rem;
+  line-height: 1.2;
+}
+.bm-rc-recipe ol {
+  display: grid;
+  margin: 0;
+  padding-left: 1.3em;
+  font-size: 0.86rem;
+  line-height: 22px;
+}
+.bm-rc-recipe li {
+  color: var(--muted);
+  letter-spacing: 0.1em;
+}
+.bm-rc-recipe li.got {
+  color: var(--text);
+  font-weight: 600;
+  letter-spacing: 0;
+}
+.bm-rc-bowl {
+  display: grid;
+  place-items: center;
+  min-height: 110px;
+  padding: 6px;
+  border: 2px dashed transparent;
+  border-radius: 18px;
+  transition: border-color 0.2s, background 0.2s;
+}
+.bm-rc-bowl.hot {
+  border-color: var(--npc);
+  background: color-mix(in srgb, var(--npc) 14%, transparent);
+}
+.bm-rc-bowl-art {
+  width: 100%;
+  max-width: 190px;
+}
+
+/* La alacena: tres por fila; lo que ya está en el tazón deja su hueco. */
+.bm-rc-shelf {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin: 0;
+  padding: 10px;
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--warm-border) 45%, var(--surface-soft));
+  list-style: none;
+}
+.bm-rc-shelf li {
+  display: flex;
+  min-height: 74px;
+}
+.bm-rc-empty {
+  border: 1.5px dashed var(--border);
+  border-radius: 14px;
+}
+.bm-rc-ing {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  min-width: 0;
+  padding: 6px 4px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  font-size: 0.8rem;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+  transition: transform 0.18s;
+}
+.bm-rc-ing svg {
+  width: 40px;
+  height: 40px;
+}
+.bm-rc-ing.dragging {
+  position: relative;
+  z-index: 2;
+  cursor: grabbing;
+  box-shadow: var(--shadow);
+  transition: none;
+}
+.bm-rc-ing:focus-visible {
+  outline: 3px solid var(--primary);
+  outline-offset: 2px;
+}
+/* Lo que no va en el pan: un meneíto de «¡ja!» y se queda en su lugar. */
+.bm-rc-ing.no {
+  animation: bm-rc-no 0.5s ease-in-out;
+}
+@keyframes bm-rc-no {
+  25% { transform: rotate(-7deg); }
+  60% { transform: rotate(6deg); }
+}
+
+/* La tabla de amasar y el horno: el dibujo cabe en su tarjetita y nada se sale. */
+.bm-rc-stage {
+  position: relative;
+  overflow: hidden;
+  border-radius: 18px;
+  background: var(--surface-soft);
+}
+.bm-rc-rub {
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+}
+.bm-rc-art {
+  display: block;
+  width: 100%;
+  max-height: 220px;
+}
+.bm-rc-board {
+  fill: color-mix(in srgb, #c98f63 70%, var(--surface));
+}
+.bm-rc-board-line {
+  stroke: color-mix(in srgb, #8a5f3d 55%, var(--surface));
+  stroke-width: 2;
+  fill: none;
+}
+.bm-rc-floor {
+  stroke: var(--border);
+  stroke-width: 3;
+}
+.bm-rc-squish {
+  transform-box: fill-box;
+  transform-origin: center bottom;
+  animation: bm-rc-squish 0.45s ease-out;
+}
+@keyframes bm-rc-squish {
+  35% { transform: scale(1.08, 0.9); }
+  70% { transform: scale(0.97, 1.04); }
+}
+.bm-rc-fire {
+  animation: bm-rc-fire 3s ease-in-out infinite;
+}
+@keyframes bm-rc-fire {
+  0%, 100% { opacity: 0.55; }
+  50% { opacity: 0.85; }
+}
+.bm-rc-smoke,
+.bm-rc-steam {
+  animation: bm-rc-rise 3.2s ease-in-out infinite;
+}
+@keyframes bm-rc-rise {
+  0% { transform: translateY(4px); opacity: 0; }
+  40% { opacity: 0.6; }
+  100% { transform: translateY(-8px); opacity: 0; }
+}
+/* La charola también se toca en el dibujo: un botón transparente encima de ella. */
+.bm-rc-tray-btn {
+  position: absolute;
+  right: 2%;
+  bottom: 6%;
+  width: 30%;
+  height: 40%;
+  border: 0;
+  border-radius: 14px;
+  background: transparent;
+  cursor: pointer;
+}
+
+/* Las tres piezas para escoger. */
+.bm-rc-shapes {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+.bm-rc-shape {
+  justify-items: center;
+  gap: 4px;
+  padding: 8px 6px;
+  text-align: center;
+}
+.bm-rc-shape svg {
+  width: 100%;
+  max-width: 96px;
+}
+.bm-rc-dot {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  margin-right: 6px;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  vertical-align: -1px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bm-rc-ing,
+  .bm-rc-bowl {
+    transition: none;
+  }
+  .bm-rc-ing.no,
+  .bm-rc-squish,
+  .bm-rc-fire,
+  .bm-rc-smoke,
+  .bm-rc-steam {
+    animation: none;
+  }
 }

@@ -1,0 +1,941 @@
+/* ---------- Sigue la señal ----------
+   Un cuerpo por capas que se ve vivo, la alarma que viaja y el freno que la apaga. Colores
+   propios del dibujo, de día y de noche; lo demás usa los de la app. */
+:root {
+  --sg-stage-1: #fbf6ef;
+  --sg-stage-2: #efe6da;
+  --sg-ground: #9c8a74;
+  --sg-skin-1: #f7eee4;
+  --sg-skin-2: #e3cfbb;
+  --sg-hi: #ffffff;
+  --sg-shade: #7a5a44;
+  --sg-cavity: #ecd5c8;
+  --sg-bone: #d9cbb8;
+  --sg-line: rgb(70 45 30 / 0.2);
+  --sg-brain: #f0cdd2;
+  --sg-brain-2: #d8a5af;
+  --sg-pfc: #d3e3d6;
+  --sg-amy: #e7a596;
+  --sg-hypo: #d798a4;
+  --sg-lung: #f2cbc1;
+  --sg-lung-2: #dfa59b;
+  --sg-airway: #f8e6dd;
+  --sg-heart: #d9796c;
+  --sg-heart-2: #b75e58;
+  --sg-atrium: #c9858a;
+  --sg-vessel: #e19a90;
+  --sg-vein: #b7a0bd;
+  --sg-liver: #cf9a88;
+  --sg-stomach: #efcb9f;
+  --sg-gut: #f1d6ae;
+  --sg-gut-2: #d9b07e;
+  --sg-kidney: #d7a091;
+  --sg-adrenal: #e9bf72;
+  --sg-muscle: #e8b7a6;
+  --sg-fiber: #cf9483;
+  --sg-dim: #c9c3bb;
+  --sg-nerve: #d7b98d;
+  --sg-sig: #e2943a;
+  --sg-sig-glow: #f6c57a;
+  --sg-vagus: #89acd6;
+  --sg-vagus-glow: #7fb3ec;
+  --sg-warm: #ef9a5e;
+  --sg-sheen-op: 0.42;
+  --sg-cyl-op: 0.55;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --sg-stage-1: #24211e;
+    --sg-stage-2: #1a1816;
+    --sg-ground: #000000;
+    --sg-skin-1: #4c443d;
+    --sg-skin-2: #2f2925;
+    --sg-hi: #fff4e8;
+    --sg-shade: #000000;
+    --sg-cavity: #3d302b;
+    --sg-bone: #6b6157;
+    --sg-line: rgb(255 240 225 / 0.16);
+    --sg-brain: #8a636b;
+    --sg-brain-2: #6d4a52;
+    --sg-pfc: #55705f;
+    --sg-amy: #b9786c;
+    --sg-hypo: #a66d78;
+    --sg-lung: #87605a;
+    --sg-lung-2: #6a4a45;
+    --sg-airway: #a3807a;
+    --sg-heart: #c9675d;
+    --sg-heart-2: #97473f;
+    --sg-atrium: #a4626a;
+    --sg-vessel: #b76d66;
+    --sg-vein: #7f6c8a;
+    --sg-liver: #8e5f53;
+    --sg-stomach: #9b7c55;
+    --sg-gut: #937953;
+    --sg-gut-2: #6f5839;
+    --sg-kidney: #93655a;
+    --sg-adrenal: #c49a4f;
+    --sg-muscle: #9a6c60;
+    --sg-fiber: #7a5248;
+    --sg-dim: #4a4743;
+    --sg-nerve: #8f7a5a;
+    --sg-sig: #f0a54c;
+    --sg-sig-glow: #ffcf86;
+    --sg-vagus: #6f8fbf;
+    --sg-vagus-glow: #8cc0ff;
+    --sg-warm: #f0a067;
+    --sg-sheen-op: 0.16;
+    --sg-cyl-op: 0.32;
+  }
+}
+
+/* La tarjeta: en pantallas anchas, el dibujo a la izquierda y los controles a la derecha. */
+.sg {
+  container-type: inline-size;
+  padding: 16px;
+  min-width: 0;
+}
+.sg [hidden] {
+  display: none !important;
+}
+.sg-top {
+  display: grid;
+  gap: 6px;
+}
+.sg-top h2 {
+  font-size: 1.2rem;
+}
+.sg-grid {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: minmax(0, 1fr);
+  min-width: 0;
+}
+.sg-acts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.sg-acts .btn {
+  flex: 1 1 auto;
+  min-height: 44px;
+  padding: 8px 16px;
+}
+.sg-stage,
+.sg-layers,
+.sg-parts {
+  min-width: 0;
+}
+.sg-note {
+  display: grid;
+  gap: 6px;
+}
+
+@container (min-width: 540px) {
+  .sg-grid {
+    grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+    grid-template-areas: 'stage acts' 'stage cap' 'stage layers' 'parts parts' 'note note';
+    grid-template-rows: auto auto 1fr auto auto;
+    align-items: start;
+    column-gap: 16px;
+  }
+  .sg-acts {
+    grid-area: acts;
+  }
+  /* En la columna angosta, cada botón en su renglón y «Pausa» chiquito. */
+  .sg-acts .btn {
+    flex: 1 1 100%;
+  }
+  .sg-acts .sg-pause {
+    flex: 0 0 auto;
+    min-height: 36px;
+    padding: 4px 14px;
+    font-size: 0.9rem;
+  }
+  .sg-stage {
+    grid-area: stage;
+  }
+  .sg-cap {
+    grid-area: cap;
+  }
+  .sg-layers {
+    grid-area: layers;
+  }
+  .sg-parts {
+    grid-area: parts;
+  }
+  .sg-note {
+    grid-area: note;
+  }
+}
+
+/* El escenario */
+.sg-stage {
+  position: relative;
+  border-radius: 16px;
+  overflow: hidden;
+  background: radial-gradient(120% 80% at 30% 18%, var(--sg-stage-1), var(--sg-stage-2));
+  border: 1px solid var(--border);
+  user-select: none;
+  -webkit-user-select: none;
+}
+.sg-svg {
+  display: block;
+  width: 100%;
+  height: min(600px, 64vh);
+  min-height: 430px;
+}
+.sg-hit {
+  cursor: pointer;
+}
+.sg-hits * {
+  fill: transparent;
+  stroke: none;
+}
+.sg-hits .sg-hit-line {
+  fill: none;
+  stroke: transparent;
+  stroke-width: 7;
+  pointer-events: stroke;
+}
+.sg-hits ellipse,
+.sg-hits circle,
+.sg-hits path:not(.sg-hit-line),
+.sg-hits rect {
+  pointer-events: all;
+}
+
+/* Piel y fondo */
+.sg-skin {
+  pointer-events: none;
+}
+.sg-skin-p {
+  fill: url(#sg-skinG);
+}
+.sg-cyl {
+  fill: url(#sg-cyl);
+  opacity: var(--sg-cyl-op);
+}
+.sg-cavity {
+  fill: url(#sg-cav);
+  opacity: 0.7;
+}
+.sg-sheen {
+  pointer-events: none;
+}
+.sg-sheen-p {
+  fill: url(#sg-sheen);
+  opacity: var(--sg-sheen-op);
+}
+.sg-bone-l {
+  fill: none;
+  stroke: var(--sg-bone);
+  stroke-width: 3;
+  stroke-linecap: round;
+  opacity: 0.75;
+}
+.sg-bone-l.thin {
+  stroke-width: 1.6;
+  opacity: 0.5;
+}
+.sg-rib {
+  fill: none;
+  stroke: var(--sg-bone);
+  stroke-width: 2;
+  stroke-linecap: round;
+  opacity: 0.32;
+  pointer-events: none;
+}
+.sg-sternum {
+  fill: var(--sg-bone);
+  opacity: 0.32;
+  pointer-events: none;
+}
+.sg-volp {
+  fill: url(#sg-vol);
+  pointer-events: none;
+}
+.sg-shadow {
+  fill: var(--sg-shade);
+  opacity: 0.14;
+  pointer-events: none;
+}
+.sg-shadow-s path {
+  fill: none;
+  stroke: var(--sg-shade);
+  opacity: 0.12;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.sg-shadow-s .w9 {
+  stroke-width: 9;
+}
+.sg-shadow-s .w6 {
+  stroke-width: 5.6;
+}
+
+/* Capas: se desvanecen al apagarse; con una parte abierta, las demás se quedan atrás. */
+.sg-layer {
+  transition: opacity 0.6s ease;
+}
+.sg-layer.sg-off {
+  opacity: 0.07;
+  pointer-events: none;
+}
+.sg-layer.sg-far {
+  opacity: 0.42;
+}
+.sg-layer.sg-far.sg-off {
+  opacity: 0.05;
+}
+
+/* Órganos */
+.sg-brain {
+  fill: var(--sg-brain);
+  stroke: var(--sg-line);
+  stroke-width: 0.6;
+}
+.sg-temporal {
+  fill: var(--sg-brain-2);
+  opacity: 0.55;
+}
+.sg-pfc {
+  fill: var(--sg-pfc);
+  opacity: 0.85;
+}
+.sg-gyrus {
+  fill: none;
+  stroke: var(--sg-brain-2);
+  stroke-width: 0.9;
+  stroke-linecap: round;
+  opacity: 0.9;
+}
+.sg-midline {
+  fill: none;
+  stroke: var(--sg-brain-2);
+  stroke-width: 1;
+}
+.sg-brainstem {
+  fill: var(--sg-brain-2);
+}
+.sg-pfclink {
+  fill: none;
+  stroke: var(--tone-calma);
+  stroke-linecap: round;
+  opacity: 0.5;
+}
+.sg-stalk {
+  stroke: var(--sg-hypo);
+  stroke-width: 0.9;
+}
+.sg-pit,
+.sg-hypo {
+  fill: var(--sg-hypo);
+  stroke: var(--sg-line);
+  stroke-width: 0.4;
+  transition: fill 0.5s;
+}
+.sg-amy {
+  fill: var(--sg-amy);
+  stroke: var(--sg-line);
+  stroke-width: 0.4;
+  transition: fill 0.5s;
+}
+.sg-amy-ring {
+  fill: none;
+  stroke: var(--sg-sig);
+  stroke-width: 0.8;
+  opacity: 0;
+}
+.sg-on-amy .sg-amy {
+  fill: var(--sg-sig);
+}
+.sg-on-hypo .sg-hypo,
+.sg-on-hypo .sg-pit {
+  fill: var(--sg-sig);
+}
+.sg-cord-l {
+  fill: none;
+  stroke: var(--sg-nerve);
+  stroke-width: 2;
+  stroke-linecap: round;
+  opacity: 0.8;
+}
+.sg-gang {
+  fill: var(--sg-nerve);
+  opacity: 0.8;
+}
+.sg-vagus {
+  fill: none;
+  stroke: var(--sg-vagus);
+  stroke-width: 0.9;
+  stroke-linecap: round;
+  opacity: 0.6;
+}
+.sg-lung {
+  fill: var(--sg-lung);
+  stroke: var(--sg-line);
+  stroke-width: 0.6;
+}
+.sg-fissure {
+  fill: none;
+  stroke: var(--sg-lung-2);
+  stroke-width: 0.8;
+  opacity: 0.9;
+}
+.sg-bronchiole {
+  fill: none;
+  stroke: var(--sg-airway);
+  stroke-width: 1.3;
+  stroke-linecap: round;
+  opacity: 0.9;
+}
+.sg-bronchus {
+  fill: none;
+  stroke: var(--sg-airway);
+  stroke-width: 3.2;
+  stroke-linecap: round;
+}
+.sg-trachea {
+  fill: var(--sg-airway);
+  stroke: var(--sg-line);
+  stroke-width: 0.5;
+}
+.sg-ring {
+  stroke: var(--sg-lung-2);
+  stroke-width: 0.7;
+  opacity: 0.8;
+}
+.sg-diaphragm {
+  fill: none;
+  stroke: var(--sg-muscle);
+  stroke-width: 2.4;
+  stroke-linecap: round;
+  opacity: 0.75;
+}
+.sg-heart {
+  fill: var(--sg-heart);
+  stroke: var(--sg-line);
+  stroke-width: 0.6;
+}
+.sg-heart-shade {
+  fill: var(--sg-heart-2);
+  opacity: 0.55;
+}
+.sg-atrium {
+  fill: var(--sg-atrium);
+  opacity: 0.8;
+}
+.sg-coronary {
+  fill: none;
+  stroke: var(--sg-heart-2);
+  stroke-width: 0.7;
+  stroke-linecap: round;
+  opacity: 0.55;
+}
+.sg-arch {
+  fill: none;
+  stroke: var(--sg-vessel);
+  stroke-width: 5.4;
+  stroke-linecap: round;
+}
+.sg-pulm {
+  fill: none;
+  stroke: var(--sg-vein);
+  stroke-width: 3.6;
+  stroke-linecap: round;
+}
+.sg-vein {
+  fill: none;
+  stroke: var(--sg-vein);
+  stroke-width: 2.8;
+  stroke-linecap: round;
+  opacity: 0.8;
+}
+.sg-vessel {
+  fill: none;
+  stroke: var(--sg-vessel);
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  opacity: 0.7;
+  transition: stroke 0.8s;
+}
+.sg-vessel.big {
+  stroke-width: 3;
+}
+.sg-vessel.thin {
+  stroke-width: 1.2;
+}
+.sg-adren .sg-vessel {
+  stroke: var(--sg-sig);
+}
+.sg-halo {
+  opacity: 0;
+  pointer-events: none;
+}
+.sg-liver {
+  fill: var(--sg-liver);
+  opacity: 0.7;
+}
+.sg-eso {
+  fill: none;
+  stroke: var(--sg-gut-2);
+  stroke-width: 2.6;
+  stroke-linecap: round;
+  opacity: 0.5;
+}
+.sg-stomach {
+  fill: var(--sg-stomach);
+  stroke: var(--sg-line);
+  stroke-width: 0.6;
+}
+.sg-rugae {
+  fill: none;
+  stroke: var(--sg-gut-2);
+  stroke-width: 0.7;
+  stroke-linecap: round;
+  opacity: 0.55;
+}
+.sg-gut-bed {
+  fill: var(--sg-cavity);
+  opacity: 0.8;
+}
+.sg-colon-o {
+  fill: none;
+  stroke: var(--sg-gut-2);
+  stroke-width: 9;
+  stroke-linecap: round;
+}
+.sg-colon {
+  fill: none;
+  stroke: var(--sg-gut);
+  stroke-width: 7;
+  stroke-linecap: round;
+  stroke-dasharray: 5 1.3;
+}
+.sg-colon-h {
+  fill: none;
+  stroke: var(--sg-hi);
+  stroke-width: 1.4;
+  stroke-linecap: round;
+  opacity: 0.28;
+  transform: translate(-1px, -1.4px);
+}
+.sg-small-o {
+  fill: none;
+  stroke: var(--sg-gut-2);
+  stroke-width: 5.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.sg-small {
+  fill: none;
+  stroke: var(--sg-gut);
+  stroke-width: 4.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.sg-small-h {
+  fill: none;
+  stroke: var(--sg-hi);
+  stroke-width: 1.1;
+  stroke-linecap: round;
+  opacity: 0.3;
+  transform: translate(-0.6px, -0.9px);
+}
+.sg-dim {
+  fill: var(--sg-dim);
+  opacity: 0.85;
+}
+.sg-gutdim {
+  opacity: 0;
+  pointer-events: none;
+}
+.sg-kidneys {
+  opacity: 0.62;
+}
+.sg-kidneys.sg-off {
+  opacity: 0.05;
+}
+.sg-kidney {
+  fill: var(--sg-kidney);
+}
+.sg-adrenal {
+  fill: var(--sg-adrenal);
+  stroke: var(--sg-line);
+  stroke-width: 0.5;
+}
+.sg-adr-glow {
+  opacity: 0;
+}
+.sg-muscle {
+  fill: var(--sg-muscle);
+  opacity: 0.62;
+}
+.sg-scm {
+  fill: none;
+  stroke: var(--sg-muscle);
+  stroke-width: 3.2;
+  stroke-linecap: round;
+  opacity: 0.7;
+}
+.sg-fiber {
+  fill: none;
+  stroke: var(--sg-fiber);
+  stroke-width: 0.6;
+  stroke-linecap: round;
+  opacity: 0.7;
+}
+.sg-tense-glow {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Las señales: ámbar la alarma, azul el freno. */
+.sg-route {
+  pointer-events: none;
+}
+.sg-route path {
+  fill: none;
+  stroke-linecap: round;
+}
+.sg-trail,
+.sg-trail-glow,
+.sg-pulse,
+.sg-pulse-glow,
+.sg-head {
+  opacity: 0;
+}
+.sg-route.amber .sg-trail {
+  stroke: var(--sg-sig);
+  stroke-width: 1.4;
+}
+.sg-route.amber .sg-trail-glow {
+  stroke: var(--sg-sig-glow);
+  stroke-width: 4.6;
+}
+.sg-route.amber .sg-pulse {
+  stroke: var(--sg-sig-glow);
+  stroke-width: 2;
+}
+.sg-route.amber .sg-pulse-glow {
+  stroke: var(--sg-sig);
+  stroke-width: 6.5;
+}
+.sg-route.amber .sg-head {
+  fill: var(--sg-sig-glow);
+}
+.sg-route.blue .sg-trail {
+  stroke: var(--sg-vagus-glow);
+  stroke-width: 1.5;
+}
+.sg-route.blue .sg-trail-glow {
+  stroke: var(--sg-vagus-glow);
+  stroke-width: 5;
+}
+.sg-route.blue .sg-pulse {
+  stroke: var(--sg-vagus-glow);
+  stroke-width: 2.2;
+}
+.sg-route.blue .sg-pulse-glow {
+  stroke: var(--sg-vagus-glow);
+  stroke-width: 7;
+}
+.sg-route.blue .sg-head {
+  fill: #fff;
+}
+.sg-hidden-route {
+  fill: none;
+  stroke: none;
+}
+.sg-part {
+  opacity: 0;
+  pointer-events: none;
+}
+.sg-part-c {
+  fill: var(--sg-sig-glow);
+}
+.sg-part-g {
+  fill: var(--sg-sig);
+  opacity: 0.3;
+}
+.sg-arrow {
+  fill: none;
+  stroke: var(--sg-sig);
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  opacity: 0;
+  pointer-events: none;
+}
+.sg-focus-ring {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 0.9;
+  stroke-dasharray: 3 2.4;
+  opacity: 0.9;
+  pointer-events: none;
+  animation: sg-fade 0.4s ease-out;
+}
+
+/* La guía de respiración, encima del dibujo. */
+.sg-breath {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 96px;
+  display: grid;
+  justify-items: center;
+  gap: 4px;
+  pointer-events: none;
+}
+.sg-breath-ring {
+  width: 84px;
+  height: 84px;
+  position: relative;
+  display: grid;
+  place-items: center;
+}
+.sg-breath-ring i {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: radial-gradient(circle, color-mix(in srgb, var(--sg-vagus-glow) 34%, transparent), color-mix(in srgb, var(--sg-vagus-glow) 10%, transparent) 70%);
+  border: 2px solid color-mix(in srgb, var(--sg-vagus-glow) 70%, transparent);
+  transform: scale(0.6);
+  will-change: transform;
+}
+.sg-breath-ring b {
+  position: relative;
+  font-size: 0.78rem;
+  font-weight: 600;
+  line-height: 1.15;
+  color: var(--text);
+  text-align: center;
+  max-width: 70px;
+}
+.sg-bdots,
+.sg-dots {
+  display: flex;
+  gap: 5px;
+}
+.sg-bdots i,
+.sg-dots i {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--stone);
+}
+.sg-bdots i.on,
+.sg-dots i.on {
+  background: var(--primary);
+}
+
+/* La ficha pegada a la parte: la vista se acerca y la ficha sale de abajo, con una colita
+   que apunta hacia la parte. */
+.sg-card {
+  position: absolute;
+  left: 10px;
+  right: 10px;
+  bottom: 10px;
+  display: grid;
+  gap: 6px;
+  max-height: calc(100% - 20px);
+  overflow: auto;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--surface);
+  box-shadow: 0 10px 28px rgb(40 30 20 / 0.16);
+  animation: sg-rise 0.35s ease-out;
+}
+.sg-card::before {
+  content: '';
+  position: absolute;
+  top: -8px;
+  left: 50%;
+  width: 14px;
+  height: 14px;
+  background: var(--surface);
+  border-left: 1px solid var(--border);
+  border-top: 1px solid var(--border);
+  transform: translateX(-50%) rotate(45deg);
+}
+.sg-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+.sg-card h3 {
+  font-size: 1.06rem;
+  margin: 0;
+  outline: none;
+}
+.sg-card dl {
+  margin: 0;
+  display: grid;
+  gap: 4px;
+}
+.sg-card dt {
+  margin-top: 2px;
+  font-size: 0.7rem;
+  font-weight: 650;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.sg-card dd {
+  margin: 0;
+  font-size: 0.88rem;
+  line-height: 1.42;
+  color: var(--text-2);
+}
+.sg-warn {
+  padding-left: 8px;
+  border-left: 3px solid var(--warm-border);
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+.sg-card .sg-go {
+  justify-self: start;
+  margin-top: 2px;
+}
+
+@keyframes sg-rise {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes sg-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 0.9;
+  }
+}
+
+/* La leyenda */
+.sg-cap {
+  display: grid;
+  gap: 6px;
+  align-content: start;
+  min-height: 118px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: var(--surface-soft);
+  transition: background 0.6s;
+}
+.sg-cap.calm {
+  background: color-mix(in srgb, var(--tone-calma) 16%, var(--surface-soft));
+}
+.sg-cap.warm {
+  background: var(--warm);
+}
+.sg-kick {
+  font-size: 0.72rem;
+  font-weight: 650;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.sg-cap h3 {
+  font-size: 1.06rem;
+  margin: 0;
+}
+.sg-cap p {
+  font-size: 0.95rem;
+  color: var(--text-2);
+}
+.sg-cap .btn {
+  justify-self: start;
+  margin-top: 4px;
+}
+
+/* Capas y partes */
+.sg-lbl {
+  margin: 0 0 8px;
+  font-size: 0.75rem;
+  font-weight: 650;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.sg-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.sg-chips .btn {
+  font-size: 0.86rem;
+  padding: 4px 12px;
+}
+.sg-chips .btn i {
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+}
+.sg-chips .btn[aria-pressed='false'] {
+  color: var(--muted);
+}
+.sg-chips .btn[aria-pressed='false'] i {
+  opacity: 0.35;
+}
+.sg-chips .btn[aria-expanded='true'] {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent) inset;
+}
+
+@media (max-width: 420px) {
+  .sg {
+    padding: 14px;
+  }
+  .sg-card {
+    padding: 10px 12px;
+    gap: 4px;
+  }
+  .sg-card dd {
+    font-size: 0.84rem;
+    line-height: 1.38;
+  }
+  .sg-svg {
+    min-height: 400px;
+  }
+}
+
+/* Movimiento reducido: nada se desliza ni se desvanece; la leyenda cuenta lo mismo. */
+.sg-still .sg-card,
+.sg-still .sg-focus-ring {
+  animation: none;
+}
+.sg-still .sg-layer,
+.sg-still .sg-vessel,
+.sg-still .sg-cap,
+.sg-still .sg-amy,
+.sg-still .sg-hypo,
+.sg-still .sg-pit {
+  transition: none;
+}
+
+/* La tarjeta de «Lo que siento» que lleva hasta aquí. */
+.sg-go {
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+}
+.sg-go-title {
+  font-family: var(--font-display);
+  font-variation-settings: 'SOFT' 100;
+  font-size: 1.28rem;
+  font-weight: 520;
+  line-height: 1.25;
+  letter-spacing: -0.015em;
+}

@@ -1,8 +1,11 @@
 // Lo del diario (texto, audio y fotos) se guarda en IndexedDB, en el dispositivo.
 // localStorage no sirve para audio ni fotos: tiene un límite de unos 5 MB y solo guarda texto.
 
-/** Lo que siento, algo que pasó o un recuerdo. Lo guardado antes del diario cuenta como «siento». */
-export type EntryKind = 'siento' | 'paso' | 'recuerdo'
+/**
+ * Lo que siento, algo que pasó, un recuerdo o una carta que no se manda.
+ * Lo guardado antes del diario cuenta como «siento».
+ */
+export type EntryKind = 'siento' | 'paso' | 'recuerdo' | 'carta'
 
 export type Thought = {
   id: string
@@ -13,6 +16,10 @@ export type Thought = {
   audio?: Blob
   seconds?: number
   photo?: Blob
+  /** Carta que no se manda: para quién va, si quiso decirlo. */
+  to?: string
+  /** Carta que no se manda: el cierre opcional, «algo que entiendo ahora». */
+  understood?: string
 }
 
 const DB_NAME = 'salvando-vidas'

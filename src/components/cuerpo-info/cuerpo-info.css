@@ -1,0 +1,809 @@
+/* ---------- Cómo funciona: los temas de «Por dentro» y sus dibujos ----------
+   Colores de la app (tonos de las historias y órganos), así se ven igual de día y de noche.
+   Todo se mueve despacio, dentro de su tarjeta, y con movimiento reducido queda quieto en el
+   momento que mejor se entiende. */
+
+/* Las dos filas de chips: «Lo que vives» y «Por dentro». */
+.ci-pick {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+}
+.body-card > .ci-pick {
+  grid-area: chips;
+}
+/* La mascota que presenta cada explicación ocupa todo el ancho en pantallas grandes, en vez
+   de quedarse en la columna angosta del cuerpo. */
+.body-card:not(.check) > .pet-says {
+  grid-column: 1 / -1;
+}
+.ci-groups {
+  display: flex;
+  gap: 4px;
+}
+.ci-groups button {
+  min-height: 36px;
+  padding: 4px 14px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--muted);
+  font: inherit;
+  font-size: 0.9rem;
+  font-weight: 620;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+.ci-groups button[aria-pressed='true'] {
+  background: var(--primary-soft);
+  color: var(--text);
+}
+
+/* Los temas de «Por dentro» en dos columnas, para que quepan sin hacer una torre. */
+.ci-topics {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+}
+.ci-topics .chip {
+  padding: 6px 12px;
+  font-size: 0.92rem;
+  line-height: 1.2;
+}
+
+/* «Ver también»: lleva a otro tema sin salir de la tarjeta. */
+.ci-see {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 36px;
+  padding: 4px 0;
+  border: 0;
+  background: none;
+  color: var(--primary);
+  font: inherit;
+  font-size: 0.92rem;
+  font-weight: 620;
+  text-align: left;
+  cursor: pointer;
+}
+.ci-see:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* «Saber más»: plegado, para quien quiere leerlo con calma. */
+.ci-more {
+  border-top: 1px solid var(--border);
+  padding-top: 8px;
+}
+.ci-more summary {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 36px;
+  align-items: center;
+  font-weight: 620;
+  cursor: pointer;
+  list-style: none;
+}
+.ci-more summary::-webkit-details-marker {
+  display: none;
+}
+.ci-more summary::after {
+  content: '+';
+  color: var(--primary);
+}
+.ci-more[open] summary::after {
+  content: '–';
+}
+.ci-more-body {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-top: 4px;
+}
+
+/* La tarjetita de cada dibujo. */
+.ci-viz {
+  width: 100%;
+  max-width: 400px;
+  margin: 4px 0 0;
+  padding: 10px 12px 8px;
+  border-radius: 16px;
+  background: var(--surface-soft);
+}
+.ci-viz figcaption {
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 0.84rem;
+}
+.ci-svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+.ci-label,
+.ci-legend text {
+  fill: var(--muted);
+  font-family: var(--font-body);
+  font-size: 11.5px;
+  font-weight: 520;
+}
+.ci-base {
+  stroke: var(--border);
+  stroke-width: 1.5;
+}
+.ci-curve {
+  fill: none;
+  stroke-width: 3.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.tone-alarma {
+  stroke: var(--tone-alarma);
+}
+.tone-estres {
+  stroke: var(--tone-estres);
+}
+.tone-calma {
+  stroke: var(--tone-calma);
+}
+.ci-ghost {
+  fill: none;
+  stroke: var(--muted);
+  stroke-width: 2.5;
+  stroke-dasharray: 4 5;
+  opacity: 0.55;
+}
+/* Una línea que se dibuja de izquierda a derecha, como el paso del tiempo. */
+.ci-draw {
+  stroke-dasharray: 1;
+  animation: ci-draw 2.6s ease-out both;
+}
+.ci-draw.loop {
+  animation: ci-draw-loop 6s ease-out infinite;
+}
+@keyframes ci-draw {
+  from {
+    stroke-dashoffset: 1;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+@keyframes ci-draw-loop {
+  0% {
+    stroke-dashoffset: 1;
+    opacity: 1;
+  }
+  55%,
+  88% {
+    stroke-dashoffset: 0;
+    opacity: 1;
+  }
+  100% {
+    stroke-dashoffset: 0;
+    opacity: 0;
+  }
+}
+
+/* Dos alarmas */
+.ci-spark {
+  fill: var(--tone-alarma);
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: ci-spark 6s ease-out infinite;
+}
+@keyframes ci-spark {
+  0%,
+  10% {
+    opacity: 0;
+    transform: scale(0.4);
+  }
+  20% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  45%,
+  100% {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+}
+.ci-bracket {
+  fill: none;
+  stroke: var(--stone);
+  stroke-width: 1.5;
+}
+.ci-night {
+  fill: var(--orb-sky);
+}
+.ci-sun circle {
+  fill: var(--accent);
+}
+.ci-sun path {
+  stroke: var(--accent);
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+.ci-moon {
+  fill: var(--tone-animo);
+  opacity: 0.8;
+}
+.ci-walker {
+  fill: var(--surface);
+  stroke: var(--text-2, var(--muted));
+  stroke-width: 2;
+  offset-rotate: 0deg;
+  animation: ci-along 8s linear infinite;
+}
+.ci-walker.slow {
+  animation-delay: 1.4s;
+}
+@keyframes ci-along {
+  from {
+    offset-distance: 0%;
+  }
+  to {
+    offset-distance: 100%;
+  }
+}
+.ci-rise {
+  fill: none;
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  animation: ci-fade 1s 2.4s ease both;
+}
+.ci-legend line {
+  stroke-width: 3;
+}
+
+/* La cadena del aire */
+.ci-airway {
+  fill: none;
+  stroke: var(--stone);
+  stroke-width: 6;
+  stroke-linecap: round;
+}
+.ci-lung {
+  fill: var(--organ-lung);
+  stroke: var(--organ-line);
+  stroke-width: 1.5;
+  transform-box: fill-box;
+  transform-origin: 50% 0;
+  animation: ci-breath-fast 0.9s ease-in-out infinite alternate;
+}
+[data-mode='lento'] .ci-lung {
+  animation: ci-breath-slow 10s ease-in-out infinite;
+}
+@keyframes ci-breath-fast {
+  to {
+    transform: scale(1.05);
+  }
+}
+/* Tomar 4 s y soltar 6 s, como la respiración de Calma. */
+@keyframes ci-breath-slow {
+  40% {
+    transform: scale(1.08);
+  }
+}
+.ci-blood {
+  fill: color-mix(in srgb, var(--tone-alarma) 16%, var(--surface));
+}
+.ci-bubble {
+  fill: var(--surface);
+  stroke: var(--muted);
+  stroke-width: 1.5;
+  transition: opacity 0.6s;
+}
+/* Al respirar rápido, varias burbujas se van con el aire (y la escena vuelve a empezar). */
+[data-mode='rapido'] .ci-bubble.leaving {
+  animation: ci-escape 7s ease-in infinite;
+  animation-delay: calc(var(--i) * 0.35s);
+}
+@keyframes ci-escape {
+  0%,
+  8% {
+    transform: none;
+    opacity: 1;
+  }
+  45% {
+    transform: translate(var(--dx), -128px);
+    opacity: 0;
+  }
+  88% {
+    transform: none;
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+.ci-bubble.gone {
+  fill: none;
+  stroke-dasharray: 2 3;
+  opacity: 0.45;
+}
+/* Al soltar lento, las que se fueron regresan. */
+[data-mode='lento'] .ci-bubble.back {
+  animation: ci-return 1.6s ease-out both;
+  animation-delay: calc(var(--i) * 0.25s);
+}
+@keyframes ci-return {
+  from {
+    transform: translateY(-40px);
+    opacity: 0;
+  }
+}
+.ci-tube {
+  fill: var(--surface);
+  stroke: var(--border);
+  stroke-width: 1.5;
+}
+.ci-fill {
+  fill: color-mix(in srgb, var(--muted) 55%, var(--surface));
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+  transition: transform 3s ease;
+}
+[data-mode='rapido'] .ci-fill {
+  animation: ci-drain 4s ease both;
+}
+@keyframes ci-drain {
+  from {
+    transform: scaleY(0.85);
+  }
+}
+.ci-head circle,
+.ci-hand path {
+  fill: var(--skin-light);
+  stroke: var(--skin-shade);
+  stroke-width: 1.5;
+}
+.ci-swirl {
+  fill: none;
+  stroke: var(--tone-animo);
+  stroke-width: 2;
+  stroke-linecap: round;
+  opacity: 0;
+  transform-box: fill-box;
+  transform-origin: center;
+  transition: opacity 1s;
+}
+.ci-tingle {
+  fill: var(--tone-estres);
+  opacity: 0;
+  transition: opacity 1s;
+}
+[data-mode='cadena'] .ci-swirl {
+  opacity: 1;
+  animation: ci-sway 2.4s ease-in-out infinite alternate;
+}
+[data-mode='cadena'] .ci-tingle {
+  opacity: 1;
+  animation: ci-twinkle 1.6s ease-in-out infinite alternate;
+}
+[data-mode='cadena'] .ci-tingle:nth-of-type(2) {
+  animation-delay: -0.5s;
+}
+[data-mode='cadena'] .ci-tingle:nth-of-type(3) {
+  animation-delay: -1s;
+}
+@keyframes ci-sway {
+  from {
+    transform: rotate(-10deg);
+  }
+  to {
+    transform: rotate(10deg);
+  }
+}
+@keyframes ci-twinkle {
+  from {
+    opacity: 0.25;
+  }
+}
+
+/* Intestino y cerebro */
+.ci-gut {
+  --c: var(--tone-estres);
+}
+.ci-gut.calma {
+  --c: var(--tone-calma);
+}
+.ci-brain circle {
+  fill: var(--organ-brain);
+  stroke: var(--organ-line);
+  stroke-width: 1.5;
+}
+.ci-brain path {
+  fill: none;
+  stroke: color-mix(in srgb, var(--muted) 55%, transparent);
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+.ci-lane line {
+  stroke: var(--border);
+  stroke-width: 7;
+  stroke-linecap: round;
+}
+.ci-lane.on line {
+  stroke: color-mix(in srgb, var(--c) 28%, var(--surface-soft));
+}
+.ci-tip {
+  fill: none;
+  stroke: var(--stone);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.ci-lane.on .ci-tip {
+  stroke: var(--c);
+}
+.ci-signal {
+  fill: var(--c);
+  animation: ci-go-down 1.8s linear infinite;
+  animation-delay: calc(var(--i) * -0.6s);
+}
+.ci-lane.up .ci-signal {
+  animation-name: ci-go-up;
+}
+.ci-gut.calma .ci-signal {
+  animation-duration: 3.6s;
+  animation-delay: calc(var(--i) * -1.2s);
+}
+@keyframes ci-go-down {
+  0% {
+    transform: translateY(0);
+    opacity: 0;
+  }
+  15%,
+  85% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(36px);
+    opacity: 0;
+  }
+}
+@keyframes ci-go-up {
+  0% {
+    transform: translateY(0);
+    opacity: 0;
+  }
+  15%,
+  85% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-36px);
+    opacity: 0;
+  }
+}
+.ci-stomach {
+  fill: var(--organ-gut);
+  stroke: var(--organ-line);
+  stroke-width: 1.5;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+/* Arriba se frena: el estómago se encoge despacio, como un nudo. */
+.ci-gut:not(.calma) .ci-stomach {
+  animation: ci-squeeze 3.2s ease-in-out infinite alternate;
+}
+@keyframes ci-squeeze {
+  to {
+    transform: scale(0.92) rotate(-4deg);
+  }
+}
+.ci-colon {
+  fill: none;
+  stroke: var(--organ-gut);
+  stroke-width: 14;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+/* Abajo se acelera: las ondas del intestino corren más rápido. */
+.ci-colon-wave {
+  fill: none;
+  stroke: color-mix(in srgb, var(--c) 70%, var(--organ-gut));
+  stroke-width: 4;
+  stroke-dasharray: 6 10;
+  stroke-linecap: round;
+  animation: ci-peri 0.8s linear infinite;
+}
+.ci-gut.sube .ci-colon-wave {
+  animation-duration: 1.6s;
+}
+.ci-gut.calma .ci-colon-wave {
+  animation-duration: 3.2s;
+}
+@keyframes ci-peri {
+  to {
+    stroke-dashoffset: -16;
+  }
+}
+
+/* La escalera del sueño */
+.ci-row {
+  stroke: var(--border);
+  stroke-width: 1;
+  stroke-dasharray: 2 4;
+}
+.ci-stage {
+  animation: ci-fade 0.8s 1.6s ease both;
+}
+.ci-stage.deep {
+  fill: color-mix(in srgb, var(--tone-animo) 38%, transparent);
+}
+.ci-stage.rem {
+  fill: color-mix(in srgb, var(--tone-mania) 32%, transparent);
+}
+.ci-stairs {
+  stroke: var(--primary);
+  stroke-width: 2.5;
+  animation-duration: 3s;
+  animation-timing-function: linear;
+}
+@keyframes ci-fade {
+  from {
+    opacity: 0;
+  }
+}
+
+/* El volumen del dolor */
+.ci-pain {
+  --c: var(--tone-animo);
+}
+.ci-pain.alto {
+  --c: var(--tone-estres);
+}
+.ci-pain.bajo {
+  --c: var(--tone-calma);
+}
+.ci-wire {
+  stroke: var(--border);
+  stroke-width: 4;
+  stroke-linecap: round;
+}
+.ci-source {
+  fill: var(--muted);
+}
+.ci-pain .ci-signal {
+  fill: var(--muted);
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: ci-wire 2.4s linear infinite;
+  animation-delay: calc(var(--i) * -0.8s);
+}
+.ci-pain .ci-signal.out {
+  fill: var(--c);
+  animation-name: ci-wire-out;
+}
+@keyframes ci-wire {
+  0% {
+    transform: translateX(0);
+    opacity: 0;
+  }
+  15%,
+  85% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(64px);
+    opacity: 0;
+  }
+}
+@keyframes ci-wire-out {
+  0% {
+    transform: translateX(0) scale(var(--felt));
+    opacity: 0;
+  }
+  15%,
+  85% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(62px) scale(var(--felt));
+    opacity: 0;
+  }
+}
+.ci-tick {
+  stroke: var(--stone);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+}
+.ci-knob {
+  fill: var(--surface);
+  stroke: var(--border);
+  stroke-width: 2;
+}
+.ci-pointer {
+  transition: transform 1.4s cubic-bezier(0.3, 1.2, 0.5, 1);
+}
+.ci-pointer line {
+  stroke: var(--c);
+  stroke-width: 5;
+  stroke-linecap: round;
+}
+.ci-felt,
+.ci-felt-ring {
+  transform-box: fill-box;
+  transform-origin: center;
+  transform: scale(var(--felt));
+  transition: transform 1.4s ease, fill 1s;
+}
+.ci-felt {
+  fill: color-mix(in srgb, var(--c) 42%, transparent);
+}
+.ci-felt-ring {
+  fill: none;
+  stroke: var(--c);
+  stroke-width: 1.5;
+  opacity: 0;
+}
+.ci-pain.alto .ci-felt-ring {
+  animation: ci-ripple 2.8s ease-out infinite;
+}
+@keyframes ci-ripple {
+  from {
+    transform: scale(var(--felt));
+    opacity: 0.6;
+  }
+  to {
+    transform: scale(calc(var(--felt) * 1.3));
+    opacity: 0;
+  }
+}
+
+/* En cámara lenta */
+.ci-walk {
+  --c: var(--tone-animo);
+  --cross: 16s;
+  --step: 1.15s;
+  --swing: 14deg;
+  --arm: 6deg;
+}
+.ci-walk.vuelve {
+  --c: var(--tone-calma);
+  --cross: 8s;
+  --step: 1s;
+  --swing: 20deg;
+  --arm: 12deg;
+}
+.ci-print {
+  fill: var(--stone);
+}
+.ci-figure {
+  transform: translateX(160px);
+  animation: ci-cross var(--cross) linear infinite;
+}
+@keyframes ci-cross {
+  0% {
+    transform: translateX(16px);
+    opacity: 0;
+  }
+  6%,
+  94% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(300px);
+    opacity: 0;
+  }
+}
+.ci-lean {
+  transition: transform 1s;
+}
+.ci-walk.lento .ci-lean {
+  transform: rotate(5deg);
+}
+.ci-limb {
+  stroke: var(--c);
+  stroke-width: 6;
+  stroke-linecap: round;
+}
+.ci-torso,
+.ci-noggin {
+  fill: var(--c);
+}
+.ci-limb.leg {
+  transform-origin: 0 -30px;
+}
+.ci-limb.arm {
+  transform-origin: 0 -52px;
+  stroke: color-mix(in srgb, var(--c) 55%, var(--surface));
+  stroke-width: 5;
+}
+/* La pierna de atrás, un poco más clara, para que se vea el paso. */
+.ci-limb.leg.b {
+  stroke: color-mix(in srgb, var(--c) 60%, var(--surface));
+}
+.ci-limb.leg.a {
+  transform: rotate(calc(var(--swing) * -1));
+}
+.ci-limb.leg.b {
+  transform: rotate(var(--swing));
+}
+.ci-limb.arm.a {
+  transform: rotate(var(--arm));
+}
+.ci-limb.arm.b {
+  transform: rotate(calc(var(--arm) * -1));
+}
+.ci-limb.leg.a,
+.ci-limb.arm.b {
+  animation: ci-swing var(--step) ease-in-out infinite alternate;
+}
+.ci-limb.leg.b,
+.ci-limb.arm.a {
+  animation: ci-swing var(--step) ease-in-out infinite alternate-reverse;
+}
+.ci-limb.arm.a,
+.ci-limb.arm.b {
+  --swing: var(--arm);
+}
+@keyframes ci-swing {
+  from {
+    transform: rotate(calc(var(--swing) * -1));
+  }
+  to {
+    transform: rotate(var(--swing));
+  }
+}
+
+/* ¿Y la inflamación? */
+.ci-person {
+  fill: color-mix(in srgb, var(--muted) 40%, var(--surface-soft));
+}
+.ci-haze circle {
+  fill: var(--tone-estres);
+  opacity: 0.13;
+}
+.ci-haze {
+  animation: ci-haze 6s ease-in-out infinite alternate;
+}
+@keyframes ci-haze {
+  from {
+    opacity: 0.6;
+  }
+}
+
+/* Quietos: con movimiento reducido, cada dibujo se queda en su momento más claro. */
+.ci-viz.still *,
+.ci-viz.still *::before {
+  animation: none !important;
+  transition: none !important;
+}
+.ci-viz.still .ci-walker {
+  display: none;
+}
+.ci-viz.still[data-mode='rapido'] .ci-bubble.leaving {
+  transform: translate(calc(var(--dx) * 0.6), -64px);
+  opacity: 0.6;
+}
+/* Las señales quietas, repartidas por su carril en vez de amontonadas al principio. */
+.ci-viz.still .ci-lane.down .ci-signal {
+  transform: translateY(calc(6px + var(--i) * 12px));
+}
+.ci-viz.still .ci-lane.up .ci-signal {
+  transform: translateY(calc(-6px - var(--i) * 12px));
+}
+.ci-viz.still .ci-pain .ci-signal.in {
+  transform: translateX(calc(10px + var(--i) * 20px));
+}
+.ci-viz.still .ci-pain .ci-signal.out {
+  transform: translateX(calc(10px + var(--i) * 20px)) scale(var(--felt));
+}
+@media (prefers-reduced-motion: reduce) {
+  .ci-viz * {
+    animation: none !important;
+    transition: none !important;
+  }
+  .ci-viz .ci-walker {
+    display: none;
+  }
+}

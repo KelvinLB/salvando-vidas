@@ -193,6 +193,7 @@ const CLINICAL: Record<MissionId, string> = {
   hueco: 'el juego «Salir del hueco»',
   desenredar: 'una actividad tranquila para descansar la cabeza (el juego «Hilos sueltos»)',
   practicar: 'exposición interoceptiva con Don Chema (o solo platicarlo, si el filtro de salud dijo que mejor no)',
+  receta: 'derreflexión: ayudar a un vecino a recordar su receta (la atención hacia afuera)',
 }
 
 const times = (n: number) => `${n} ${n === 1 ? 'vez' : 'veces'}`

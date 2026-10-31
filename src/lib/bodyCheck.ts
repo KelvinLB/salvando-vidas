@@ -1,5 +1,7 @@
 import {
+  type Area,
   type Band,
+  type BodyView,
   type Duration,
   type Feel,
   type Heat,
@@ -8,8 +10,19 @@ import {
   type RedFlag,
   type Sensation,
   SENSATIONS,
+  spotSize,
 } from '../data/bodyCheck'
-import type { Fx, Tone } from '../data/bodyStories'
+import { REGION_LABELS, type Fx, type Region, type Tone } from '../data/bodyStories'
+import type { BodyFx } from './bodyfx'
+
+/**
+ * Una marca hecha con el dedo: dónde (en qué vista de la figura) y qué tan grande (el radio,
+ * en las medidas del dibujo). `after` es el tamaño que la persona dijo después de respirar.
+ */
+export type Spot = { id: string; view: BodyView; x: number; y: number; r: number; region: Region | null; after?: number }
+
+/** Una nota con sus palabras, pegada a una parte del cuerpo (o a una de sus marcas). */
+export type BodyNote = { id: string; date: string; area: Area; text: string; at?: { view: BodyView; x: number; y: number } }
 
 export type BodyRecord = {
   id: string
@@ -19,11 +32,20 @@ export type BodyRecord = {
   /** Qué tan fuerte se sentía después de bajarle juntos. */
   after: number | null
   duration: Duration | null
+  /** Dónde exacto y qué tan grande, si lo marcó con el dedo. */
+  spots?: Spot[]
 }
 
 export type BodyStage = 'marcar' | 'nivel' | 'resumen'
 /** Lo que la persona está marcando ahora. Se recuerda unas horas, por si va a otra pantalla y regresa. */
-export type BodyNow = { at: number; ids: string[]; intensity: number | null; duration: Duration | null; stage: BodyStage }
+export type BodyNow = {
+  at: number
+  ids: string[]
+  intensity: number | null
+  duration: Duration | null
+  stage: BodyStage
+  spots?: Spot[]
+}
 
 export const EMPTY_NOW: BodyNow = { at: 0, ids: [], intensity: null, duration: null, stage: 'marcar' }
 const FRESH_MS = 6 * 60 * 60 * 1000
@@ -114,8 +136,31 @@ export function readBody(ids: string[], intensity: number | null): Reading {
   }
 }
 
-/** Mientras se respira para bajarle, el corazón y la respiración siguen el ritmo lento. */
-export function calmingFx(fx: Fx[]): Fx[] {
+/**
+ * Mientras se respira para bajarle, el corazón y la respiración siguen el ritmo lento, y el
+ * nervio vago (el freno) se ilumina al soltar el aire.
+ */
+export function calmingFx(fx: Fx[]): BodyFx[] {
   const fast: Fx[] = ['heart-fast', 'heart-very-fast', 'breath-fast']
-  return [...fx.filter((f) => !fast.includes(f)), 'breath-slow', 'heart-calm']
+  return [...fx.filter((f) => !fast.includes(f)), 'breath-slow', 'heart-calm', 'vagus']
 }
+
+const VIEW_WORDS: Record<BodyView, string> = { frente: 'de frente', espalda: 'de espalda', lado: 'de lado' }
+
+/** Las marcas en palabras: «el pecho, de frente, mediano; después de respirar, más chico». */
+export function spotLines(spots: Spot[]): string[] {
+  return spots.map((s) => {
+    const where =
+      s.view === 'espalda' && s.region === 'estomago'
+        ? 'la espalda baja'
+        : s.view === 'espalda' && s.region === 'pecho'
+          ? 'la espalda alta'
+          : s.region
+            ? REGION_LABELS[s.region]
+            : 'el cuerpo'
+    const after =
+      s.after === undefined ? '' : s.after < s.r * 0.9 ? '; después de respirar, más chico' : s.after > s.r * 1.1 ? '; después de respirar, más grande' : '; después de respirar, igual'
+    return `${where[0].toUpperCase()}${where.slice(1)} (${VIEW_WORDS[s.view]}), ${spotSize(s.r)}${after}`
+  })
+}
+

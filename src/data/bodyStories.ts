@@ -2,6 +2,8 @@
 // sin tecnicismos y sin diagnosticar; cada historia termina con lo que ayuda.
 // Antes de cambiar los textos, que los revise un profesional de la salud.
 
+import { TOPICS } from './cuerpoInfo'
+
 export type Region = 'cabeza' | 'cuello' | 'pecho' | 'estomago' | 'brazos' | 'piernas'
 export type Tone = 'alarma' | 'estres' | 'animo' | 'mania' | 'calma'
 
@@ -34,6 +36,19 @@ export type Fx =
   | 'tingle'
   | 'restless'
 
+/**
+ * Dibujos chicos que van debajo del texto de un paso (src/components/cuerpo-info). Cada uno
+ * muestra un proceso, y `mode` dice en qué momento de ese proceso va la historia.
+ */
+export type Viz =
+  | { id: 'alarmas'; mode: 'chispazo' | 'dia' | 'semanas' }
+  | { id: 'aire'; mode: 'rapido' | 'cadena' | 'lento' }
+  | { id: 'panza'; mode: 'baja' | 'sube' | 'ambas' | 'calma' }
+  | { id: 'sueno'; mode: 'tranquila' | 'estres' }
+  | { id: 'dolor'; mode: 'medio' | 'alto' | 'bajo' }
+  | { id: 'lento'; mode: 'lento' | 'vuelve' }
+  | { id: 'inflamacion'; mode: 'algunas' }
+
 export type StoryStep = {
   title: string
   text: string
@@ -42,9 +57,18 @@ export type StoryStep = {
   tone?: Tone
   links?: { to: string; label: string }[]
   note?: string
+  viz?: Viz
+  /** Otra explicación de aquí mismo que sigue el hilo de este paso. */
+  see?: string
+  /** Una capa opcional, plegada, para quien quiere saber más con calma. */
+  more?: { title: string; text: string; viz?: Viz }
 }
 
-export type Story = { id: string; label: string; tone: Tone; intro: string; steps: StoryStep[] }
+/**
+ * `group`: las condiciones («Lo que vives») o los temas de cómo trabaja el cuerpo
+ * («Por dentro»), que se eligen en dos filas de chips para que quepan en el teléfono.
+ */
+export type Story = { id: string; label: string; tone: Tone; intro: string; steps: StoryStep[]; group?: 'dentro' }
 
 export const REGION_LABELS: Record<Region, string> = {
   cabeza: 'la cabeza',
@@ -87,12 +111,14 @@ export const STORIES: Story[] = [
         text: 'Sientes que no entra el aire, aunque sí entra. Querer jalar más aire lo empeora.',
         focus: 'pecho',
         fx: ['alarm-brain', 'nerves', 'heart-fast', 'breath-fast'],
+        see: 'aire',
       },
       {
         title: 'Se aprieta el estómago',
         text: 'El cuerpo frena la digestión para ahorrar energía: nudo, mariposas o náusea.',
         focus: 'estomago',
         fx: ['alarm-brain', 'nerves', 'heart-fast', 'breath-fast', 'stomach-knot'],
+        see: 'panza',
       },
       {
         title: 'Músculos tensos, manos sudadas',
@@ -134,6 +160,7 @@ export const STORIES: Story[] = [
         focus: 'brazos',
         fx: ['heart-very-fast', 'alarm-brain', 'nerves', 'breath-fast', 'tremble', 'dizzy'],
         note: HEART_NOTE,
+        see: 'aire',
       },
       {
         title: 'El susto alimenta la alarma',
@@ -147,6 +174,7 @@ export const STORIES: Story[] = [
         focus: 'pecho',
         fx: ['breath-slow', 'heart-calm'],
         links: [{ to: '/panico', label: 'Guía de pánico' }],
+        see: 'alarmas',
       },
     ],
   },
@@ -167,6 +195,7 @@ export const STORIES: Story[] = [
         text: 'Unas glándulas sobre los riñones sueltan cortisol, la hormona del estrés, para darte energía extra. Sirve para un rato, no para semanas.',
         focus: 'estomago',
         fx: ['stress-brain', 'cortisol'],
+        see: 'alarmas',
       },
       {
         title: 'Músculos que no se sueltan',
@@ -179,12 +208,14 @@ export const STORIES: Story[] = [
         text: 'Acidez, colitis, comer de más o de menos.',
         focus: 'estomago',
         fx: ['stress-brain', 'cortisol', 'tension', 'gut'],
+        see: 'panza',
       },
       {
         title: 'Dormir ya no descansa',
         text: 'Cuesta dormir, o despiertas con cansancio aunque hayas dormido.',
         focus: 'cabeza',
         fx: ['stress-brain', 'cortisol', 'tension', 'gut', 'sleep-bad'],
+        see: 'sueno',
       },
       {
         title: 'Cómo bajarle',
@@ -206,21 +237,41 @@ export const STORIES: Story[] = [
     steps: [
       {
         title: 'El cerebro baja la energía',
-        text: 'Cambian las sustancias que regulan el ánimo, el sueño y el gusto por las cosas. A veces hay una causa clara y a veces no.',
+        text: 'Cambia la forma en que se comunican las partes del cerebro que regulan el ánimo, el sueño y el gusto por las cosas. A veces hay una causa clara y a veces no.',
         focus: 'cabeza',
         fx: ['dim'],
+        // Pendiente de revisión con psicóloga y médico. Fuentes: Osimo et al. 2019, Psychol Med
+        // (~27 % con PCR > 3 mg/L), metaanálisis de marcadores inflamatorios en la depresión,
+        // Brain Behav Immun 2020. Se dice «en algunas personas» y sin recomendar
+        // antiinflamatorios ni dietas: es una pieza más, no la causa.
+        more: {
+          title: '¿Y la inflamación?',
+          text: 'En algunas personas con depresión, el cuerpo tiene un poco de inflamación, como la que deja una gripa o el estrés largo. Es una pieza más del rompecabezas, no «la causa», y no hay un análisis de sangre que diagnostique la depresión. Por eso moverte, dormir y atender otras enfermedades también ayuda al ánimo.',
+          viz: { id: 'inflamacion', mode: 'algunas' },
+        },
       },
       {
         title: 'Todo pesa',
         text: 'Cansancio que no se quita durmiendo, cuerpo pesado, moverse lento. No es flojera.',
         focus: 'piernas',
         fx: ['dim', 'heavy'],
+        see: 'lento',
       },
       {
         title: 'Un peso o un vacío en el pecho',
         text: 'La tristeza se siente en el pecho, aunque a veces no puedas llorar.',
         focus: 'pecho',
         fx: ['dim', 'heavy', 'chest-weight'],
+      },
+      {
+        // Pendiente de revisión con psicóloga y médico. Fuentes: Bair et al. 2003, Arch Intern
+        // Med (dolor y depresión comparten vías); NIMH, folleto de la depresión (dolores sin
+        // causa física clara).
+        title: 'A veces todo duele más',
+        text: 'Dolor de cabeza, de espalda o de panza sin una causa clara. El dolor y el ánimo comparten caminos en el cuerpo: duele de verdad.',
+        focus: 'cuello',
+        fx: ['dim', 'heavy', 'tension'],
+        see: 'dolor',
       },
       {
         title: 'Nada da gusto',
@@ -302,6 +353,7 @@ export const STORIES: Story[] = [
         text: 'El cortisol, que de noche debería bajar, se queda alto: el corazón y los músculos no terminan de soltarse.',
         focus: 'pecho',
         fx: ['stress-brain', 'cortisol', 'tension'],
+        see: 'alarmas',
       },
       {
         title: 'Pelear con el sueño lo aleja',
@@ -315,6 +367,7 @@ export const STORIES: Story[] = [
         tone: 'animo',
         focus: 'piernas',
         fx: ['sleep-bad', 'dim', 'heavy'],
+        see: 'sueno',
       },
       {
         title: 'Cómo ayudarle a tu cuerpo',
@@ -337,6 +390,7 @@ export const STORIES: Story[] = [
         tone: 'alarma',
         focus: 'cabeza',
         fx: ['alarm-brain', 'heart-calm'],
+        see: 'alarmas',
       },
       {
         title: 'Temblor y cansancio',
@@ -383,7 +437,7 @@ export const STORIES: Story[] = [
       },
       {
         title: 'La mejoría llega despacio',
-        text: 'Muchas personas notan los primeros cambios entre las 2 y las 4 semanas, y el efecto completo suele llegar entre las 4 y las 6, a veces más. A veces mejoran primero el sueño y la energía, y el ánimo después.',
+        text: 'Muchas personas notan los primeros cambios entre las 2 y las 4 semanas, y el efecto completo suele llegar entre las 4 y las 8, a veces más. A veces mejoran primero el sueño y la energía, y el ánimo después.',
         focus: 'pecho',
         fx: ['breath-slow', 'heart-calm'],
       },
@@ -398,4 +452,6 @@ export const STORIES: Story[] = [
       },
     ],
   },
+  // Al final, los temas de «Por dentro» (src/data/cuerpoInfo.ts).
+  ...TOPICS,
 ]

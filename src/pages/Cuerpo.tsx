@@ -4,11 +4,13 @@ import PageHeader from '../components/PageHeader'
 import BodyCheck from '../components/BodyCheck'
 import BodyRelease from '../components/BodyRelease'
 import BodyStories from '../components/BodyStories'
+import Senal from '../components/senal/Senal'
 import { AREAS } from '../data/bodyCheck'
 import { STORIES } from '../data/bodyStories'
 
 // Tu cuerpo por dentro: «Lo que siento» para marcar dónde se siente y bajarle, y
-// «Cómo funciona» para ver paso a paso qué pasa con cada condición.
+// «Cómo funciona» para ver paso a paso qué pasa con cada condición y seguir la señal de la
+// alarma por el cuerpo hasta que el freno la apaga.
 
 const prefersStill = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
@@ -16,17 +18,35 @@ type Mode = 'siento' | 'funciona'
 
 export default function Cuerpo() {
   const { hash } = useLocation()
-  // Otras pantallas pueden abrir directo una explicación (/cuerpo?ver=panico) o una parte
-  // del cuerpo lista para marcar (/cuerpo?zona=pecho), como la figura de Inicio.
+  // Otras pantallas pueden abrir directo una explicación (/cuerpo?ver=panico), «Sigue la
+  // señal» (/cuerpo?ver=senal o /cuerpo#senal) o una parte del cuerpo lista para marcar
+  // (/cuerpo?zona=pecho), como la figura de Inicio.
   const [params] = useSearchParams()
   const [zone] = useState(() => AREAS.find((a) => a.id === params.get('zona'))?.id)
   const [still] = useState(prefersStill)
   const [story, setStory] = useState(() => STORIES.find((s) => s.id === params.get('ver'))?.id ?? null)
-  const [mode, setMode] = useState<Mode>(story && !zone ? 'funciona' : 'siento')
+  const [senal] = useState(() => !zone && (params.get('ver') === 'senal' || hash === '#senal'))
+  const [mode, setMode] = useState<Mode>((story || senal) && !zone ? 'funciona' : 'siento')
+  // Pide bajar hasta «Sigue la señal» en cuanto esté en la pantalla.
+  const [toSenal, setToSenal] = useState(senal ? 1 : 0)
 
   useEffect(() => {
     if (hash) document.getElementById(hash.slice(1))?.scrollIntoView({ block: 'start' })
   }, [hash])
+
+  useEffect(() => {
+    if (!toSenal) return
+    // Un cuadro después, para que no le gane el «volver arriba» al cambiar de pantalla.
+    const id = requestAnimationFrame(() =>
+      document.getElementById('senal')?.scrollIntoView({ block: 'start', behavior: still ? 'auto' : 'smooth' }),
+    )
+    return () => cancelAnimationFrame(id)
+  }, [toSenal, still])
+
+  const openSenal = () => {
+    setMode('funciona')
+    setToSenal((n) => n + 1)
+  }
 
   const openStory = (id: string) => {
     setStory(id)
@@ -55,10 +75,30 @@ export default function Cuerpo() {
       </div>
 
       {mode === 'siento' ? (
-        <BodyCheck still={still} onStory={openStory} initialArea={zone} />
+        <>
+          <BodyCheck still={still} onStory={openStory} initialArea={zone} />
+          {/* Pendiente de revisión con psicóloga (textos de las dos tarjetas nuevas). */}
+          <button type="button" className="card link-card sg-go" onClick={openSenal}>
+            <span className="sg-go-title">Sigue la señal</span>
+            <span className="muted">
+              Mira cómo viaja la alarma por el cuerpo, del cerebro al corazón, y cómo la frena el aire
+              que sueltas despacio.
+            </span>
+          </button>
+        </>
       ) : (
-        <BodyStories key={story ?? 'ninguna'} initial={story} still={still} />
+        <>
+          <BodyStories key={story ?? 'ninguna'} initial={story} still={still} />
+          <Senal still={still} />
+        </>
       )}
+
+      <Link to="/cuerpo/explorar" className="card link-card">
+        <h2>Explorar por dentro, en 3D</h2>
+        <p className="muted">
+          Gira el cuerpo y acércate a cada parte. Es opcional: se descarga al abrirlo.
+        </p>
+      </Link>
 
       <Link to="/mascota" className="card link-card">
         <h2>¿No sabes bien qué es?</h2>

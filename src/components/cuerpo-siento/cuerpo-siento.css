@@ -1,0 +1,560 @@
+/* ---------- Tu cuerpo por dentro, versión 2: la figura ----------
+   La piel con luz y volumen, los órganos con su forma real y los colores suaves de la app,
+   las tres vistas, la respiración en reposo, el freno (nervio vago), las marcas con el dedo
+   y las notas. Lo demás del cuerpo sigue en src/styles.css (Tu cuerpo por dentro). */
+
+.body-stage {
+  /* Colores de cada órgano: los efectos los tiñen cambiando estas variables. */
+  --c-brain: var(--organ-brain);
+  --c-lung: var(--organ-lung);
+  --c-heart: color-mix(in srgb, var(--organ-heart) 62%, var(--organ-lung));
+  --c-gut: var(--organ-gut);
+  --c-kidney: color-mix(in srgb, var(--organ-heart) 30%, var(--organ-gut));
+  --c-liver: color-mix(in srgb, var(--organ-heart) 28%, var(--organ-gut));
+  --c-adrenal: color-mix(in srgb, var(--tone-estres) 30%, var(--organ-gut));
+  --bone: color-mix(in srgb, var(--organ-gut) 30%, var(--skin-light));
+  --vagus: color-mix(in srgb, var(--tone-animo) 78%, var(--tone-calma));
+  --spot: color-mix(in srgb, var(--tone-alarma) 72%, var(--tone-estres));
+  --skin-vol: #6b4a33;
+  --o-hi: white;
+  --o-hi-amt: 40%;
+}
+@media (prefers-color-scheme: dark) {
+  .body-stage {
+    --skin-vol: #000;
+    --o-hi-amt: 16%;
+  }
+}
+
+/* La piel del muñequito de Desde afuera, si la persona se hizo uno. */
+.body-stage.mine {
+  --skin-light: color-mix(in srgb, var(--yo-skin) 80%, white);
+  --skin-shade: color-mix(in srgb, var(--yo-skin) 90%, black);
+}
+@media (prefers-color-scheme: dark) {
+  .body-stage.mine {
+    --skin-light: color-mix(in srgb, var(--yo-skin) 72%, var(--bg));
+    --skin-shade: color-mix(in srgb, var(--yo-skin) 48%, var(--bg));
+  }
+}
+
+/* Cómo se tiñe el cuerpo según lo que pasa */
+.body-stage[data-fx~='stress-brain'] {
+  --c-brain: color-mix(in srgb, var(--tone-estres) 40%, var(--organ-brain));
+}
+.body-stage[data-fx~='mania'] {
+  --c-brain: color-mix(in srgb, var(--tone-mania) 45%, var(--organ-brain));
+}
+.body-stage[data-fx~='dim'] {
+  --c-brain: color-mix(in srgb, var(--tone-animo) 35%, var(--body-dim));
+}
+.body-stage:is([data-fx~='stomach-knot'], [data-fx~='gut']) {
+  --c-gut: color-mix(in srgb, var(--fx) 45%, var(--organ-gut));
+}
+.body-stage[data-fx~='cortisol'] {
+  --c-adrenal: var(--tone-estres);
+}
+
+/* Piel */
+.b-part {
+  fill: var(--skin, var(--body-fill));
+  transition: fill 0.8s;
+}
+.b-vol {
+  fill: var(--vol);
+  pointer-events: none;
+}
+.b-vol-stop {
+  stop-color: var(--skin-vol);
+}
+.b-far .b-part {
+  fill: var(--skin-shade);
+}
+[data-fx~='dim'] .b-part {
+  fill: var(--body-dim);
+}
+[data-fx~='heavy'] .b-legs .b-part {
+  fill: color-mix(in srgb, var(--tone-animo) 25%, var(--body-dim));
+}
+:is([data-fx~='tension'], [data-fx~='tremble']) .b-hand .b-part {
+  fill: color-mix(in srgb, var(--fx) 22%, var(--skin-shade));
+}
+.b-contour {
+  fill: none;
+  stroke: var(--organ-line);
+  stroke-width: 1.1;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.b-shirt {
+  fill: var(--b-shirt);
+  opacity: 0.78;
+}
+.b-pants {
+  fill: #4a566a;
+  opacity: 0.72;
+}
+@media (prefers-color-scheme: dark) {
+  .b-shirt {
+    fill: color-mix(in srgb, var(--b-shirt) 70%, var(--bg));
+  }
+}
+.b-hair {
+  opacity: 0.94;
+}
+
+/* Órganos: un degradado con luz arriba a la izquierda, sin texturas */
+.b-o-light {
+  stop-color: color-mix(in srgb, var(--oc), var(--o-hi) var(--o-hi-amt));
+  transition: stop-color 0.8s;
+}
+.b-o-dark {
+  stop-color: color-mix(in srgb, var(--oc), black 6%);
+  transition: stop-color 0.8s;
+}
+.b-o-brain { --oc: var(--c-brain); }
+.b-o-lung { --oc: var(--c-lung); }
+.b-o-heart { --oc: var(--c-heart); }
+.b-o-gut { --oc: var(--c-gut); }
+.b-o-kidney { --oc: var(--c-kidney); }
+.b-o-liver { --oc: var(--c-liver); }
+
+.b-brain,
+.b-lung-shape,
+.b-heart-shape,
+.b-stomach-shape,
+.b-kidney,
+.b-liver,
+.b-brain-part,
+.b-trachea {
+  stroke: var(--organ-line);
+  stroke-width: 0.8;
+}
+.b-brain-part {
+  fill: color-mix(in srgb, var(--c-brain), black 5%);
+  transition: fill 0.8s;
+}
+.b-trachea {
+  fill: color-mix(in srgb, var(--c-lung), var(--o-hi) 30%);
+}
+.b-fold {
+  fill: none;
+  stroke: var(--organ-line);
+  stroke-width: 0.8;
+  stroke-linecap: round;
+}
+.b-airway {
+  fill: none;
+  stroke: color-mix(in srgb, var(--c-lung), var(--o-hi) 55%);
+  stroke-width: 1.1;
+  stroke-linecap: round;
+  opacity: 0.8;
+}
+@media (prefers-color-scheme: dark) {
+  .b-airway {
+    stroke: color-mix(in srgb, var(--c-lung), white 22%);
+    opacity: 0.6;
+  }
+}
+.b-airway.thick {
+  stroke-width: 2.4;
+  opacity: 1;
+}
+.b-vessel {
+  fill: none;
+  stroke: color-mix(in srgb, var(--c-heart), var(--o-hi) 22%);
+  stroke-width: 3.4;
+  stroke-linecap: round;
+}
+.b-colon {
+  fill: none;
+  stroke: color-mix(in srgb, var(--c-gut), black 8%);
+  stroke-width: 6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: stroke 0.8s;
+}
+.b-gut {
+  fill: none;
+  stroke: color-mix(in srgb, var(--c-gut), black 4%);
+  stroke-width: 4.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: stroke 0.8s;
+}
+/* Una línea de luz por dentro hace que se lean como tubos. */
+.b-colon-in,
+.b-gut-in {
+  fill: none;
+  stroke: color-mix(in srgb, var(--c-gut), var(--o-hi) var(--o-hi-amt));
+  stroke-width: 2.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 5 1.6;
+  transition: stroke 0.8s;
+}
+.b-gut-in {
+  stroke-width: 1.6;
+  stroke-dasharray: none;
+}
+.b-liver {
+  opacity: 0.5;
+}
+.b-kidney {
+  opacity: 0.7;
+}
+.b-adrenal {
+  fill: var(--c-adrenal);
+  stroke: var(--organ-line);
+  stroke-width: 0.8;
+  transition: fill 0.8s;
+}
+.b-amygdala {
+  fill: var(--organ-heart);
+  fill-opacity: 0.45;
+  transition: fill 0.8s;
+}
+[data-fx~='alarm-brain'] .b-amygdala {
+  fill: var(--tone-alarma);
+  fill-opacity: 1;
+}
+.b-spine rect {
+  fill: var(--bone);
+  stroke: var(--organ-line);
+  stroke-width: 0.6;
+}
+.b-spine-edge {
+  fill: none;
+  stroke: var(--organ-line);
+  stroke-width: 6.2;
+  stroke-linecap: round;
+}
+.b-spine-line {
+  fill: none;
+  stroke: var(--bone);
+  stroke-width: 4.6;
+  stroke-dasharray: 5 1.4;
+  stroke-linecap: round;
+}
+/* De espalda, lo de adelante se ve tenue y lo de atrás (columna, riñones) al frente. */
+.back :is(.b-heart, .b-stomach, .b-colon, .b-colon-in, .b-gut, .b-gut-in, .b-liver, .b-vessel) {
+  opacity: 0.4;
+}
+.back .b-kidney {
+  opacity: 1;
+}
+.side .b-kidney {
+  opacity: 0.85;
+}
+
+/* Lo que se mueve desde su centro (además de lo de src/styles.css) */
+.body-svg :is(.b-lungs, .b-spot-fill) {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+.body-svg :is(.b-breathe, .b-view) {
+  transform-box: view-box;
+}
+.body-svg .b-breathe {
+  transform-origin: 100px 384px;
+}
+.body-svg .b-view {
+  transform-origin: 100px 214px;
+}
+
+/* En reposo respira despacio: el cuerpo apenas sube y los pulmones se llenan. Cuando un
+   efecto ya respira (o se respira con la pantalla), manda ese. */
+.body-stage:not(.still) .b-breathe {
+  animation: b-rest 5s ease-in-out infinite;
+}
+.body-stage:not(.still) .b-lungs {
+  animation: b-rest-lungs 5s ease-in-out infinite;
+}
+.body-stage:is([data-fx~='breath-slow'], [data-fx~='breath-fast'], [data-phase]) :is(.b-breathe, .b-lungs) {
+  animation: none;
+}
+.body-stage.away :is(.b-breathe, .b-lungs) {
+  animation-play-state: paused;
+}
+@keyframes b-rest {
+  40% {
+    transform: scaleY(1.006);
+  }
+}
+@keyframes b-rest-lungs {
+  40% {
+    transform: scale(1.035);
+  }
+}
+
+/* Al cambiar de vista, media vuelta suave. */
+.body-stage:not(.still) .b-view.turn {
+  animation: b-turn 0.55s cubic-bezier(0.2, 0.7, 0.3, 1);
+}
+@keyframes b-turn {
+  from {
+    transform: scaleX(0.3);
+    opacity: 0;
+  }
+}
+
+/* El freno: el nervio vago, azul */
+.fx.on.keep {
+  opacity: 1;
+}
+.b-vagus,
+.b-vagus-glow,
+.b-vagus-pulse {
+  fill: none;
+  stroke: var(--vagus);
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.b-vagus {
+  stroke-width: 1.2;
+  opacity: 0.6;
+}
+.b-vagus-glow {
+  stroke-width: 5;
+  stroke-opacity: 0.4;
+  opacity: 0.3;
+}
+.b-vagus-pulse {
+  stroke: color-mix(in srgb, var(--vagus), white 45%);
+  stroke-width: 2.4;
+  stroke-dasharray: 0 1000;
+}
+.still .b-vagus-pulse {
+  display: none;
+}
+.still[data-phase='out'] .b-vagus-glow {
+  opacity: 1;
+  transition: opacity 1.2s;
+}
+.still[data-phase='in'] .b-vagus-glow {
+  opacity: 0.15;
+  transition: opacity 1.2s;
+}
+
+/* Marcar con el dedo */
+.body-stage.marking .body-svg {
+  touch-action: none;
+  cursor: crosshair;
+}
+.b-spot-fill {
+  fill: var(--spot);
+  fill-opacity: 0.34;
+  stroke: var(--spot);
+  stroke-width: 1.2;
+  transition: transform 1.4s cubic-bezier(0.3, 0.8, 0.3, 1);
+}
+.still .b-spot-fill {
+  transition: none;
+}
+.b-spot.sel .b-spot-fill {
+  stroke-width: 2.2;
+}
+.b-spot-before {
+  fill: none;
+  stroke: var(--text-2);
+  stroke-width: 1;
+  stroke-dasharray: 3 3;
+  opacity: 0.75;
+}
+.b-pin circle {
+  fill: var(--surface);
+  stroke: var(--text-2);
+  stroke-width: 1;
+}
+.b-pin text {
+  fill: var(--text);
+  font: 700 7px var(--font-body);
+  text-anchor: middle;
+  dominant-baseline: central;
+}
+
+/* ---------- Debajo de la figura: vistas y marcas ---------- */
+
+.body-tools {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-top: 4px;
+}
+.body-views {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 4px;
+  padding: 4px;
+  border-radius: 999px;
+  background: var(--surface-soft);
+}
+.body-view-btn {
+  position: relative;
+  min-height: 38px;
+  padding: 4px 6px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text-2);
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+}
+.body-view-btn[aria-pressed='true'] {
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: 0 0 0 1px var(--border), 0 2px 6px -3px rgb(29 36 34 / 0.25);
+}
+.body-view-btn:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 1px;
+}
+.body-view-dot {
+  position: absolute;
+  top: 6px;
+  right: 8px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--tone-alarma);
+}
+.spot-tools {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+}
+.spot-tools p {
+  margin: 0;
+}
+.spot-tools .chip.small {
+  min-height: 36px;
+  padding: 4px 12px;
+  font-size: 0.88rem;
+}
+.spot-size {
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.spot-note {
+  margin: 0;
+}
+.calm-why {
+  max-width: 34ch;
+  margin: 0;
+}
+
+/* ---------- Tus palabras ---------- */
+
+.body-notes {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.body-notes li {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 8px 4px 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--surface);
+}
+.body-notes li > div {
+  flex: 1;
+  min-width: 0;
+}
+.body-notes p {
+  margin: 2px 0 0;
+  overflow-wrap: anywhere;
+}
+.body-note-num {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  margin-top: 2px;
+  border: 1px solid var(--text-2);
+  border-radius: 50%;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+/* ---------- Así lo pintaron 700 personas ---------- */
+
+.emo-maps {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.emo-maps figure {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  padding: 10px 6px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--bg);
+}
+.emo-maps figcaption {
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-align: center;
+  color: var(--text-2);
+}
+.emo-body {
+  display: block;
+  width: auto;
+  height: 200px;
+  max-width: 100%;
+}
+.emo-skin {
+  fill: var(--body-fill);
+}
+.emo-stop.mas {
+  stop-color: color-mix(in srgb, var(--tone-alarma) 70%, var(--tone-estres));
+}
+.emo-stop.menos {
+  stop-color: var(--tone-animo);
+}
+.emo-legend {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  color: var(--text-2);
+}
+.emo-key {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  margin-left: 6px;
+  border-radius: 50%;
+}
+.emo-key:first-child {
+  margin-left: 0;
+}
+.emo-key.mas {
+  background: color-mix(in srgb, var(--tone-alarma) 70%, var(--tone-estres));
+}
+.emo-key.menos {
+  background: var(--tone-animo);
+}
+.emo-card > p {
+  margin: 0;
+}
+@media (min-width: 640px) {
+  .emo-body {
+    height: 240px;
+  }
+}

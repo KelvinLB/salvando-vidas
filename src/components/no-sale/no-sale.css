@@ -1,0 +1,572 @@
+/* ---------- Lo que no sale ----------
+   La ventana empañada con el barrio detrás, los pasos alrededor (palabras, frasco y carta),
+   la brújula y las canciones. En el teléfono es una sola columna; en pantallas anchas la
+   ventana va a la izquierda y los pasos a la derecha. Las animaciones se quedan dentro de su
+   tarjeta y se apagan con movimiento reducido. */
+
+:root {
+  /* El vaho del vidrio y el marco de madera de la ventana. */
+  --ns-frost: #e9eef0;
+  --ns-frost-edge: #cfd9dd;
+  --ns-frost-ink: rgb(29 36 34 / 0.55);
+  --ns-frame: #dcc6a6;
+  /* La carta de lotería y el papelito del frasco: papel con tinta, en claro y en oscuro. */
+  --ns-card: #fffaf1;
+  --ns-card-ink: #2a2420;
+  --ns-card-red: #c8693c;
+  --ns-paper: #fff6dc;
+  --ns-paper-ink: #3a3026;
+  --ns-paper-edge: #e6d6b2;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --ns-frost: #3a4247;
+    --ns-frost-edge: #4c565c;
+    --ns-frost-ink: rgb(241 236 229 / 0.6);
+    --ns-frame: #4f4134;
+    --ns-card: #f3ece0;
+    --ns-paper: #efe4cb;
+    --ns-paper-edge: #b9a77f;
+  }
+}
+
+/* Botón de texto, para lo que no es la acción principal. */
+.ns-link {
+  justify-self: start;
+  align-self: flex-start;
+  min-height: 40px;
+  padding: 6px 2px;
+  border: 0;
+  background: none;
+  color: var(--text-2);
+  font-weight: 560;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+/* ---------- Permiso primero ---------- */
+
+.ns-permiso {
+  gap: 14px;
+}
+.ns-options .chip {
+  font-size: 0.94rem;
+}
+
+/* ---------- Ventana y pasos ---------- */
+
+.ns-play {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+}
+.ns-side {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+}
+
+.ns-win-card {
+  padding: 16px;
+}
+.ns-win {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  border: 7px solid var(--ns-frame);
+  border-radius: 16px;
+  background: #2b2f4a;
+  box-shadow: 0 3px 0 var(--stone);
+}
+.ns-win canvas {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.ns-fog {
+  touch-action: none;
+  cursor: grab;
+}
+.ns-fog:active {
+  cursor: grabbing;
+}
+.ns-fog:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: -3px;
+}
+.ns-mullion {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.ns-mullion::before,
+.ns-mullion::after {
+  content: '';
+  position: absolute;
+  background: var(--ns-frame);
+}
+.ns-mullion::before {
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 6px;
+  transform: translateX(-50%);
+}
+.ns-mullion::after {
+  top: 50%;
+  right: 0;
+  left: 0;
+  height: 6px;
+  transform: translateY(-50%);
+}
+.ns-win-hint {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--ns-frost) 80%, transparent);
+  color: var(--ns-frost-ink);
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 1.15rem;
+  white-space: nowrap;
+  pointer-events: none;
+  transition: opacity 0.6s;
+}
+.ns-win-hint.gone {
+  opacity: 0;
+}
+
+.ns-step {
+  gap: 10px;
+  padding: 16px;
+}
+.ns-step-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 1.1rem;
+}
+.ns-n {
+  display: inline-grid;
+  flex: none;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--surface-soft);
+  color: var(--text-2);
+  font: 650 0.85rem/1 var(--font-body);
+}
+.ns-n.done {
+  background: var(--tone-calma);
+  color: #fff;
+}
+.ns-words {
+  gap: 6px;
+}
+.ns-words .chip {
+  min-height: 38px;
+  padding: 6px 13px;
+  font-size: 0.92rem;
+}
+.ns-words .chip[aria-disabled='true'] {
+  opacity: 0.5;
+  cursor: default;
+}
+
+/* El frasco: vidrio, dulces y papelitos, y una tapa de tela que se levanta al abrirlo. */
+.ns-jar-row {
+  display: grid;
+  grid-template-columns: 104px minmax(0, 1fr);
+  gap: 12px;
+  align-items: center;
+}
+.ns-jar {
+  display: block;
+  width: 104px;
+  height: auto;
+  overflow: visible;
+}
+.ns-jar-glass {
+  fill: color-mix(in srgb, var(--orb-sky) 55%, transparent);
+}
+.ns-jar-line {
+  fill: none;
+  stroke: color-mix(in srgb, var(--text-2) 50%, transparent);
+  stroke-width: 2;
+}
+.ns-jar-shine {
+  fill: none;
+  stroke: rgb(255 255 255 / 0.55);
+  stroke-width: 3;
+  stroke-linecap: round;
+}
+.ns-jar-lid {
+  transform-origin: 100px 32px;
+  transition: transform 0.5s cubic-bezier(0.3, 0.7, 0.3, 1.2);
+}
+.ns-jar.open .ns-jar-lid {
+  transform: translate(6px, -8px) rotate(16deg);
+}
+.ns-drop {
+  animation: ns-drop 0.8s cubic-bezier(0.3, 0.7, 0.3, 1.15) both;
+}
+@keyframes ns-drop {
+  from {
+    transform: translateY(-130px);
+    opacity: 0;
+  }
+  25% {
+    opacity: 1;
+  }
+}
+.ns-jar-form {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+}
+.ns-jar-form .btn {
+  justify-self: start;
+}
+.ns-jar-open {
+  display: grid;
+  gap: 8px;
+}
+.ns-papelito {
+  display: grid;
+  gap: 4px;
+  padding: 12px 14px;
+  border-radius: 4px;
+  background: var(--ns-paper);
+  color: var(--ns-paper-ink);
+  box-shadow: 0 2px 0 var(--ns-paper-edge);
+  transform: rotate(-1.2deg);
+}
+.ns-papelito p {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  overflow-wrap: anywhere;
+}
+.ns-papelito .muted {
+  color: color-mix(in srgb, var(--ns-paper-ink) 70%, transparent);
+}
+
+/* La carta de lotería que se voltea. */
+.ns-lot {
+  align-self: center;
+  width: min(210px, 72%);
+  padding: 0;
+  border: 0;
+  border-radius: 14px;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  perspective: 900px;
+}
+.ns-lot:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 3px;
+}
+.ns-lot-in {
+  position: relative;
+  display: block;
+  aspect-ratio: 5 / 7;
+  transform-style: preserve-3d;
+  transition: transform 0.7s cubic-bezier(0.3, 0.7, 0.2, 1);
+}
+.ns-lot.flip .ns-lot-in {
+  transform: rotateY(180deg);
+}
+.ns-face {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  gap: 6px;
+  padding: 12px;
+  border: 2px solid var(--ns-card-ink);
+  border-radius: 14px;
+  background: var(--ns-card);
+  color: var(--ns-card-ink);
+  box-shadow:
+    inset 0 0 0 4px var(--ns-card),
+    inset 0 0 0 6px var(--ns-card-red),
+    0 3px 0 var(--stone);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+.ns-face svg {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+}
+.ns-lot-num {
+  font: 700 1rem/1 var(--font-display);
+}
+.ns-lot-name {
+  padding-top: 6px;
+  border-top: 2px solid var(--ns-card-ink);
+  font: 600 1.15rem/1.1 var(--font-display);
+  text-align: center;
+}
+.ns-back {
+  grid-template-rows: auto;
+  align-content: start;
+  gap: 10px;
+  overflow: auto;
+  transform: rotateY(180deg);
+}
+.ns-lot-q {
+  font: 600 1.02rem/1.3 var(--font-display);
+}
+.ns-lot-hint {
+  font-size: 0.84rem;
+  line-height: 1.4;
+  color: #5a514a;
+}
+.ns-answers {
+  display: grid;
+  gap: 8px;
+}
+.ns-answers .chip {
+  font-size: 0.92rem;
+  text-align: left;
+}
+.ns-saved {
+  font-family: var(--font-display);
+  font-style: italic;
+  color: var(--primary);
+}
+
+/* ---------- Mi brújula ---------- */
+
+.ns-compass {
+  gap: 12px;
+}
+.ns-deck {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  min-height: 44px;
+}
+.ns-vcard {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 42px;
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+  color: var(--text);
+  font-weight: 560;
+  text-align: left;
+  cursor: pointer;
+  box-shadow: 0 2px 0 var(--stone);
+  transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+}
+.ns-vcard.held {
+  border-color: var(--accent);
+  box-shadow: 0 5px 0 var(--accent);
+  transform: translateY(-3px) rotate(-2deg);
+}
+.ns-vcard.small {
+  min-width: 0;
+  min-height: 36px;
+  padding: 6px 8px;
+  font-size: 0.84rem;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+  hyphens: auto;
+}
+/* En el teléfono los montones son angostos: las cartas repartidas van sin su dibujito. */
+@media (max-width: 480px) {
+  .ns-pile {
+    padding: 6px;
+  }
+  .ns-vcard.small > span[aria-hidden] {
+    display: none;
+  }
+}
+.ns-hand {
+  min-height: 1.4em;
+}
+.ns-piles {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+.ns-pile {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+  min-height: 112px;
+  padding: 8px;
+  border: 2px dashed transparent;
+  border-radius: 16px;
+  background: var(--surface-soft);
+  transition: border-color 0.2s;
+}
+.ns-pile-mucho {
+  background: color-mix(in srgb, var(--tone-calma) 14%, var(--surface));
+}
+.ns-pile-algo {
+  background: color-mix(in srgb, var(--tone-animo) 12%, var(--surface));
+}
+.ns-piles.ready .ns-pile {
+  border-color: color-mix(in srgb, var(--primary) 45%, transparent);
+}
+.ns-pile-drop {
+  min-height: 36px;
+  padding: 4px 6px;
+  border: 0;
+  border-radius: 10px;
+  background: none;
+  color: var(--text);
+  font: 650 0.92rem/1.2 var(--font-body);
+  text-align: left;
+}
+.ns-pile-drop:disabled {
+  color: var(--text-2);
+  cursor: default;
+}
+.ns-piles.ready .ns-pile-drop {
+  background: var(--primary);
+  color: var(--primary-ink);
+  cursor: pointer;
+}
+.ns-action {
+  display: grid;
+  gap: 10px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+}
+.ns-action .chip {
+  font-size: 0.92rem;
+  text-align: left;
+}
+.ns-today {
+  display: grid;
+  gap: 8px;
+}
+.ns-today-text {
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+.ns-own {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+  align-items: center;
+}
+.ns-link-row {
+  align-self: flex-start;
+  font-weight: 650;
+  text-decoration: none;
+}
+
+/* ---------- Canciones ---------- */
+
+.ns-song-list {
+  display: grid;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.ns-song-list li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 0 4px 12px;
+  border-radius: 14px;
+  background: var(--surface-soft);
+}
+.ns-song-note {
+  color: var(--accent);
+  font-size: 1.1rem;
+}
+.ns-song-title {
+  display: inline-flex;
+  flex: 1;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  font-weight: 560;
+  overflow-wrap: anywhere;
+}
+a.ns-song-title {
+  color: var(--primary);
+}
+.ns-song-form {
+  display: grid;
+  gap: 8px;
+}
+.ns-song-form .btn {
+  justify-self: start;
+}
+
+/* ---------- «Ya fue suficiente por hoy», siempre a la vista ---------- */
+
+.ns-enough {
+  position: sticky;
+  bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom, 0px) + 12px);
+  z-index: 6;
+  align-self: flex-end;
+  min-height: 44px;
+  padding: 8px 18px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--surface) 92%, transparent);
+  color: var(--text-2);
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 8px 22px -10px rgb(0 0 0 / 0.35);
+  backdrop-filter: blur(10px);
+}
+
+/* En pantallas anchas la ventana sale del ancho de la columna y los pasos van a su derecha. */
+@media (min-width: 980px) {
+  .ns-play {
+    --ns-wide: min(1000px, calc(100vw - 48px));
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 340px;
+    align-items: start;
+    width: var(--ns-wide);
+    margin-inline: calc((100% - var(--ns-wide)) / 2);
+  }
+  /* La ventana se queda a la vista mientras se hacen los pasos de la derecha. */
+  .ns-win-card {
+    position: sticky;
+    top: calc(var(--topbar-h, 60px) + 12px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ns-lot-in,
+  .ns-jar-lid,
+  .ns-win-hint,
+  .ns-vcard {
+    transition: none;
+  }
+  .ns-drop {
+    animation: none;
+  }
+  .ns-vcard.held {
+    transform: none;
+  }
+}

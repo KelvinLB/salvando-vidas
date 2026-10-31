@@ -37,8 +37,47 @@ export default defineConfig({
       workbox: {
         globPatterns: ['**/*.{js,css,html,svg,png,ico,woff2}'],
         // El español solo usa el subconjunto latino de las fuentes.
-        globIgnores: ['**/*-{cyrillic,cyrillic-ext,greek,greek-ext,vietnamese,latin-ext}-*'],
+        // three.js (la escena 3D) tampoco: solo lo baja quien abre «Explorar por dentro».
+        globIgnores: ['**/*-{cyrillic,cyrillic-ext,greek,greek-ext,vietnamese,latin-ext}-*', '**/escena-*.js'],
         navigateFallback: '/index.html',
+        // Los modelos 3D de «Explorar por dentro» no van en el precache (no todos los abren): se
+        // guardan la primera vez que se abren y desde ahí funcionan sin internet. El nombre lleva
+        // versión (cuerpo-v1.glb), así que CacheFirst nunca se queda con uno viejo.
+        runtimeCaching: [
+          {
+            // El nombre lleva hash: si cambia, es otro archivo.
+            urlPattern: /\/assets\/escena-[^/]+\.js$/,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'cuerpo-3d-codigo',
+              expiration: { maxEntries: 2 },
+              cacheableResponse: { statuses: [0, 200] },
+            },
+          },
+          {
+            // Las reflexiones de «Para escuchar» se guardan la primera vez que se escuchan.
+            // rangeRequests: Safari pide el audio por pedazos y necesita que la caché los sirva.
+            // El nombre de la caché lleva la voz: al cambiarla (la de prueba por la real), cámbialo
+            // para que nadie se quede con los audios viejos.
+            urlPattern: /\/audio\/escuchar\/[^/]+\.m4a$/,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'escuchar-voz-prueba',
+              expiration: { maxEntries: 40 },
+              cacheableResponse: { statuses: [0, 200] },
+              rangeRequests: true,
+            },
+          },
+          {
+            urlPattern: /\/models\/cuerpo\/[^/]+\.glb$/,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'cuerpo-3d',
+              expiration: { maxEntries: 6 },
+              cacheableResponse: { statuses: [0, 200] },
+            },
+          },
+        ],
       },
     }),
   ],

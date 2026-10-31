@@ -21,6 +21,7 @@ const REPLIES: Record<Neighbor, string> = {
   ramiro: 'Gracias. Las palabras buenas también se quedan, como la madera que dura.',
   rosa: 'Gracias… Justo hoy lo necesitaba. Me hiciste sentir menos sola.',
   chayo: 'Ay, qué bonito. La voy a guardar entre mis rebozos, para que se quede calientita.',
+  fermin: '¡Mira nomás! La voy a poner junto al horno, para leerla en las madrugadas mientras sube la masa.',
 }
 
 /** Si lo que escribió sonó a riesgo, el vecino no contesta como si nada. */

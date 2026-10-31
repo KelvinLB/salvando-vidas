@@ -1983,83 +1983,7 @@ audio {
   fill: var(--stone);
   opacity: 0.55;
 }
-.b-skin > *,
-.b-arms > *,
-.b-legs > * {
-  fill: var(--skin, var(--body-fill));
-  transition: fill 0.8s, stroke 0.8s;
-}
-.b-contour {
-  fill: none;
-  stroke: var(--organ-line);
-  stroke-width: 1.4;
-  stroke-linecap: round;
-}
-.b-brain {
-  fill: var(--organ-brain);
-}
-.b-lung {
-  fill: var(--organ-lung);
-}
-.b-heart {
-  fill: var(--organ-heart);
-}
-.b-stomach,
-.b-adrenal {
-  fill: var(--organ-gut);
-}
-.b-brain,
-.b-lung,
-.b-stomach,
-.b-adrenal,
-.b-amygdala {
-  stroke: var(--organ-line);
-  stroke-width: 1;
-  transition: fill 0.8s;
-}
-.b-amygdala {
-  fill: var(--organ-heart);
-  fill-opacity: 0.45;
-}
-.b-line,
-.b-gut {
-  fill: none;
-  stroke: var(--organ-line);
-  stroke-width: 2.5;
-  stroke-linecap: round;
-}
-
-/* Cómo se tiñe el cuerpo según lo que pasa */
-[data-fx~='alarm-brain'] .b-amygdala {
-  fill: var(--tone-alarma);
-  fill-opacity: 1;
-}
-[data-fx~='stress-brain'] .b-brain {
-  fill: color-mix(in srgb, var(--tone-estres) 40%, var(--organ-brain));
-}
-[data-fx~='mania'] .b-brain {
-  fill: color-mix(in srgb, var(--tone-mania) 45%, var(--organ-brain));
-}
-[data-fx~='dim'] .b-brain {
-  fill: color-mix(in srgb, var(--tone-animo) 35%, var(--body-dim));
-}
-[data-fx~='dim'] .b-skin > *,
-[data-fx~='dim'] .b-arms > *,
-[data-fx~='dim'] .b-legs > * {
-  fill: var(--body-dim);
-}
-[data-fx~='heavy'] .b-legs > .leg {
-  fill: color-mix(in srgb, var(--tone-animo) 25%, var(--body-dim));
-}
-:is([data-fx~='stomach-knot'], [data-fx~='gut']) .b-stomach {
-  fill: color-mix(in srgb, var(--fx) 45%, var(--organ-gut));
-}
-[data-fx~='cortisol'] .b-adrenal {
-  fill: var(--tone-estres);
-}
-:is([data-fx~='tension'], [data-fx~='tremble']) .b-hand {
-  fill: color-mix(in srgb, var(--fx) 25%, var(--body-fill));
-}
+/* La piel, los órganos y cómo se tiñen según lo que pasa: en cuerpo-siento/cuerpo-siento.css. */
 
 /* Capas de efectos: aparecen y se van despacio */
 .fx {
@@ -2311,7 +2235,8 @@ audio {
     grid-area: stage;
   }
   .body-card.check {
-    grid-template-columns: 240px 1fr;
+    /* Ancho para que quepan debajo de la figura las vistas y las marcas. */
+    grid-template-columns: 300px 1fr;
     grid-template-areas: 'stage panel';
   }
   .body-card.check > .stack {
@@ -2637,6 +2562,7 @@ audio {
   --kind-siento: #4f74b8;
   --kind-paso: #c0801f;
   --kind-recuerdo: #3f8a69;
+  --kind-carta: #9a5b86;
 }
 @media (prefers-color-scheme: dark) {
   :root {
@@ -2650,6 +2576,7 @@ audio {
     --kind-siento: #8eaae0;
     --kind-paso: #e2aa55;
     --kind-recuerdo: #7cc0a0;
+    --kind-carta: #d49cc4;
   }
 }
 
@@ -2804,6 +2731,9 @@ html.diary-open {
 }
 .strip-marks i[data-kind='recuerdo'] {
   background: var(--kind-recuerdo);
+}
+.strip-marks i[data-kind='carta'] {
+  background: var(--kind-carta);
 }
 .strip-day.active {
   background: var(--paper);
@@ -3024,6 +2954,11 @@ html.diary-open {
 .composer[data-kind='recuerdo'] {
   --k: var(--kind-recuerdo);
 }
+.entry[data-kind='carta'],
+.kind-tile[data-kind='carta'],
+.composer[data-kind='carta'] {
+  --k: var(--kind-carta);
+}
 .entry-head {
   display: flex;
   align-items: flex-end;
@@ -3234,7 +3169,7 @@ html.diary-open {
 }
 .kind-switch {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: 6px;
 }
 .kind-pill {
@@ -3344,6 +3279,120 @@ html.diary-open {
   font-family: var(--hand);
   font-size: 1.35rem;
   font-weight: 600;
+}
+
+/* La carta que no se manda: va en su propio renglón, a lo ancho, debajo de las otras tres. */
+.kind-tile[data-kind='carta'] {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: auto auto;
+  justify-content: center;
+  align-items: center;
+  column-gap: 12px;
+  text-align: left;
+}
+.kind-tile[data-kind='carta'] .kind-emoji {
+  grid-row: span 2;
+}
+.letter-intro {
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: 0.95rem;
+  line-height: 1.45;
+}
+.letter-to {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  border-bottom: 1px solid var(--rule);
+  font-family: var(--hand);
+  font-size: 1.55rem;
+}
+.letter-to span {
+  flex: none;
+  font-weight: 600;
+  color: var(--k);
+}
+.composer .letter-to input {
+  flex: 1;
+  min-width: 0;
+  padding: 2px 4px;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  color: var(--ink);
+  font: inherit;
+}
+.composer .letter-to input::placeholder {
+  color: color-mix(in srgb, var(--ink-soft) 70%, transparent);
+}
+.composer .letter-to input:focus {
+  outline: none;
+}
+/* La carta crece con lo que se escribe (donde el navegador sabe hacerlo): sin tope de largo. */
+.composer[data-kind='carta'] textarea {
+  field-sizing: content;
+}
+/* Al llegar directo a escribirla, la barra de arriba no tapa el principio de la hoja. */
+.composer[data-kind='carta'] {
+  scroll-margin-top: 76px;
+}
+.letter-to:focus-within {
+  border-bottom-color: var(--k);
+}
+.letter-close-open {
+  align-self: flex-start;
+}
+.letter-close {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.letter-close strong {
+  font-family: var(--hand);
+  font-size: 1.5rem;
+  line-height: 1;
+}
+.letter-close textarea {
+  min-height: calc(var(--line) * 2);
+}
+/* «Ya fue suficiente» no se va de la vista aunque la carta sea larga. */
+.letter-enough {
+  position: sticky;
+  bottom: 0;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 4px;
+  margin: 0 -14px -14px;
+  padding: 10px 14px 14px;
+  border-radius: 0 0 14px 14px;
+  background: linear-gradient(transparent, var(--paper) 14px);
+  text-align: center;
+}
+.letter-enough small {
+  color: var(--ink-soft);
+}
+.entry-to {
+  margin: 0;
+  font-family: var(--hand);
+  font-size: 1.4rem;
+  font-weight: 600;
+  line-height: var(--line);
+  color: var(--k);
+}
+.entry-understood {
+  margin: 6px 0 0;
+  padding-left: 10px;
+  border-left: 3px solid color-mix(in srgb, var(--k) 55%, transparent);
+  font-family: var(--hand);
+  font-size: 1.4rem;
+  line-height: var(--line);
+  color: var(--ink);
+}
+.entry-understood strong {
+  color: var(--k);
 }
 .photo-drop {
   display: flex;
@@ -6224,4 +6273,10 @@ html.diary-open {
   to {
     transform: translateY(-3px) rotate(5deg);
   }
+}
+
+/* Mientras se descarga una pantalla. */
+.page-loading {
+  padding: 32px 0;
+  text-align: center;
 }

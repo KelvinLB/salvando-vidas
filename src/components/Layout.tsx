@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { Suspense, useEffect, useRef } from 'react'
 import { House, LifeBuoy, NotebookPen, Puzzle, Sprout, Wind } from 'lucide-react'
 import { Link, NavLink, Outlet, useLocation } from 'react-router-dom'
 import FloatingPet from './FloatingPet'
@@ -63,7 +63,9 @@ export default function Layout() {
       </header>
 
       <main className="content">
-        <Outlet />
+        <Suspense fallback={<p className="muted page-loading">Cargando…</p>}>
+          <Outlet />
+        </Suspense>
       </main>
 
       <nav className="tabbar" aria-label="Secciones">

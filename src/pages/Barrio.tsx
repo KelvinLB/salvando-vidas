@@ -58,6 +58,7 @@ const NPC_LINES: Record<NeighborId, (pet: string, address: ReturnType<typeof use
   rosa: () => 'Siéntate tantito, si quieres. Desde esta banca se ve pasar la tarde.',
   memo: () => 'Hoy no traigo cartas para ti, pero el buzón sigue aquí para cuando quieras escribir una.',
   chayo: (pet) => `¡Pásale, ${pet}! Aquí ando, hilo por hilo. Los rebozos no salen de prisa, y por eso salen bonitos.`,
+  fermin: (pet) => `¡Buenas, ${pet}! Huele a pan, ¿verdad? Aquí ando, con las manos en la masa. Las conchas salen calientitas en la tarde.`,
 }
 
 /** Lo que dice la mascota al tocar las cosas de la plaza. */

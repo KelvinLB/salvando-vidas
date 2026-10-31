@@ -1,12 +1,18 @@
 import { type ReactNode, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { type MissionId, missionById } from '../data/barrio'
-import { LOTERIA, type LoteriaCard, cardOf } from '../data/loteria'
+import { LOTERIA, type LoteriaCard, PATH_CARDS, cardOf, isPathCard } from '../data/loteria'
+import type { PathId } from '../data/sentido'
 import { useBarrio } from '../lib/barrio'
+import { pathsAnswered, useCardAnswers } from '../lib/sentido'
 import { today } from '../lib/storage'
 import './insights.css'
 
 // La lotería de dichos: cada misión terminada deja su carta para siempre. No se cuentan ni se
 // comparan: las que faltan se ven de espaldas, con lo que hay que hacer para ganarlas.
+// Las cartas de «Lo que no sale» (61 a 63, los tres caminos de Frankl) se suman solas cuando la
+// persona contesta ese camino una vez («hoy no» no cuenta); las que no ha contestado no se
+// muestran ni de espaldas, para no empujar a nadie a ese tema. Al tocarlas llevan a su pantalla.
 
 /** Los dibujos de cada carta: trazos sencillos que se ven bien de día y de noche. */
 const ART: Record<MissionId, ReactNode> = {
@@ -110,6 +116,51 @@ const ART: Record<MissionId, ReactNode> = {
       <path className="bi-ink" d="M22 38 Q32 41 42 38 M30 50 L32 55 L34 50" />
     </>
   ),
+  receta: (
+    <>
+      <path className="bi-ink" d="M8 52 H56" />
+      <path className="bi-f-warm" d="M12 46 Q12 18 32 18 Q52 18 52 46 Q32 51 12 46 Z" />
+      <path className="bi-f-soft" d="M14 40 Q14 20 32 20 Q50 20 50 40 Q32 45 14 40 Z" />
+      <path className="bi-ink" d="M32 44 V21 M32 44 Q24 32 20 24 M32 44 Q18 38 15 32 M32 44 Q40 32 44 24 M32 44 Q46 38 49 32" />
+      <path className="bi-ink" d="M44 12 q-3 -3 0 -6 M50 14 q-3 -3 0 -6" />
+    </>
+  ),
+}
+
+/** Los dibujos de las cartas de «Lo que no sale»: lo que haces, lo que recibes y cómo estás. */
+const PATH_ART: Record<PathId, ReactNode> = {
+  // El Hacer: una regadera que riega una plantita.
+  hacer: (
+    <>
+      <path className="bi-ink" d="M8 54 H56" />
+      <path className="bi-f-warm" d="M38 54 L40 42 H52 L54 54 Z" />
+      <path className="bi-ink" d="M46 42 V32 M46 36 Q40 32 40 28 Q45 28 46 34 M46 34 Q52 30 54 26 Q48 26 46 32" />
+      <path className="bi-f-sky" d="M10 22 H28 V36 Q28 38 26 38 H12 Q10 38 10 36 Z" />
+      <path className="bi-ink" d="M28 26 L38 20 M10 26 Q4 26 4 31 Q4 35 10 34 M14 22 Q19 14 24 22" />
+      <path className="bi-ink" d="M40 22 L42 26 M38 24 L39 29 M42 20 L45 23" />
+    </>
+  ),
+  // El Recibir: un jarrito calientito y el sol de la mañana.
+  recibir: (
+    <>
+      <circle className="bi-f-accent" cx="46" cy="16" r="7" />
+      <path className="bi-ink" d="M46 4 V6 M56 16 H58 M53 8 L55 6 M37 8 L39 10" />
+      <path className="bi-f-warm" d="M14 30 H42 Q42 52 28 52 Q14 52 14 30 Z" />
+      <path className="bi-ink" d="M42 34 Q50 34 50 40 Q50 46 42 45" />
+      <path className="bi-ink" d="M22 24 Q19 20 22 16 M30 24 Q27 20 30 16" />
+      <path className="bi-ink" d="M10 56 H46" />
+    </>
+  ),
+  // La Postura: un arbolito firme bajo la lluvia.
+  postura: (
+    <>
+      <path className="bi-f-soft" d="M8 22 Q8 12 18 13 Q22 6 31 9 Q40 6 42 15 Q50 15 49 22 Z" />
+      <path className="bi-ink" d="M14 28 L12 33 M22 28 L20 33 M30 28 L28 33 M38 28 L36 33" />
+      <path className="bi-f-calma" d="M40 44 Q30 44 32 36 Q30 28 40 28 Q50 28 48 36 Q50 44 40 44 Z" />
+      <path className="bi-ink bi-thick" d="M40 44 V54" />
+      <path className="bi-ink" d="M12 56 H54 M40 54 Q34 56 32 58 M40 54 Q46 56 48 58" />
+    </>
+  ),
 }
 
 /** El frente de una carta: número, dibujo, nombre y, si cabe, su dicho. */
@@ -120,7 +171,7 @@ export function CardFace({ card, saying = true }: { card: LoteriaCard; saying?: 
         {card.number}
       </span>
       <svg className="bi-card-art" viewBox="0 0 64 64" aria-hidden="true" focusable="false">
-        {ART[card.mission]}
+        {isPathCard(card) ? PATH_ART[card.path] : ART[card.mission]}
       </svg>
       <span className="bi-card-name">{card.name}</span>
       {saying && <span className="bi-card-saying">{card.saying}</span>}
@@ -148,9 +199,12 @@ const wonOn = (date: string) =>
 /** El álbum: las cartas ganadas de frente y las demás de espaldas. */
 export default function Loteria() {
   const { barrio } = useBarrio()
+  const [answers] = useCardAnswers()
   const [open, setOpen] = useState<MissionId | null>(null)
   const done = barrio.done ?? {}
   const shown = open && done[open] ? cardOf(open) : null
+  const answered = pathsAnswered(answers)
+  const paths = PATH_CARDS.filter((c) => answered.includes(c.path))
 
   return (
     <section className="card bi-loteria" aria-labelledby="bi-loteria-title">
@@ -192,6 +246,29 @@ export default function Loteria() {
           </div>
         )}
       </div>
+
+      {paths.length > 0 && (
+        <>
+          <h3 className="bi-paths-title">De «Lo que no sale»</h3>
+          <p className="muted small">Cada camino que contestas en la carta de hoy deja aquí su carta.</p>
+          <ul className="bi-paths">
+            {paths.map((card) => (
+              <li key={card.path}>
+                <Link to="/lo-que-no-sale" className="bi-path" aria-label={`${card.name}: ${card.saying} ${card.idea} Abrir Lo que no sale.`}>
+                  <span className="bi-path-card">
+                    <CardFace card={card} saying={false} />
+                  </span>
+                  <span className="bi-path-text">
+                    <span className="bi-detail-saying">«{card.saying}»</span>
+                    <span>{card.idea}</span>
+                    <span className="bi-path-go">Abrir Lo que no sale</span>
+                  </span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </>
+      )}
     </section>
   )
 }

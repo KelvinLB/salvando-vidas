@@ -30,7 +30,12 @@ import { localDate, today } from './storage'
 // 8. Practicar en el kiosco con Don Chema (exposición interoceptiva) nunca sale con riesgo ni de
 //    noche (tampoco se ofrece al platicar con él), ni en un día pesado (no es chiquita), ni si
 //    en el filtro de salud marcó algo. Con nervios sube poquito, como la ruta del mercado.
-// 9. Cada vecino ofrece una sola cosa a la vez: si dos de Don Chema quedan arriba, va la que
+// 9. La receta de Don Fermín (derreflexión: ayudarle a recordar su receta, la atención hacia
+//    afuera) nunca sale con señales de riesgo, ni en el tablero ni al platicar con él: ahí va
+//    primero la ayuda. Sí cabe en un día pesado (su versión chiquita) y no entra de noche (no
+//    está en lo de descansar). Con soledad sube poquito, después de la carta de Memo.
+//    Pendiente de revisión con psicóloga.
+// 10. Cada vecino ofrece una sola cosa a la vez: si dos de Don Chema quedan arriba, va la que
 //    sumó más y la otra deja su lugar a la siguiente.
 //
 // Para que el tablero no cambie a cada rato durante el día, lo que hace en el barrio se toma
@@ -45,8 +50,13 @@ const MAX = 3
 
 /** Lo que no se ofrece con señales de riesgo ni de noche, ni en el tablero ni al platicar. */
 const NOT_NOW: MissionId[] = ['practicar']
-export const canOffer = (id: MissionId, { reading, hour }: BoardInput) =>
-  !NOT_NOW.includes(id) || (!reading?.risk && !isNight(hour))
+/** Lo que no se ofrece con señales de riesgo (de noche sí, si la persona lo busca). */
+const NOT_WITH_RISK: MissionId[] = ['receta']
+export const canOffer = (id: MissionId, { reading, hour }: BoardInput) => {
+  if (NOT_NOW.includes(id)) return !reading?.risk && !isNight(hour)
+  if (NOT_WITH_RISK.includes(id)) return !reading?.risk
+  return true
+}
 
 /** Pesos: lo que contestó hoy pesa más que lo que hizo otros días; los rumbos y lo nuevo, poquito. */
 const W = {
@@ -132,6 +142,7 @@ export function pickBoard(barrio: Barrio, { reading, hour, practiceNo }: BoardIn
       if (id === 'practicar' && !heavy && state === 'nervios') add(W.stateFar)
     }
     if (state === 'soledad' && id === 'carta') add(W.state, 'Como en tus registros salió la soledad, Memo te propone una carta.')
+    if (state === 'soledad' && id === 'receta') add(W.stateSecond)
     if (state === 'animo' && id === 'mandado') add(W.state, 'Como en tus registros el ánimo anda bajo, Tere te propone un mandado chiquito.')
     if (state === 'mezcla' && id === 'mandado') add(W.stateSecond)
     // Salir del hueco ya se parece a lo que trae: con cualquier lectura, sube tantito.

@@ -59,6 +59,7 @@ const PLACE_OF: Partial<Record<PlazaSpot, NeighborId>> = {
   taller: 'ramiro',
   buzon: 'memo',
   telar: 'chayo',
+  panaderia: 'fermin',
 }
 
 const MARK_Y: Partial<Record<NeighborId, number>> = { nico: -56, rosa: -66 }
@@ -186,7 +187,7 @@ export default function Plaza({ house, values, board, talking, glow, season, pet
     // La calle de los oficios
     place('taller', <Taller />, 'El taller de Don Ramiro'),
     place('tiendita', <Tiendita />, 'La tiendita de Tere'),
-    spot('panaderia', <Panaderia />, 'La panadería'),
+    place('panaderia', <Panaderia />, 'La panadería de Don Fermín'),
     spot('papeleria', <Papeleria />, 'La papelería'),
     // El mercado
     place('mercado', <Mercado />, 'El puesto del mercado de Don Beto'),

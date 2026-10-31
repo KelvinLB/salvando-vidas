@@ -210,6 +210,16 @@ export default function Calma() {
         <h2>¿Es enojo lo que no se va?</h2>
         <p className="muted">Escríbelo, rómpelo y bájale al cuerpo la alerta.</p>
       </Link>
+      {/* Pendiente de revisión con psicóloga. */}
+      <Link to="/lo-que-no-sale" className="card link-card">
+        <h2>Lo que no sale</h2>
+        <p className="muted">Cuando quieres llorar y no puedes, o todo se siente sin sentido.</p>
+      </Link>
+      {/* Pendiente de revisión con psicóloga. */}
+      <Link to="/escuchar" className="card link-card">
+        <h2>Para escuchar</h2>
+        <p className="muted">Reflexiones cortas con voz, para un día pesado.</p>
+      </Link>
       <Link to="/noche" className="card link-card">
         <h2>¿No puedes dormir?</h2>
         <p className="muted">Sonidos, relajación y un lugar para vaciar la cabeza.</p>

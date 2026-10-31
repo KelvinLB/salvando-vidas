@@ -3,19 +3,21 @@ import type { Band } from '../data/bodyCheck'
 
 // Marco del cuerpo: el título arriba a la izquierda, el estado arriba a la derecha, la
 // pista para tocar abajo a la izquierda y la lectura en vivo abajo a la derecha. Así las
-// palabras quedan fuera del dibujo.
+// palabras quedan fuera del dibujo. Debajo pueden ir herramientas (cambiar de vista, marcar).
 
 export default function BodyFrame({
   title,
   state,
   hint,
   readout,
+  tools,
   children,
 }: {
   title: string
   state?: string
   hint?: string
   readout?: ReactNode
+  tools?: ReactNode
   children: ReactNode
 }) {
   return (
@@ -31,6 +33,7 @@ export default function BodyFrame({
           {readout}
         </div>
       )}
+      {tools}
     </div>
   )
 }
