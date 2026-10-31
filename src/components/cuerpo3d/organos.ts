@@ -1,4 +1,4 @@
-// Las partes que se pueden tocar en «Explorar por dentro» (3D) y su tarjeta corta: qué es, por
+// Las partes que se pueden tocar en «Explorar» (3D) y su tarjeta corta: qué es, por
 // qué se siente así con los nervios o el ánimo bajo, y qué ayuda. Este archivo no importa three:
 // lo usan también la lista de partes y la versión en 2D, que deben pesar poco.
 //
@@ -65,6 +65,22 @@ export type Senal = {
   bpm?: number
   /** Una banda de luz que baja por la piel y los huesos: el apagado del sueño o la tensión. */
   ola?: 'alarma' | 'freno'
+  /** Dónde se siente algo en la piel, y qué: la zona se tiñe del color de esa sensación, sin latir. */
+  zonas?: Partial<Record<Zona, Sensacion>>
+}
+
+/** Partes de la piel que se pueden teñir. */
+export type Zona = 'cara' | 'cuello' | 'pecho' | 'panza' | 'manos'
+
+/** Lo que se siente en una zona. El color de cada una lo comparten la escena y la leyenda. */
+export type Sensacion = 'tension' | 'calor' | 'sudor' | 'hormigueo' | 'frio'
+
+export const SENSACIONES: Record<Sensacion, { nombre: string; color: string }> = {
+  tension: { nombre: 'Tensión', color: '#ff8a4c' },
+  calor: { nombre: 'Calor', color: '#ff5f6d' },
+  sudor: { nombre: 'Sudor', color: '#5fd0f0' },
+  hormigueo: { nombre: 'Hormigueo', color: '#b99cff' },
+  frio: { nombre: 'Frío', color: '#a9c4ff' },
 }
 
 export type Parte = {

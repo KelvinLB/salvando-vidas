@@ -1,11 +1,12 @@
 import { useLocation, useNavigate } from 'react-router-dom'
 
-// Las cinco secciones de la barra de abajo y las pantallas que cuelgan de cada una.
+// Las seis secciones de la barra de abajo y las pantallas que cuelgan de cada una.
 // `also` mantiene encendida la pestaña (por ejemplo, el cuerpo vive en Calma) y sirve
 // de salida cuando alguien llega directo a una pantalla, sin nada atrás.
 export const SECTIONS = [
   { to: '/', label: 'Inicio', also: [] },
   { to: '/calma', label: 'Calma', also: ['/cuerpo', '/panico', '/enojo', '/noche', '/nervios'] },
+  { to: '/explorar', label: 'Explorar', also: [] },
   { to: '/distraer', label: 'Distraer', also: ['/juegos', '/musica', '/videos'] },
   { to: '/diario', label: 'Mi diario', also: ['/responder'] },
   { to: '/mi-espacio', label: 'Mi espacio', also: ['/mi-espacio/', '/mi-dia', '/especialista', '/mascota', '/redes', '/opinion'] },
@@ -25,6 +26,7 @@ const NAMES: Record<string, string> = {
   '/mi-espacio/como-voy': 'cómo vas',
   '/mi-espacio/ajustes': 'ajustes',
   '/cuerpo': 'tu cuerpo',
+  '/explorar': 'Explorar',
   '/panico': 'pánico',
   '/enojo': 'enojo',
   '/noche': 'la noche',
@@ -84,7 +86,7 @@ export function rememberStep(path: string) {
 
 const nameOf = (path: string) => NAMES[path.split('?')[0]]
 
-/** A dónde lleva «Volver» desde aquí, o nada si es una de las cinco secciones. */
+/** A dónde lleva «Volver» desde aquí, o nada si es una de las secciones. */
 export function useBack() {
   const { pathname, search } = useLocation()
   const navigate = useNavigate()

@@ -2,10 +2,6 @@
    El pecho es de vidrio que brilla en los bordes: necesita un escenario oscuro en los dos temas,
    como una sala con la luz baja (--escena-*). La fase y los segundos van abajo, encima del lienzo. */
 
-.breath-vista {
-  justify-content: center;
-}
-
 .breath-3d {
   position: relative;
   width: min(340px, 100%);

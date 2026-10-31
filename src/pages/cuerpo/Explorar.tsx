@@ -5,25 +5,31 @@ import PageHeader from '../../components/PageHeader'
 import { CAPAS, PARTES, parteById, type Capa, type Parte, type ParteId, type Senal } from '../../components/cuerpo3d/organos'
 import type { Escena } from '../../components/cuerpo3d/escena'
 import { MODELO_3D, PESO_3D, prefersStill, revisar3d, type Motivo } from '../../components/cuerpo3d/soporte'
+import Biblioteca from './biblioteca/Biblioteca'
+import ComoSeMueve from './ComoSeMueve'
 import LoQueSiento from './LoQueSiento'
 import { Definicion, MiDiccionario, Texto } from './Palabras'
 import './explorar.css'
 
-// «Explorar por dentro»: el cuerpo en 3D con anatomía real (BodyParts3D), para mirar con calma
+// «Explorar»: el cuerpo en 3D con anatomía real (BodyParts3D), para mirar con calma
 // qué hace cada parte con los nervios o el ánimo. Es un modo aparte y opcional: three.js y el
 // modelo solo se bajan al abrir esta pantalla, y nada de la ruta de crisis depende de ella.
 // Si el teléfono no tiene WebGL, es muy sencillo o falla la carga, se queda en 2D (la lista de
 // partes con sus tarjetas, y las mismas explicaciones en texto) y se ofrece «Tu cuerpo por dentro».
 //
-// Tres maneras de usarlo: tocar una parte y que te la explique, «Lo que siento» (una explicación
-// paso a paso con la señal corriendo por el cuerpo) y «Mi diccionario» (las palabras guardadas).
+// Cinco maneras de usarlo: tocar una parte y que te la explique, la «Biblioteca» (un objeto que
+// funciona por cada cosa que hoy se conoce, con dónde se siente en el cuerpo), «Lo que siento» (una
+// explicación paso a paso con la señal corriendo por el cuerpo), «Cómo se mueve la ansiedad» (una
+// situación recorrida punto por punto sobre su ola) y «Mi diccionario» (las palabras guardadas).
 
 type Fase = { es: 'cargando' } | { es: 'listo' } | { es: '2d'; motivo: Motivo }
-type Modo = 'tocar' | 'siento' | 'dicc'
+type Modo = 'tocar' | 'biblioteca' | 'siento' | 'ansiedad' | 'dicc'
 
 const MODOS: { id: Modo; label: string }[] = [
   { id: 'tocar', label: 'Tocar el cuerpo' },
+  { id: 'biblioteca', label: 'Biblioteca' },
   { id: 'siento', label: 'Lo que siento' },
+  { id: 'ansiedad', label: 'Cómo se mueve la ansiedad' },
   { id: 'dicc', label: 'Mi diccionario' },
 ]
 
@@ -79,6 +85,12 @@ export default function Explorar() {
   const onSenal = useCallback((s: Senal | null) => setSenal(s), [])
   const [fichaAbierta, setFichaAbierta] = useState(false)
   const onAbierta = useCallback((a: boolean) => setFichaAbierta(a), [])
+  // Desde la Biblioteca se puede ir a recorrer la ola de una situación.
+  const [olaInicial, setOlaInicial] = useState<string | undefined>()
+  const onOla = useCallback((id: string) => {
+    setOlaInicial(id)
+    setModo('ansiedad')
+  }, [])
   const [encima, setEncima] = useState<HTMLDivElement | null>(null)
   const host = useRef<HTMLDivElement>(null)
   const escena = useRef<Escena | null>(null)
@@ -135,9 +147,9 @@ export default function Explorar() {
   useEffect(() => {
     const e = escena.current
     if (!e) return
-    if (modo === 'siento') {
+    if (modo === 'siento' || modo === 'ansiedad' || modo === 'biblioteca') {
       e.senal(senal)
-      e.setHueco(fichaAbierta ? 0.25 : 0)
+      e.setHueco(modo !== 'biblioteca' && fichaAbierta ? 0.25 : 0)
       return
     }
     e.senal(null)
@@ -163,8 +175,8 @@ export default function Explorar() {
   return (
     <div className="stack explorar">
       <PageHeader
-        title="Explorar por dentro"
-        subtitle="Gira el cuerpo con el dedo y toca una parte, o cuéntale lo que sientes y mira qué pasa por dentro."
+        title="Explorar"
+        subtitle="Gira el cuerpo con el dedo y toca una parte, abre la biblioteca, o cuéntale lo que sientes y mira qué pasa por dentro."
       />
 
       <div className="chips ex-modos" role="radiogroup" aria-label="Qué quieres hacer">
@@ -175,7 +187,10 @@ export default function Explorar() {
             role="radio"
             aria-checked={modo === m.id}
             className={`chip${modo === m.id ? ' selected' : ''}`}
-            onClick={() => setModo(m.id)}
+            onClick={() => {
+              setModo(m.id)
+              setOlaInicial(undefined)
+            }}
           >
             {m.label}
           </button>
@@ -233,6 +248,16 @@ export default function Explorar() {
       {modo === 'siento' && (
         <LoQueSiento onSenal={onSenal} onAbierta={onAbierta} encima={en3d ? encima : null} still={still} />
       )}
+      {modo === 'ansiedad' && (
+        <ComoSeMueve
+          onSenal={onSenal}
+          onAbierta={onAbierta}
+          encima={en3d ? encima : null}
+          still={still}
+          inicial={olaInicial}
+        />
+      )}
+      {modo === 'biblioteca' && <Biblioteca onSenal={onSenal} onOla={onOla} en3d={en3d} still={still} />}
       {modo === 'dicc' && <MiDiccionario />}
 
       {en3d && modo === 'tocar' && (

@@ -93,10 +93,10 @@ export default function Cuerpo() {
         </>
       )}
 
-      <Link to="/cuerpo/explorar" className="card link-card">
-        <h2>Explorar por dentro, en 3D</h2>
+      <Link to="/explorar" className="card link-card">
+        <h2>Explorar</h2>
         <p className="muted">
-          Gira el cuerpo y acércate a cada parte. Es opcional: se descarga al abrirlo.
+          Tu cuerpo por dentro, en 3D: gira el cuerpo y acércate a cada parte. Se descarga al abrirlo.
         </p>
       </Link>
 

@@ -1,4 +1,4 @@
-// Piezas que comparten las escenas 3D («Explorar por dentro» y «Respirar por dentro»). Solo lo
+// Piezas que comparten las escenas 3D («Explorar» y «Respirar por dentro»). Solo lo
 // importan archivos de esta carpeta, así que todo queda en el mismo chunk que three.
 import {
   AdditiveBlending,
@@ -11,6 +11,7 @@ import {
   ShaderMaterial,
   SphereGeometry,
   Vector3,
+  Vector4,
 } from 'three'
 
 /**
@@ -44,14 +45,23 @@ export function puntosVago(
   return pts
 }
 
+/** Cuántas zonas de la piel se pueden teñir a la vez (cara, cuello, hombros, pecho, panza, manos). */
+export const NZONAS = 8
+
 /**
  * Vidrio: casi invisible de frente y claro en los bordes, como una radiografía suave. Sin brillos
  * que laten: el color solo cambia cuando se le pide. `uScan` prende una banda de luz a la altura
- * `uScanY` (la ola que baja por el cuerpo en algunas fichas); apagada no cambia nada.
+ * `uScanY` (la ola que baja por el cuerpo en algunas fichas); apagada no cambia nada. Con `zonas`,
+ * la piel puede teñirse por partes (una esfera por zona: centro y radio en `uZona`, color en
+ * `uZonaColor`, fuerza en `uZonaOn`), para mostrar dónde se siente algo.
  */
-export function vidrio(color: string, { base = 0.02, fuerza = 0.5, borde = 2.2 } = {}) {
+export function vidrio(color: string, { base = 0.02, fuerza = 0.5, borde = 2.2, zonas = false } = {}) {
+  const defZonas = zonas ? `#define ZONAS ${NZONAS}\n` : ''
   return new ShaderMaterial({
     uniforms: {
+      uZona: { value: Array.from({ length: NZONAS }, () => new Vector4(0, -10, 0, 0.01)) },
+      uZonaColor: { value: Array.from({ length: NZONAS }, () => new Color()) },
+      uZonaOn: { value: new Array<number>(NZONAS).fill(0) },
       uColor: { value: new Color(color) },
       uBase: { value: base },
       uFuerza: { value: fuerza },
@@ -69,16 +79,32 @@ export function vidrio(color: string, { base = 0.02, fuerza = 0.5, borde = 2.2 }
         vN = normalize(mat3(modelMatrix) * normal);
         gl_Position = projectionMatrix * viewMatrix * w;
       }`,
-    fragmentShader: /* glsl */ `
+    fragmentShader:
+      defZonas +
+      /* glsl */ `
       uniform vec3 uColor, uScanColor;
       uniform float uBase, uFuerza, uBorde, uScanY, uScan;
+      #ifdef ZONAS
+      uniform vec4 uZona[ZONAS];
+      uniform vec3 uZonaColor[ZONAS];
+      uniform float uZonaOn[ZONAS];
+      #endif
       varying vec3 vN;
       varying vec3 vP;
       void main() {
         float nv = abs(dot(normalize(vN), normalize(cameraPosition - vP)));
         float rim = pow(1.0 - nv, uBorde);
         float banda = exp(-pow((vP.y - uScanY) / 0.045, 2.0)) * uScan;
-        gl_FragColor = vec4(uColor * (0.25 + rim * 1.2) + uScanColor * banda * 1.6, uBase + uFuerza * rim + banda * 0.4);
+        vec3 col = uColor * (0.25 + rim * 1.2) + uScanColor * banda * 1.6;
+        float a = uBase + uFuerza * rim + banda * 0.4;
+        #ifdef ZONAS
+        for (int i = 0; i < ZONAS; i++) {
+          float f = (1.0 - smoothstep(uZona[i].w * 0.3, uZona[i].w, distance(vP, uZona[i].xyz))) * uZonaOn[i];
+          col += uZonaColor[i] * f * (0.55 + rim);
+          a += f * (0.12 + 0.5 * rim);
+        }
+        #endif
+        gl_FragColor = vec4(col, a);
       }`,
     transparent: true,
     depthWrite: false,

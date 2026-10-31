@@ -92,7 +92,8 @@ export default function App() {
         <Route path="cuerpo" element={<Cuerpo />} />
         <Route path="nervios" element={<Nervios />} />
         <Route path="nervios/practicar" element={<Practicar />} />
-        <Route path="cuerpo/explorar" element={<Explorar />} />
+        <Route path="explorar" element={<Explorar />} />
+        <Route path="cuerpo/explorar" element={<Navigate to="/explorar" replace />} />
         <Route path="lo-que-no-sale" element={<NoSale />} />
         <Route path="*" element={<Inicio />} />
       </Route>

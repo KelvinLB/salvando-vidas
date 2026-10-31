@@ -1,5 +1,5 @@
 import { Suspense, useEffect, useRef } from 'react'
-import { House, LifeBuoy, NotebookPen, Puzzle, Sprout, Wind } from 'lucide-react'
+import { Compass, House, LifeBuoy, NotebookPen, Puzzle, Sprout, Wind } from 'lucide-react'
 import { Link, NavLink, Outlet, useLocation } from 'react-router-dom'
 import FloatingPet from './FloatingPet'
 import UpdatePrompt from './UpdatePrompt'
@@ -8,7 +8,7 @@ import { MOMENT_SOURCES, syncMoments } from '../lib/moments'
 import { SECTIONS, rememberStep } from '../lib/sections'
 import { onStoredChange } from '../lib/storage'
 
-const ICONS = { '/': House, '/calma': Wind, '/distraer': Puzzle, '/diario': NotebookPen, '/mi-espacio': Sprout }
+const ICONS = { '/': House, '/calma': Wind, '/explorar': Compass, '/distraer': Puzzle, '/diario': NotebookPen, '/mi-espacio': Sprout }
 
 export default function Layout() {
   const { pathname, search } = useLocation()

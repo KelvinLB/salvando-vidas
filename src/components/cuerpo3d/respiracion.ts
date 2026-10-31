@@ -1,5 +1,5 @@
-// «Respirar por dentro»: el pecho del modelo de «Explorar por dentro» visto como vidrio, siguiendo
-// el mismo ritmo que el círculo de Calma. Al tomar aire, el diafragma baja, los pulmones se llenan y
+// «Respirar por dentro»: el pecho del modelo de «Explorar» visto como vidrio, siguiendo
+// la respiración de Calma. Al tomar aire, el diafragma baja, los pulmones se llenan y
 // el aire (turquesa) baja por la tráquea, se reparte y los va llenando de abajo hacia arriba; al
 // soltarlo el nivel baja, el aire sale tibio y el nervio vago lleva el freno hacia abajo.
 //

@@ -1,4 +1,4 @@
-/* ---------- Explorar por dentro (3D) ----------
+/* ---------- Explorar (3D) ----------
    El lienzo ocupa el escenario; la tarjeta de cada parte aparece abajo, encima del lienzo, y la
    cámara sube el cuerpo para dejarle espacio. En 2D, la tarjeta va debajo de la lista. */
 
@@ -255,4 +255,89 @@
   padding: 10px 16px 16px;
   background: var(--surface);
   border-top: 1px solid var(--border);
+}
+
+/* ---------- Cómo se mueve la ansiedad ----------
+   La ola de cada situación: una línea suave y sus puntos, que se tocan para ir a ese momento. */
+.ola {
+  position: relative;
+  height: 52px;
+  margin: 0;
+}
+.ola-ficha h2 {
+  font-size: 1.05rem;
+}
+.ola svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+.ola-base {
+  stroke: var(--border);
+  stroke-width: 1.5;
+  stroke-dasharray: 4 5;
+}
+.ola-linea {
+  fill: none;
+  stroke: var(--primary);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  opacity: 0.75;
+}
+.ola-puntos {
+  position: absolute;
+  inset: 0;
+}
+.ola-punto {
+  position: absolute;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  margin: -18px 0 0 -18px;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+.ola-punto i {
+  width: 12px;
+  height: 12px;
+  border: 2px solid var(--primary);
+  border-radius: 50%;
+  background: var(--surface);
+  transition: transform 0.2s;
+}
+.ola-punto.visto i {
+  background: var(--primary);
+}
+.ola-punto.actual i {
+  background: var(--primary);
+  transform: scale(1.45);
+  box-shadow: 0 0 0 4px var(--primary-soft);
+}
+.ola-nombre {
+  margin: 0;
+  font-size: 1rem;
+}
+.ola-leyenda {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+.ola-leyenda li {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.ola-leyenda i {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
 }

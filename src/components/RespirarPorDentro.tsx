@@ -3,9 +3,9 @@ import type { Aire, Respiracion } from './cuerpo3d/escena'
 import { MODELO_3D, prefersStill } from './cuerpo3d/soporte'
 import './respirar.css'
 
-// «Respirar por dentro»: en vez del círculo, el pecho en 3D siguiendo la misma respiración. three
-// y el modelo se bajan solo al elegir esta vista (y quedan guardados para usarse sin internet). Si
-// algo falla, avisa con onFalla y Calma regresa al círculo, que nunca deja de funcionar.
+// «Respirar por dentro»: la respiración de Calma en el pecho en 3D. three y el modelo se bajan al
+// abrir Calma (y quedan guardados para usarse sin internet). Si algo falla, avisa con onFalla y Calma
+// pasa al círculo, que nunca deja de funcionar.
 
 export default function RespirarPorDentro({
   aire,

@@ -1,6 +1,6 @@
 import type { Senal } from '../components/cuerpo3d/organos'
 
-// «Mi diccionario» y «Lo que siento» de Explorar por dentro: palabras que se abren con una frase
+// «Mi diccionario» y «Lo que siento» de Explorar: palabras que se abren con una frase
 // sencilla y fichas que explican paso a paso lo que la gente pregunta en los grupos de apoyo (los
 // posts se resumieron; nunca se guardan nombres). Cada paso le dice a la escena 3D qué encender.
 // Se cuenta con «puede», «suele» y «una explicación posible»: se explica, no se diagnostica.
@@ -10,6 +10,9 @@ import type { Senal } from '../components/cuerpo3d/organos'
 // y ansiedad después de un infarto y rehabilitación cardiaca; NICE y AASM 2017 (TCC-I como primer
 // tratamiento del insomnio crónico); FDA y NHS (no suspender hipnóticos de golpe); Ebrahim et al.
 // 2013, Alcohol Clin Exp Res (alcohol y la segunda mitad del sueño); Breit et al. 2018 (nervio vago).
+// Las palabras de terapias (TCC, exposición, prevención de respuesta, reversión de hábitos, ensayo en
+// imaginación, EMDR) y del estabilizador del ánimo salen de las fuentes de las fichas de la Biblioteca;
+// EMDR: OMS 2013, «Guidelines for the management of conditions specifically related to stress».
 
 /** En el texto, {{id}} abre una palabra; {{id|otra forma}} la escribe distinto. */
 export type Termino = { id: string; nombre: string; def: string }
@@ -26,8 +29,17 @@ export const TERMINOS: Record<string, Termino & { palabra: string }> = Object.fr
       ['adrenalina', 'Adrenalina', 'adrenalina', 'La alarma rápida: llega en segundos y se gasta en minutos. Acelera el corazón y la respiración.'],
       ['cortisol', 'Cortisol', 'cortisol', 'La alarma lenta. Ayuda a despertar en la mañana, pero con estrés de semanas se queda encendida en bajito y cansa.'],
       ['vago', 'Nervio vago', 'nervio vago', 'El cable largo que baja del cerebro al corazón, los pulmones y la panza. Es el freno del cuerpo.'],
+      ['presion', 'Presión arterial', 'presión', 'La fuerza con la que la sangre empuja por dentro de las arterias. Si baja de golpe, llega menos sangre a la cabeza y te mareas.'],
       ['rehabilitacion', 'Rehabilitación cardiaca', 'rehabilitación cardiaca', 'Un programa con personal de salud después de un problema del corazón: ejercicio vigilado, aprender las señales de alarma y apoyo con el miedo.'],
       ['tcci', 'Terapia para el insomnio (TCC-I)', 'terapia para el insomnio', 'Una terapia corta que cambia hábitos y pensamientos sobre el sueño. Las guías la recomiendan como primer tratamiento para el insomnio que dura.'],
+      ['tcc', 'Terapia cognitivo-conductual', 'terapia cognitivo-conductual', 'Una terapia con psicología que trabaja con lo que piensas y lo que haces. Se practica en sesiones y con tareas pequeñas entre una y otra; es de las que tienen más estudios.'],
+      ['psicoterapia', 'Psicoterapia', 'psicoterapia', 'Hablar con una persona preparada en psicología o psiquiatría, con un método, para entender lo que te pasa y practicar formas nuevas de manejarlo.'],
+      ['exposicion', 'Exposición', 'exposición', 'Acercarte poco a poco, con guía, a lo que te da miedo, hasta que el cuerpo aprende que puede estar ahí. Se hace por pasos y el ritmo se acuerda con quien te acompaña.'],
+      ['erp', 'Prevención de respuesta', 'prevención de respuesta', 'Practicar no hacer lo que la obsesión pide (revisar, lavar, preguntar) y esperar a que la inquietud baje sola. Se hace junto con la exposición y con guía profesional.'],
+      ['reversion', 'Reversión de hábitos', 'reversión de hábitos', 'Una terapia que enseña a notar las ganas a tiempo y a hacer, en su lugar, otro movimiento que no deja hacer el primero. Se usa con los tics y con jalarse el pelo o la piel.'],
+      ['ensayo', 'Ensayo en imaginación', 'ensayo en imaginación', 'Para las pesadillas que se repiten: de día escribes la pesadilla con un final nuevo y lo repasas unos minutos. Con la práctica, la pesadilla suele cambiar o llegar menos.'],
+      ['estabilizador', 'Estabilizador del ánimo', 'estabilizador del ánimo', 'Un medicamento que receta psiquiatría para que las subidas y bajadas del ánimo sean menos fuertes. Se sigue tomando en las temporadas buenas y no se deja de golpe.'],
+      ['emdr', 'EMDR', 'EMDR', 'Una terapia para el trauma: mientras recuerdas con guía lo que pasó, sigues con los ojos un movimiento de lado a lado. La OMS la recomienda para el estrés postraumático.'],
     ] as const
   ).map(([id, nombre, palabra, def]) => [id, { id, nombre, palabra, def }]),
 )

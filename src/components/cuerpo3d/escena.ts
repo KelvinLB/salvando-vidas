@@ -1,4 +1,4 @@
-// La escena 3D de «Explorar por dentro»: three.js «a mano» (sin react-three-fiber, que pesa ~47 KB
+// La escena 3D de «Explorar»: three.js «a mano» (sin react-three-fiber, que pesa ~47 KB
 // más). Este archivo (con comun.ts y respiracion.ts, que solo se importan desde aquí) es el único
 // que trae three; las pantallas lo cargan con import() para que three quede en su propio chunk y
 // nunca en el principal.
@@ -38,7 +38,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js'
 import { MeshoptDecoder } from 'three/addons/libs/meshopt_decoder.module.js'
 import { moverDiafragma, puntos, puntosVago, soloPiezasGrandes, vidrio, viaYDiafragma } from './comun'
-import type { Capa, Flujo, Organo3D, ParteId, Senal } from './organos'
+import { SENSACIONES, type Capa, type Flujo, type Organo3D, type ParteId, type Senal, type Zona } from './organos'
 
 // «Respirar por dentro» (Calma) vive en su propio archivo, pero se carga desde aquí para que three
 // siga en un solo chunk que nadie baja hasta abrir algo en 3D.
@@ -173,7 +173,7 @@ export async function crearEscena(canvas: HTMLCanvasElement, opts: Opciones): Pr
   const piel = mallas.get('piel')
   const huesos = mallas.get('esqueleto')
   if (piel) {
-    piel.material = vidrio('#8fd6cb', { base: 0.008, fuerza: 0.42, borde: 2.8 })
+    piel.material = vidrio('#8fd6cb', { base: 0.008, fuerza: 0.42, borde: 2.8, zonas: true })
     piel.renderOrder = 5
   }
   if (huesos) {
@@ -336,8 +336,45 @@ export async function crearEscena(canvas: HTMLCanvasElement, opts: Opciones): Pr
   controls.minPolarAngle = Math.PI * 0.22
   controls.maxPolarAngle = Math.PI * 0.78
   controls.minDistance = 0.25
-  controls.maxDistance = 2.6
+  const LEJOS = 2.6
+  controls.maxDistance = LEJOS
   const alto = bPiel.max.y - bPiel.min.y
+
+  // Zonas de la piel que se tiñen donde se siente algo. Se miden en la piel misma (qué tan anchos
+  // son los hombros y dónde quedan las manos), así quedan en su lugar aunque el modelo cambie.
+  const cx = (bPiel.min.x + bPiel.max.x) / 2
+  const cz = (bPiel.min.z + bPiel.max.z) / 2
+  const enY = (f: number) => bPiel.min.y + alto * f
+  const hombro = { x: alto * 0.1 }
+  const mano = { x: alto * 0.17, y: enY(0.47), z: cz }
+  if (piel) {
+    const pos = piel.geometry.attributes.position
+    const v = new Vector3()
+    let xMano = 0
+    for (let i = 0; i < pos.count; i++) {
+      v.fromBufferAttribute(pos, i).applyMatrix4(piel.matrixWorld)
+      const dx = Math.abs(v.x - cx)
+      if (v.y > enY(0.79) && v.y < enY(0.83)) hombro.x = Math.max(hombro.x, dx * 0.78)
+      // Las manos cuelgan a los lados: lo más afuera entre la cadera y el muslo.
+      if (v.y > enY(0.4) && v.y < enY(0.56) && dx > xMano) {
+        xMano = dx
+        Object.assign(mano, { x: dx - alto * 0.02, y: v.y, z: v.z })
+      }
+    }
+  }
+  const ESFERAS: { zona: Zona; c: Vector3; r: number }[] = [
+    { zona: 'cara', c: new Vector3(cx, enY(0.925), cz + alto * 0.035), r: alto * 0.055 },
+    { zona: 'cuello', c: new Vector3(cx, enY(0.855), cz), r: alto * 0.045 },
+    { zona: 'cuello', c: new Vector3(cx - hombro.x, enY(0.815), cz), r: alto * 0.055 },
+    { zona: 'cuello', c: new Vector3(cx + hombro.x, enY(0.815), cz), r: alto * 0.055 },
+    { zona: 'pecho', c: new Vector3(cx, enY(0.72), cz + alto * 0.04), r: alto * 0.075 },
+    { zona: 'panza', c: new Vector3(cx, enY(0.6), cz + alto * 0.045), r: alto * 0.07 },
+    { zona: 'manos', c: new Vector3(cx - mano.x, mano.y, mano.z), r: alto * 0.05 },
+    { zona: 'manos', c: new Vector3(cx + mano.x, mano.y, mano.z), r: alto * 0.05 },
+  ]
+  const zonaU = piel ? (piel.material as ShaderMaterial).uniforms : null
+  ESFERAS.forEach((e, i) => zonaU?.uZona.value[i].set(e.c.x, e.c.y, e.c.z, e.r))
+  const colorSensacion = Object.fromEntries(Object.entries(SENSACIONES).map(([id, s]) => [id, new Color(s.color)]))
   // Vista de inicio: de la cabeza a la cadera, de frente.
   const casa = {
     target: new Vector3(0, bPiel.min.y + alto * 0.73, (bPiel.min.z + bPiel.max.z) / 2),
@@ -501,6 +538,15 @@ export async function crearEscena(canvas: HTMLCanvasElement, opts: Opciones): Pr
       f.geo.attributes.aA.needsUpdate = true
     }
 
+    // Dónde se siente algo: la zona se tiñe despacio y se queda así, sin latir.
+    if (zonaU) {
+      ESFERAS.forEach((e, i) => {
+        const s = orden.zonas?.[e.zona]
+        if (s) zonaU.uZonaColor.value[i].copy(colorSensacion[s])
+        zonaU.uZonaOn.value[i] += ((s ? 1 : 0) - zonaU.uZonaOn.value[i]) * k
+      })
+    }
+
     // La ola que baja por la piel y los huesos (el apagado del sueño, o la tensión).
     for (const m of [piel, huesos]) {
       if (!m) continue
@@ -611,7 +657,13 @@ export async function crearEscena(canvas: HTMLCanvasElement, opts: Opciones): Pr
       if (nombres?.length === 1 && nombres[0] === 'rinones') dir = new Vector3(0, 0.15, -1).normalize()
       else if (nombres?.length === 1 && (nombres[0] === 'piel' || nombres[0] === 'esqueleto')) dist = Math.max(dist * 0.55, 1)
       else dir.lerp(new Vector3(0, 0.08, 1), 0.6).normalize()
-    } else dir = new Vector3(0, 0.05, 1).normalize()
+    } else {
+      dir = new Vector3(0, 0.05, 1).normalize()
+      // Con una explicación encima, el cuerpo entero tiene que caber en lo que queda arriba de ella.
+      dist *= 1 + huecoMeta * 5.6
+      toT.y += alto * 0.05 * huecoMeta
+      controls.maxDistance = Math.max(LEJOS, dist * 1.05)
+    }
     const toP = toT.clone().addScaledVector(dir, dist)
     if (opts.still) {
       controls.target.copy(toT)
@@ -656,8 +708,10 @@ export async function crearEscena(canvas: HTMLCanvasElement, opts: Opciones): Pr
       despertar()
     },
     setHueco(f) {
+      const cambia = f !== huecoMeta
       huecoMeta = f
-      despertar()
+      if (cambia && sel === null && !orden.foco?.length) viajar(null)
+      else despertar()
     },
     dispose() {
       cancelAnimationFrame(raf)

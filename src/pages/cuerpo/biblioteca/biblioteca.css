@@ -1,0 +1,350 @@
+/* ---------- Biblioteca (Explorar) ----------
+   Los objetos viven en un escenario oscuro, el mismo del cuerpo de vidrio, en los dos temas. */
+
+.bib-vistas {
+  justify-content: center;
+}
+
+.bib-donde {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 170px);
+  gap: 12px;
+  align-items: center;
+}
+.bib-donde h2 {
+  margin: 0 0 4px;
+}
+.bib-donde .btn {
+  margin-top: 10px;
+}
+.bib-cuerpo {
+  display: block;
+  width: 100%;
+  border-radius: 16px;
+  background: radial-gradient(90% 70% at 50% 35%, var(--escena-bg-1) 0%, var(--escena-bg-2) 78%);
+}
+.bib-cuerpo-label {
+  fill: var(--escena-ink-2);
+  font: 600 10px var(--font-body);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  pointer-events: none;
+}
+.bib-pin {
+  fill: transparent;
+  cursor: pointer;
+}
+.bib-pin:focus-visible {
+  outline: none;
+  stroke: var(--accent);
+  stroke-width: 3;
+}
+
+.bib-familia {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.bib-familia .section-title {
+  margin: 4px 0 0;
+}
+.bib-tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 240px), 1fr));
+  gap: 10px;
+}
+.bib-tile {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr);
+  gap: 12px;
+  align-items: start;
+  padding: 12px;
+  border-radius: 16px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.bib-tile.abierta {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px var(--primary-soft);
+}
+.bib-tile > span {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  min-width: 0;
+}
+.bib-cuerpito {
+  width: 44px;
+  height: 72px;
+  border-radius: 8px;
+  background: var(--escena-bg-2);
+}
+.bib-obj {
+  font-family: var(--font-display);
+  font-variation-settings: 'SOFT' 100;
+  font-size: 1rem;
+  line-height: 1.25;
+}
+.bib-cond {
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+.bib-nuevo {
+  margin-top: 4px;
+  background: var(--warm);
+  color: var(--text);
+  border: 1px solid var(--warm-border);
+}
+
+/* La ficha */
+.bib-ficha-wrap {
+  scroll-margin: 76px 0 calc(var(--tabbar-h) + 12px);
+}
+.bib-ficha {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.bib-ficha h2 {
+  margin: 0;
+  font-size: 1.3rem;
+}
+.bib-ficha .eyebrow {
+  margin: 0;
+}
+.bib-ficha h3 {
+  margin: 12px 0 0;
+  font-family: var(--font-body);
+  font-size: 0.8rem;
+  font-weight: 650;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.bib-ficha p {
+  margin: 0;
+  line-height: 1.5;
+}
+.bib-condicion {
+  color: var(--muted);
+}
+.bib-riesgo {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+}
+.bib-acciones {
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.bib-acciones .btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.bib-escena {
+  position: relative;
+  aspect-ratio: 5 / 4;
+  max-height: 380px;
+  width: 100%;
+  margin-top: 6px;
+  border-radius: 18px;
+  overflow: hidden;
+  background: radial-gradient(90% 70% at 50% 35%, var(--escena-bg-1) 0%, var(--escena-bg-2) 78%);
+  color: var(--escena-ink);
+}
+.bib-pista {
+  position: absolute;
+  top: 10px;
+  left: 14px;
+  right: 14px;
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--escena-ink-2);
+}
+/* El dibujo deja libres la franja de la pista (arriba) y la de la lectura en vivo (abajo). */
+.bib-dibujo {
+  position: absolute;
+  top: 36px;
+  left: 0;
+  width: 100%;
+  height: calc(100% - 86px);
+}
+.bib-lectura {
+  position: absolute;
+  left: 14px;
+  right: 14px;
+  bottom: 10px;
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 14px;
+  font: 400 0.8rem/1.35 ui-monospace, 'SFMono-Regular', Menlo, monospace;
+  font-variant-numeric: tabular-nums;
+  color: var(--escena-ink-2);
+}
+.bib-lectura b {
+  color: var(--escena-ink);
+  font-weight: 600;
+}
+.bib-barra {
+  transition: y 0.4s ease, height 0.4s ease, fill 0.4s;
+}
+.bib-controles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+.bib-rango {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1 1 200px;
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+.bib-rango input {
+  flex: 1;
+  accent-color: var(--primary);
+}
+.bib-leyenda-barras,
+.bib-canales {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+.bib-leyenda-barras span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.bib-leyenda-barras i {
+  width: 12px;
+  height: 12px;
+  border-radius: 4px;
+}
+
+.bib-mito {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  margin-top: 12px;
+  padding: 14px 16px;
+  border-radius: 16px;
+  background: var(--warm);
+  border: 1px solid var(--warm-border);
+}
+.bib-mito.volteada {
+  background: var(--primary-soft);
+  border-color: transparent;
+}
+.bib-mito-texto {
+  font-family: var(--font-display);
+  font-variation-settings: 'SOFT' 100;
+  font-size: 1.05rem;
+}
+.bib-cita {
+  margin: 0;
+  padding-left: 14px;
+  border-left: 3px solid var(--border);
+  color: var(--text-2);
+  line-height: 1.5;
+}
+.bib-fuentes {
+  font-size: 0.88rem;
+  color: var(--muted);
+}
+.bib-fuentes summary {
+  cursor: pointer;
+  padding: 8px 0;
+  font-weight: 600;
+}
+.bib-fuentes ul {
+  margin: 0 0 8px;
+  padding-left: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.bib-fuentes a {
+  color: inherit;
+  overflow-wrap: anywhere;
+}
+
+/* Dos que se confunden, a quién acudir, nombres */
+.bib-par-objetos {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.bib-par-objetos figure {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.85rem;
+  color: var(--muted);
+  text-align: center;
+}
+.bib-mini {
+  width: 100%;
+  max-width: 150px;
+  border-radius: 12px;
+  background: var(--escena-bg-2);
+}
+.bib-par h3,
+.bib-quien h3,
+.bib-opcion h3,
+.bib-nombre h3 {
+  margin: 4px 0 6px;
+}
+.bib-par p,
+.bib-quien p,
+.bib-opcion p,
+.bib-nombre p {
+  margin: 0 0 6px;
+  line-height: 1.5;
+}
+.bib-lista {
+  margin: 0 0 10px;
+  padding-left: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.bib-nombre-par {
+  font-size: 1.05rem;
+}
+.bib-nombre-par s {
+  color: var(--muted);
+}
+
+@media (max-width: 420px) {
+  .bib-donde {
+    grid-template-columns: minmax(0, 1fr) 128px;
+  }
+  .bib-escena {
+    aspect-ratio: 1 / 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bib-barra {
+    transition: none;
+  }
+}

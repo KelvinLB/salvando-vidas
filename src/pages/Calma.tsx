@@ -73,17 +73,18 @@ export function Breathing({
   initial?: string
   /** En una crisis no hay que pedir un toque más: la respiración arranca sola. */
   autoStart?: boolean
-  /** Ofrece ver la respiración en el pecho en 3D. En Pánico no: ahí basta el círculo. */
+  /** La respiración se ve en el pecho en 3D. En Pánico no: ahí basta el círculo. */
   porDentro?: boolean
 }) {
-  const [vista, setVista] = useStored<'circulo' | 'dentro'>('respirar-vista', 'circulo')
   // Los números que cambian cada segundo distraen del ritmo: por omisión, solo una línea que avanza.
   const [verSegundos, setVerSegundos] = useStored('respirar-segundos', false)
-  // Se revisa una vez: si el teléfono no puede con el 3D, ni se ofrece.
+  // Se revisa una vez. Si el teléfono no puede con el 3D, o algo falla, queda el círculo, que
+  // siempre funciona. Con el ahorro de datos encendido, el pecho se baja solo si la persona lo pide.
   const [motivo] = useState(() => (porDentro ? revisar3d() : 'sin-webgl'))
   const [fallo, setFallo] = useState(false)
+  const [bajar, setBajar] = useState(false)
   const puede3d = motivo !== 'sin-webgl' && motivo !== 'debil' && !fallo
-  const dentro = puede3d && vista === 'dentro'
+  const dentro = puede3d && (motivo !== 'datos' || bajar)
   const [patternId, setPatternId] = useState(initial)
   const [running, setRunning] = useState(autoStart)
   const [index, setIndex] = useState(0)
@@ -163,28 +164,15 @@ export function Breathing({
         </p>
       )}
 
-      {puede3d && (
-        <div className="chips breath-vista" role="radiogroup" aria-label="Cómo ver la respiración">
-          {(
-            [
-              ['circulo', 'Círculo'],
-              ['dentro', 'Por dentro'],
-            ] as const
-          ).map(([id, nombre]) => (
-            <button
-              key={id}
-              role="radio"
-              aria-checked={vista === id}
-              className={`chip ${vista === id ? 'selected' : ''}`}
-              onClick={() => setVista(id)}
-            >
-              {nombre}
-            </button>
-          ))}
-        </div>
-      )}
-      {puede3d && vista === 'dentro' && motivo === 'datos' && (
-        <p className="muted breath-3d-nota">Tienes el ahorro de datos encendido: el pecho en 3D baja {PESO_3D} una sola vez.</p>
+      {puede3d && !dentro && (
+        <>
+          <p className="muted breath-3d-nota">
+            Tienes el ahorro de datos encendido. Para ver los pulmones se bajan {PESO_3D}, una sola vez.
+          </p>
+          <button type="button" className="btn ghost small" onClick={() => setBajar(true)}>
+            Ver los pulmones
+          </button>
+        </>
       )}
 
       {dentro ? (
@@ -215,9 +203,7 @@ export function Breathing({
           el nervio vago frena un poquito al corazón: por eso exhalar largo calma.
         </p>
       )}
-      {fallo && vista === 'dentro' && (
-        <p className="muted breath-3d-nota">Esta vez no se pudo mostrar por dentro. Seguimos con el círculo.</p>
-      )}
+      {fallo && <p className="muted breath-3d-nota">Esta vez no se pudieron mostrar los pulmones. Seguimos con un círculo.</p>}
 
       {!running && (
         <p className="muted small">
