@@ -36,20 +36,21 @@ export default function Layout() {
   }, [])
 
   // Lo que se queda pegado arriba (como la mascota mientras se arregla) se acomoda
-  // justo debajo de esta barra, mida lo que mida en cada teléfono.
+  // justo debajo de esta barra, que flota un poco despegada de la orilla en cada teléfono.
   useEffect(() => {
     const bar = topbar.current
     if (!bar) return
-    const observer = new ResizeObserver(() =>
-      document.documentElement.style.setProperty('--topbar-h', `${bar.offsetHeight}px`),
-    )
+    const observer = new ResizeObserver(() => {
+      const top = parseFloat(getComputedStyle(bar).top) || 0
+      document.documentElement.style.setProperty('--topbar-h', `${bar.offsetHeight + top}px`)
+    })
     observer.observe(bar)
     return () => observer.disconnect()
   }, [])
 
   return (
     <div className="app">
-      <header className="topbar" ref={topbar}>
+      <header className="topbar vidrio" ref={topbar}>
         <Link to="/" className="brand" aria-label="Ir al inicio">
           <img src="/logo.svg" alt="" width={32} height={32} />
           <span>Salvando Vidas</span>
@@ -68,7 +69,7 @@ export default function Layout() {
         </Suspense>
       </main>
 
-      <nav className="tabbar" aria-label="Secciones">
+      <nav className="tabbar vidrio" aria-label="Secciones">
         {SECTIONS.map(({ to, label, also }) => {
           const Icon = ICONS[to]
           return (
@@ -81,9 +82,9 @@ export default function Layout() {
               }
             >
               <span className="tab-icon" aria-hidden="true">
-                <Icon size={22} strokeWidth={1.75} />
+                <Icon size={24} strokeWidth={2} />
               </span>
-              {label}
+              <span className="tab-label">{label}</span>
             </NavLink>
           )
         })}

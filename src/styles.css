@@ -1,25 +1,37 @@
-/* Diseño «papel cálido»: fondo crema, bordes finos en vez de sombras, títulos con
-   serifa suave y color solo donde importa (ayuda, ilustraciones, la mascota). */
+/* Diseño «calma y vidrio»: minimalista, con una sola letra (Inter), líneas finas en vez de cajas,
+   un solo acento verde y el rojo solo para la ayuda. El vidrio va únicamente en lo que flota (la
+   barra de arriba, la de pestañas y los controles sobre las escenas); el contenido y los avisos de
+   ayuda van sólidos, para leerse bien. */
 :root {
-  --bg: #f6f3ee;
-  --surface: #fdfcfa;
-  --surface-soft: #f0ebe3;
-  --text: #1d2422;
-  --text-2: #47504c;
-  --muted: #69665f;
-  --primary: #23433d;
-  --primary-ink: #fdfcfa;
-  --primary-soft: #e2ebe5;
+  --bg: #fbfbf9;
+  --surface: #ffffff;
+  --surface-soft: #f2f4f2;
+  --text: #111413;
+  --text-2: #3f4744;
+  --muted: #5d6663;
+  --primary: #1f6b5a;
+  --primary-ink: #ffffff;
+  --primary-soft: #e3efe9;
   --accent: #e8a462;
-  --warm: #fbefe4;
-  --warm-border: #efd2b9;
-  --danger: #b3473c;
-  --border: #e6dfd5;
-  --stone: #d9d0c3;
+  --warm: #fbefe9;
+  --warm-border: #f0d3c6;
+  --danger: #c2412d;
+  --border: #e9ecea;
+  --stone: #d3d9d6;
   --control-line: color-mix(in srgb, var(--muted) 75%, var(--surface));
-  --shadow: 0 1px 2px rgb(29 36 34 / 0.04), 0 12px 28px -18px rgb(29 36 34 / 0.22);
-  --radius: 22px;
-  --tabbar-h: 70px;
+  --shadow: 0 1px 2px rgb(17 20 19 / 0.04), 0 12px 28px -18px rgb(17 20 19 / 0.2);
+  --radius: 20px;
+  /* Lo que ocupa abajo la barra de pestañas que flota: la barra, su separación y un respiro. */
+  --tabbar-h: 88px;
+  /* Vidrio: fondo translúcido, desenfoque, borde de luz y un brillo arriba que se apaga. */
+  --glass-bg: rgb(251 251 249 / 0.62);
+  --glass-blur: blur(24px) saturate(180%);
+  --glass-border: rgb(255 255 255 / 0.8);
+  --glass-shadow: 0 12px 32px rgb(17 20 19 / 0.12), inset 0 1px 0 rgb(255 255 255 / 0.95),
+    inset 0 -1px 0 rgb(17 20 19 / 0.05);
+  --glass-shine: linear-gradient(180deg, rgb(255 255 255 / 0.6), rgb(255 255 255 / 0) 50%);
+  --glass-lens: rgb(255 255 255 / 0.8);
+  --glass-lens-shadow: inset 0 1px 0 #fff, 0 1px 4px rgb(17 20 19 / 0.1);
   --orb-sage: #cfe3d9;
   --orb-peach: #f7d8c2;
   --orb-sky: #d8e2f2;
@@ -35,40 +47,49 @@
   --organ-lung: #f1d3c8;
   --organ-heart: #d4675a;
   --organ-gut: #ecd3a6;
-  --organ-line: rgb(29 36 34 / 0.16);
+  --organ-line: rgb(17 20 19 / 0.16);
   --body-dim: #dcd8d3;
   --skin-light: #f4ece2;
   --skin-shade: #dccbb8;
   /* Escenario de las escenas 3D de vidrio: oscuro en los dos temas, como una sala con la luz
      baja, porque el vidrio solo brilla en los bordes. */
-  --escena-bg-1: #1d3a37;
-  --escena-bg-2: #0f1c1b;
+  --escena-bg-1: #17302b;
+  --escena-bg-2: #0a1513;
   --escena-ink: #eef7f3;
   --escena-ink-2: #b9cec7;
-  --font-display: 'Fraunces Variable', Georgia, 'Times New Roman', serif;
   --font-body: 'Inter Variable', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  /* Una sola familia: los títulos se distinguen por tamaño y peso, no por otra letra. */
+  --font-display: var(--font-body);
   color-scheme: light;
   font-family: var(--font-body);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg: #141312;
-    --surface: #1c1b19;
-    --surface-soft: #252320;
-    --text: #f1ece5;
-    --text-2: #cfc8bf;
-    --muted: #a39b91;
-    --primary: #b7d5cb;
-    --primary-ink: #13211d;
-    --primary-soft: #24312d;
+    --bg: #0b0d0c;
+    --surface: #121514;
+    --surface-soft: #181d1b;
+    --text: #eef1ef;
+    --text-2: #c9d0cc;
+    --muted: #97a19c;
+    --primary: #7fd8c0;
+    --primary-ink: #0b1a16;
+    --primary-soft: #15302a;
     --accent: #e8a462;
-    --warm: #2c241c;
-    --warm-border: #5e4632;
-    --danger: #b94a42;
-    --border: #302d2a;
-    --stone: #3d3935;
+    --warm: #261b16;
+    --warm-border: #573a2d;
+    --danger: #c2412d;
+    --border: #1f2523;
+    --stone: #2e3633;
     --shadow: none;
+    --glass-bg: rgb(18 24 22 / 0.62);
+    --glass-blur: blur(22px) saturate(170%);
+    --glass-border: rgb(255 255 255 / 0.12);
+    --glass-shadow: 0 12px 32px rgb(0 0 0 / 0.45), inset 0 1px 0 rgb(255 255 255 / 0.14),
+      inset 0 -1px 0 rgb(0 0 0 / 0.25);
+    --glass-shine: linear-gradient(180deg, rgb(255 255 255 / 0.08), rgb(255 255 255 / 0) 55%);
+    --glass-lens: rgb(255 255 255 / 0.12);
+    --glass-lens-shadow: inset 0 1px 0 rgb(255 255 255 / 0.2);
     --orb-sage: #1f3029;
     --orb-peach: #3a2a20;
     --orb-sky: #1f2836;
@@ -82,12 +103,35 @@
     --organ-lung: #5f4740;
     --organ-heart: #c9635a;
     --organ-gut: #66553a;
-    --organ-line: rgb(241 236 229 / 0.18);
+    --organ-line: rgb(238 241 239 / 0.18);
     --body-dim: #34383d;
     --skin-light: #4a443e;
     --skin-shade: #2e2a27;
     color-scheme: dark;
   }
+}
+
+/* Si el navegador no desenfoca, o la persona pidió menos transparencia, el vidrio se vuelve sólido. */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  :root {
+    --glass-bg: var(--surface);
+  }
+}
+@media (prefers-reduced-transparency: reduce) {
+  :root {
+    --glass-bg: var(--surface);
+    --glass-blur: none;
+    --glass-shine: none;
+  }
+}
+
+/* Lo que flota lleva vidrio. */
+.vidrio {
+  background: var(--glass-bg);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
 }
 
 * {
@@ -103,8 +147,8 @@ body {
 }
 
 body {
-  font-size: 17px;
-  line-height: 1.55;
+  font-size: 16px;
+  line-height: 1.5;
   font-feature-settings: 'cv11', 'ss01';
 }
 
@@ -113,22 +157,22 @@ h2,
 h3 {
   margin: 0;
   font-family: var(--font-display);
-  font-variation-settings: 'SOFT' 100;
   letter-spacing: -0.015em;
 }
 h1 {
-  font-size: 2rem;
-  font-weight: 460;
+  font-size: 1.9rem;
+  font-weight: 800;
   line-height: 1.1;
+  letter-spacing: -0.025em;
 }
 h2 {
-  font-size: 1.28rem;
-  font-weight: 520;
+  font-size: 1.2rem;
+  font-weight: 750;
   line-height: 1.25;
 }
 h3 {
-  font-size: 1.08rem;
-  font-weight: 560;
+  font-size: 1.04rem;
+  font-weight: 700;
 }
 strong {
   font-weight: 650;
@@ -158,30 +202,33 @@ textarea {
   padding-bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom));
 }
 
+/* La barra de arriba flota como una píldora de vidrio y el contenido pasa por debajo. */
 .topbar {
   position: sticky;
-  top: 0;
+  top: calc(8px + env(safe-area-inset-top));
   z-index: 10;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  padding: calc(10px + env(safe-area-inset-top)) 16px 10px;
-  background: color-mix(in srgb, var(--bg) 88%, transparent);
-  backdrop-filter: blur(10px);
+  width: min(1040px, calc(100% - 24px));
+  height: 52px;
+  margin: calc(8px + env(safe-area-inset-top)) auto 0;
+  padding: 0 6px 0 10px;
+  border-radius: 26px;
 }
 
 .brand {
   display: flex;
   align-items: center;
-  gap: 10px;
-  font-family: var(--font-display);
-  font-variation-settings: 'SOFT' 100;
-  font-size: 1.12rem;
-  font-weight: 560;
+  gap: 8px;
+  min-width: 0;
+  font-size: 0.95rem;
+  font-weight: 700;
   letter-spacing: -0.01em;
   color: var(--text);
   text-decoration: none;
+  white-space: nowrap;
 }
 .brand img {
   border-radius: 9px;
@@ -191,12 +238,13 @@ textarea {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 9px 16px;
+  min-height: 40px;
+  padding: 0 14px;
   border-radius: 999px;
   background: var(--danger);
   color: #fff;
-  font-weight: 650;
-  font-size: 0.92rem;
+  font-weight: 700;
+  font-size: 0.875rem;
   text-decoration: none;
   white-space: nowrap;
 }
@@ -204,45 +252,58 @@ textarea {
 .content {
   max-width: 640px;
   margin: 0 auto;
-  padding: 8px 16px 32px;
+  padding: 16px 16px 32px;
 }
 
+/* La barra de pestañas flota abajo, centrada; en el teléfono solo lleva los íconos y la pestaña
+   activa se marca con un lente. El nombre sigue ahí para los lectores de pantalla. */
 .tabbar {
   position: fixed;
-  inset: auto 0 0 0;
+  left: 50%;
+  bottom: calc(12px + env(safe-area-inset-bottom));
   z-index: 10;
-  display: grid;
-  grid-template-columns: repeat(6, minmax(0, 1fr));
-  height: calc(var(--tabbar-h) + env(safe-area-inset-bottom));
-  padding: 6px 2px env(safe-area-inset-bottom);
-  background: color-mix(in srgb, var(--surface) 90%, transparent);
-  backdrop-filter: blur(14px);
-  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  width: min(420px, calc(100% - 32px));
+  height: 64px;
+  padding: 0 6px;
+  border-radius: 32px;
+  transform: translateX(-50%);
 }
 
 .tab {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 3px;
-  font-size: 0.7rem;
-  font-weight: 560;
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 24px;
   color: var(--muted);
   text-decoration: none;
-  text-align: center;
-  line-height: 1.15;
+  transition: background 0.2s, color 0.2s;
+}
+.tab-label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
   white-space: nowrap;
+}
+.tab-icon {
+  display: grid;
+  place-items: center;
+}
+.tab.active {
+  color: var(--primary);
+  background: var(--glass-lens);
+  box-shadow: var(--glass-lens-shadow);
 }
 /* En teléfonos angostos, el nombre y «Necesito ayuda» se achican para caber en una línea. */
 @media (max-width: 400px) {
-  .brand {
-    font-size: 1rem;
-    white-space: nowrap;
-  }
   .sos {
-    padding: 8px 12px;
-    font-size: 0.85rem;
+    padding: 0 12px;
+    font-size: 0.84rem;
   }
 }
 /* Y si ni así caben, se queda solo el logo: el botón de ayuda importa más que el nombre. */
@@ -250,29 +311,9 @@ textarea {
   .brand span {
     display: none;
   }
-}
-/* Con seis pestañas, en teléfonos muy angostos la letra baja un poco para que quepa «Mi espacio». */
-@media (max-width: 350px) {
   .tab {
-    font-size: 0.62rem;
-    letter-spacing: -0.01em;
+    width: 42px;
   }
-}
-/* El ícono activo lleva una píldora suave detrás, como indicador. */
-.tab-icon {
-  display: grid;
-  place-items: center;
-  width: min(52px, 100%);
-  height: 30px;
-  border-radius: 999px;
-  transition: background 0.2s;
-}
-.tab.active {
-  color: var(--text);
-  font-weight: 650;
-}
-.tab.active .tab-icon {
-  background: var(--primary-soft);
 }
 
 .stack {
@@ -334,45 +375,16 @@ textarea {
   background: var(--primary-soft);
 }
 
+/* La portada es solo letra sobre el fondo: sin cajas ni decoración. */
 .hero {
-  position: relative;
-  isolation: isolate;
-  overflow: hidden;
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  padding: 26px 22px;
-  border-radius: 28px;
-  background: var(--surface-soft);
-}
-/* Esferas de color difuminadas: la única decoración de la portada. */
-.hero::before,
-.hero::after {
-  content: '';
-  position: absolute;
-  z-index: -1;
-  border-radius: 50%;
-  filter: blur(28px);
-}
-.hero::before {
-  width: 240px;
-  height: 240px;
-  top: -90px;
-  right: -60px;
-  background: radial-gradient(circle, var(--orb-peach), transparent 70%);
-}
-.hero::after {
-  width: 260px;
-  height: 260px;
-  bottom: -130px;
-  left: -70px;
-  background: radial-gradient(circle, var(--orb-sage), transparent 70%);
+  gap: 8px;
+  padding: 4px 4px 8px;
 }
 .hero h1 {
-  font-size: 2.2rem;
-}
-.hero.help::before {
-  background: radial-gradient(circle, var(--warm-border), transparent 70%);
+  font-size: 2.1rem;
+  line-height: 1.06;
 }
 
 .eyebrow {
@@ -451,10 +463,8 @@ textarea {
 
 /* ---------- Botones ---------- */
 
-/* Los elementos de Uiverse.io (MIT) se adaptaron a la paleta y llevan el nombre de su autor.
-   Botón: borde inferior que se hunde al tocar (KhelVers, «orange-lionfish-62»). */
+/* Píldoras planas: el color dice qué es lo principal; al tocar, el botón se hunde apenas. */
 .btn {
-  --edge: color-mix(in srgb, var(--primary) 72%, #000);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -465,25 +475,21 @@ textarea {
   border-radius: 999px;
   background: var(--primary);
   color: var(--primary-ink);
-  font-weight: 600;
+  font-weight: 700;
   letter-spacing: -0.005em;
   text-decoration: none;
   cursor: pointer;
-  box-shadow: 0 4px 0 var(--edge);
-  transition: transform 0.12s, box-shadow 0.12s, background 0.2s;
+  transition: transform 0.12s, background 0.2s, border-color 0.2s;
 }
 .btn:active {
-  transform: translateY(4px);
-  box-shadow: 0 0 0 var(--edge);
+  transform: scale(0.98);
 }
 .btn.ghost {
-  --edge: var(--stone);
-  border-color: var(--border);
-  background: var(--surface);
+  border-color: var(--stone);
+  background: transparent;
   color: var(--text);
 }
 .btn.danger {
-  --edge: color-mix(in srgb, var(--danger) 70%, #000);
   border-color: var(--danger);
   background: var(--danger);
   color: #fff;
@@ -491,17 +497,12 @@ textarea {
 .btn.big {
   width: 100%;
   min-height: 56px;
-  font-size: 1.1rem;
+  font-size: 1.06rem;
 }
 .btn.small {
   min-height: 36px;
   padding: 4px 14px;
   font-size: 0.9rem;
-  box-shadow: 0 3px 0 var(--edge);
-}
-.btn.small:active {
-  transform: translateY(3px);
-  box-shadow: 0 0 0 var(--edge);
 }
 
 .icon-btn {
@@ -732,29 +733,38 @@ input[type='checkbox'][role='switch']:checked::after {
   grid-template-columns: repeat(5, 1fr);
   gap: 6px;
 }
+/* Cada cara va en un círculo de línea fina; la elegida se rellena con el verde. */
 .mood {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
-  padding: 12px 2px 10px;
-  border: 1px solid transparent;
-  border-radius: 18px;
-  background: var(--surface-soft);
+  gap: 6px;
+  padding: 0;
+  border: 0;
+  background: none;
   cursor: pointer;
-  transition: background 0.2s, border-color 0.2s;
 }
 .mood span {
-  font-size: 1.8rem;
+  display: grid;
+  place-items: center;
+  width: min(54px, 100%);
+  aspect-ratio: 1;
+  border: 1px solid var(--stone);
+  border-radius: 50%;
+  font-size: 1.6rem;
+  transition: background 0.2s, border-color 0.2s;
 }
 .mood small {
   font-size: 0.72rem;
   font-weight: 560;
   color: var(--muted);
 }
-.mood.selected {
+.mood.selected span {
   border-color: var(--primary);
   background: var(--primary-soft);
+}
+.mood.selected small {
+  color: var(--primary);
 }
 
 .mood-history {
@@ -6446,15 +6456,13 @@ html.diary-open {
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 8px;
 }
+/* Sin cajas: un círculo y su nombre. */
 .atajo {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 6px;
-  padding: 12px 4px 10px;
-  border: 1px solid var(--border);
-  border-radius: 18px;
-  background: var(--surface);
+  gap: 8px;
+  padding: 4px 2px;
   color: var(--text);
   font-size: 0.82rem;
   font-weight: 600;
@@ -6462,10 +6470,15 @@ html.diary-open {
   text-decoration: none;
 }
 .atajo .tile-emoji {
-  width: 40px;
-  height: 40px;
+  width: 56px;
+  height: 56px;
   margin: 0;
-  font-size: 1.25rem;
+  background: var(--surface-soft);
+  font-size: 1.4rem;
+  transition: transform 0.12s;
+}
+.atajo:active .tile-emoji {
+  transform: scale(0.96);
 }
 
 /* Filas (components/Filas.tsx): varias opciones en una sola tarjeta, cada una con su flecha. */
@@ -6594,26 +6607,26 @@ html.diary-open {
   }
 }
 
-/* Computadora: la barra de secciones flota centrada, del ancho de lo que se lee, en vez de
-   estirarse de orilla a orilla; y la barra de arriba se alinea con el contenido. */
+/* Computadora: la barra de pestañas se ensancha y cada pestaña muestra su nombre. */
 @media (min-width: 760px) {
-  .app {
-    padding-bottom: calc(var(--tabbar-h) + 40px);
-  }
   .tabbar {
-    left: 50%;
-    right: auto;
-    bottom: 16px;
-    width: min(620px, calc(100% - 32px));
-    height: var(--tabbar-h);
-    padding: 6px;
-    transform: translateX(-50%);
-    border: 1px solid var(--border);
-    border-radius: 22px;
-    box-shadow: var(--shadow);
+    width: min(600px, calc(100% - 32px));
   }
-  .topbar {
-    padding-inline: max(24px, calc((100% - 1040px) / 2));
+  .tab {
+    flex: 1;
+    gap: 2px;
+    height: 52px;
+    border-radius: 26px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    line-height: 1.1;
+  }
+  .tab-label {
+    position: static;
+    width: auto;
+    height: auto;
+    overflow: visible;
+    clip-path: none;
   }
 }
 @media (min-width: 960px) {

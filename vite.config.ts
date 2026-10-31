@@ -19,8 +19,8 @@ export default defineConfig({
         scope: '/',
         display: 'standalone',
         orientation: 'portrait',
-        background_color: '#f6f3ee',
-        theme_color: '#f6f3ee',
+        background_color: '#fbfbf9',
+        theme_color: '#fbfbf9',
         categories: ['health', 'lifestyle', 'medical'],
         icons: [
           { src: 'pwa-64x64.png', sizes: '64x64', type: 'image/png' },
