@@ -9,9 +9,10 @@
   overflow: hidden;
   border-radius: var(--radius);
   border: 1px solid var(--border);
-  background:
-    radial-gradient(120% 70% at 50% 35%, var(--surface) 0%, transparent 70%),
-    var(--surface-soft);
+  /* Al acercarlo (abrir una explicación), que no quede bajo el encabezado ni la barra de abajo. */
+  scroll-margin: 76px 0 calc(var(--tabbar-h) + 12px);
+  /* El cuerpo es de vidrio: brilla en los bordes y necesita la luz baja (--escena-*). */
+  background: radial-gradient(90% 70% at 50% 35%, var(--escena-bg-1) 0%, var(--escena-bg-2) 75%);
 }
 .ex-canvas {
   display: block;
@@ -30,7 +31,7 @@
   display: grid;
   place-items: center;
   margin: 0;
-  color: var(--muted);
+  color: var(--escena-ink-2);
   font-family: var(--font-display);
   font-variation-settings: 'SOFT' 100;
   font-size: 1.1rem;
@@ -163,4 +164,95 @@
   .ex-overlay .ex-card {
     animation: none;
   }
+}
+
+/* ---------- Lo que siento y Mi diccionario ---------- */
+
+.ex-modos {
+  justify-content: center;
+}
+
+/* Una palabra que se abre: subrayada con puntos, del mismo tamaño que el texto. */
+.dic-term {
+  display: inline;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  color: var(--primary);
+  text-decoration: underline dotted;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+.dic-term[aria-expanded='true'] {
+  text-decoration-style: solid;
+}
+
+.dic-def {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: var(--primary-soft);
+}
+.dic-def p {
+  margin: 0;
+  line-height: 1.45;
+}
+.dic-def .row {
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.dic-ficha h2 {
+  margin: 0;
+  font-size: 1.2rem;
+}
+.dic-ficha .eyebrow {
+  margin: 0;
+}
+.dic-ficha p {
+  margin: 0;
+  line-height: 1.5;
+}
+.dic-texto {
+  font-size: 1.05rem;
+}
+.dic-adivina {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+}
+.dic-pasos {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding-top: 4px;
+}
+.dic-pasos span {
+  font-size: 0.9rem;
+}
+.dic-hallada,
+.dic-ir {
+  align-self: flex-start;
+}
+.dic-mio h2,
+.dic-buscar h2 {
+  margin: 0;
+}
+.dic-mio .eyebrow {
+  margin: 4px 0 -4px;
+}
+/* Encima del cuerpo la tarjeta puede desplazarse: Atrás y Sigue se quedan siempre a la mano. */
+.ex-overlay .dic-pasos {
+  position: sticky;
+  bottom: -16px;
+  margin: 0 -16px -16px;
+  padding: 10px 16px 16px;
+  background: var(--surface);
+  border-top: 1px solid var(--border);
 }

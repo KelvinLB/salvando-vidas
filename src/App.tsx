@@ -27,6 +27,7 @@ const Mascota = lazy(() => import('./pages/Mascota'))
 const MiDia = lazy(() => import('./pages/MiDia'))
 const Enojo = lazy(() => import('./pages/Enojo'))
 const Redes = lazy(() => import('./pages/Redes'))
+const Acompanar = lazy(() => import('./pages/Acompanar'))
 const Cuerpo = lazy(() => import('./pages/Cuerpo'))
 const NoSale = lazy(() => import('./pages/NoSale'))
 const Explorar = lazy(() => import('./pages/cuerpo/Explorar'))
@@ -87,6 +88,7 @@ export default function App() {
         <Route path="mi-dia" element={<MiDia />} />
         <Route path="enojo" element={<Enojo />} />
         <Route path="redes" element={<Redes />} />
+        <Route path="acompanar" element={<Acompanar />} />
         <Route path="cuerpo" element={<Cuerpo />} />
         <Route path="nervios" element={<Nervios />} />
         <Route path="nervios/practicar" element={<Practicar />} />

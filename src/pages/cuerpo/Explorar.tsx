@@ -1,45 +1,31 @@
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Focus, RotateCcw, RotateCw, X } from 'lucide-react'
 import PageHeader from '../../components/PageHeader'
-import { CAPAS, PARTES, parteById, type Capa, type Parte, type ParteId } from '../../components/cuerpo3d/organos'
+import { CAPAS, PARTES, parteById, type Capa, type Parte, type ParteId, type Senal } from '../../components/cuerpo3d/organos'
 import type { Escena } from '../../components/cuerpo3d/escena'
+import { MODELO_3D, PESO_3D, prefersStill, revisar3d, type Motivo } from '../../components/cuerpo3d/soporte'
+import LoQueSiento from './LoQueSiento'
+import { Definicion, MiDiccionario, Texto } from './Palabras'
 import './explorar.css'
 
 // «Explorar por dentro»: el cuerpo en 3D con anatomía real (BodyParts3D), para mirar con calma
 // qué hace cada parte con los nervios o el ánimo. Es un modo aparte y opcional: three.js y el
 // modelo solo se bajan al abrir esta pantalla, y nada de la ruta de crisis depende de ella.
 // Si el teléfono no tiene WebGL, es muy sencillo o falla la carga, se queda en 2D (la lista de
-// partes con sus tarjetas) y se ofrece «Tu cuerpo por dentro».
+// partes con sus tarjetas, y las mismas explicaciones en texto) y se ofrece «Tu cuerpo por dentro».
+//
+// Tres maneras de usarlo: tocar una parte y que te la explique, «Lo que siento» (una explicación
+// paso a paso con la señal corriendo por el cuerpo) y «Mi diccionario» (las palabras guardadas).
 
-// El nombre lleva versión: si el modelo cambia, se cambia el nombre y el caché no sirve uno viejo.
-const MODELO = `${import.meta.env.BASE_URL}models/cuerpo/cuerpo-v1.glb`
-const PESO = 'unos 0.3 MB'
-
-type Motivo = 'sin-webgl' | 'debil' | 'falla' | 'datos'
 type Fase = { es: 'cargando' } | { es: 'listo' } | { es: '2d'; motivo: Motivo }
+type Modo = 'tocar' | 'siento' | 'dicc'
 
-const prefersStill = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches
-
-/** ¿Se puede mostrar en 3D sin trabar el teléfono? */
-function revisar(): Motivo | null {
-  try {
-    const c = document.createElement('canvas')
-    // failIfMajorPerformanceCaveat: si solo hay WebGL «por software», mejor quedarse en 2D.
-    const gl =
-      c.getContext('webgl2', { failIfMajorPerformanceCaveat: true }) ??
-      c.getContext('webgl', { failIfMajorPerformanceCaveat: true })
-    if (!gl) return 'sin-webgl'
-    gl.getExtension('WEBGL_lose_context')?.loseContext()
-  } catch {
-    return 'sin-webgl'
-  }
-  const nav = navigator as Navigator & { deviceMemory?: number; connection?: { saveData?: boolean } }
-  // Si el navegador no lo dice (Safari), se asume que sí alcanza.
-  if ((nav.deviceMemory ?? 8) < 3 || (nav.hardwareConcurrency || 8) < 4) return 'debil'
-  if (nav.connection?.saveData) return 'datos'
-  return null
-}
+const MODOS: { id: Modo; label: string }[] = [
+  { id: 'tocar', label: 'Tocar el cuerpo' },
+  { id: 'siento', label: 'Lo que siento' },
+  { id: 'dicc', label: 'Mi diccionario' },
+]
 
 const AVISO: Record<Motivo, string> = {
   'sin-webgl':
@@ -48,11 +34,15 @@ const AVISO: Record<Motivo, string> = {
     'Para cuidar la batería y la memoria de tu teléfono, aquí te lo mostramos sin 3D. Abajo puedes leer qué hace cada parte.',
   falla:
     'No se pudo abrir el cuerpo en 3D. Puede ser la conexión o la memoria del teléfono. Abajo puedes leer qué hace cada parte.',
-  datos: `Tienes prendido el ahorro de datos. El cuerpo en 3D pesa ${PESO} y se baja una sola vez.`,
+  datos: `Tienes prendido el ahorro de datos. El cuerpo en 3D pesa ${PESO_3D} y se baja una sola vez.`,
 }
 
 /** La tarjeta corta de una parte: qué es, por qué se siente así y qué ayuda. */
 function Tarjeta({ parte, onClose }: { parte: Parte; onClose: () => void }) {
+  const [palabra, setPalabra] = useState<string | null>(null)
+  const texto = (t: string) => (
+    <Texto texto={t} abierta={palabra} onPalabra={(id) => setPalabra((p) => (p === id ? null : id))} />
+  )
   return (
     <article className="ex-card" aria-labelledby="ex-card-title">
       <div className="ex-card-head">
@@ -61,11 +51,12 @@ function Tarjeta({ parte, onClose }: { parte: Parte; onClose: () => void }) {
           <X size={20} aria-hidden="true" />
         </button>
       </div>
-      <p>{parte.que}</p>
+      <p>{texto(parte.que)}</p>
       <h3>Con los nervios o el ánimo bajo</h3>
-      <p>{parte.porque}</p>
+      <p>{texto(parte.porque)}</p>
       <h3>Qué ayuda</h3>
-      <p>{parte.ayuda}</p>
+      <p>{texto(parte.ayuda)}</p>
+      {palabra && <Definicion id={palabra} onCerrar={() => setPalabra(null)} />}
       {parte.ir && (
         <Link to={parte.ir.to} className="btn ghost small">
           {parte.ir.label}
@@ -78,11 +69,17 @@ function Tarjeta({ parte, onClose }: { parte: Parte; onClose: () => void }) {
 export default function Explorar() {
   const [still] = useState(prefersStill)
   const [fase, setFase] = useState<Fase>(() => {
-    const motivo = revisar()
+    const motivo = revisar3d()
     return motivo ? { es: '2d', motivo } : { es: 'cargando' }
   })
   const [capas, setCapas] = useState<Record<Capa, boolean>>({ piel: true, esqueleto: true, organos: true, nervios: true })
   const [sel, setSel] = useState<ParteId | null>(null)
+  const [modo, setModo] = useState<Modo>('tocar')
+  const [senal, setSenal] = useState<Senal | null>(null)
+  const onSenal = useCallback((s: Senal | null) => setSenal(s), [])
+  const [fichaAbierta, setFichaAbierta] = useState(false)
+  const onAbierta = useCallback((a: boolean) => setFichaAbierta(a), [])
+  const [encima, setEncima] = useState<HTMLDivElement | null>(null)
   const host = useRef<HTMLDivElement>(null)
   const escena = useRef<Escena | null>(null)
   const en3d = fase.es !== '2d'
@@ -101,9 +98,14 @@ export default function Explorar() {
       .then(({ crearEscena }) =>
         vivo
           ? crearEscena(canvas, {
-              url: MODELO,
+              url: MODELO_3D,
               still,
-              onPick: (id) => vivo && setSel(id),
+              // Tocar el cuerpo desde cualquier modo lleva a su explicación.
+              onPick: (id) => {
+                if (!vivo) return
+                setModo('tocar')
+                setSel(id)
+              },
               onLost: () => vivo && setFase({ es: '2d', motivo: 'falla' }),
             })
           : null,
@@ -133,9 +135,16 @@ export default function Explorar() {
   useEffect(() => {
     const e = escena.current
     if (!e) return
-    e.enfocar(sel)
-    e.setHueco(sel ? 0.2 : 0)
-  }, [sel, fase.es])
+    if (modo === 'siento') {
+      e.senal(senal)
+      e.setHueco(fichaAbierta ? 0.25 : 0)
+      return
+    }
+    e.senal(null)
+    const parte = modo === 'tocar' ? sel : null
+    e.enfocar(parte)
+    e.setHueco(parte ? 0.2 : 0)
+  }, [modo, sel, senal, fichaAbierta, fase.es])
 
   // En 2D la tarjeta sale debajo de la lista: se acerca para que se vea sin buscarla.
   const tarjeta2d = useRef<HTMLDivElement>(null)
@@ -149,14 +158,29 @@ export default function Explorar() {
     if (p && !capas[p.capa]) setCapas((c) => ({ ...c, [p.capa]: true }))
     setSel((cur) => (cur === id ? null : id))
   }
-  const parte = sel ? parteById(sel) : undefined
+  const parte = modo === 'tocar' && sel ? parteById(sel) : undefined
 
   return (
     <div className="stack explorar">
       <PageHeader
         title="Explorar por dentro"
-        subtitle="Gira el cuerpo con el dedo y toca una parte para ver qué le pasa con los nervios y qué ayuda."
+        subtitle="Gira el cuerpo con el dedo y toca una parte, o cuéntale lo que sientes y mira qué pasa por dentro."
       />
+
+      <div className="chips ex-modos" role="radiogroup" aria-label="Qué quieres hacer">
+        {MODOS.map((m) => (
+          <button
+            key={m.id}
+            type="button"
+            role="radio"
+            aria-checked={modo === m.id}
+            className={`chip${modo === m.id ? ' selected' : ''}`}
+            onClick={() => setModo(m.id)}
+          >
+            {m.label}
+          </button>
+        ))}
+      </div>
 
       {en3d ? (
         <div ref={host} className={`ex-stage${parte ? ' con-tarjeta' : ''}`}>
@@ -170,7 +194,15 @@ export default function Explorar() {
               <button type="button" className="icon-btn" onClick={() => escena.current?.girar(-45)} aria-label="Girar a la izquierda">
                 <RotateCcw size={20} aria-hidden="true" />
               </button>
-              <button type="button" className="icon-btn" onClick={() => setSel(null)} aria-label="Ver todo el cuerpo de frente">
+              <button
+                type="button"
+                className="icon-btn"
+                onClick={() => {
+                  setSel(null)
+                  escena.current?.enfocar(null)
+                }}
+                aria-label="Ver todo el cuerpo de frente"
+              >
                 <Focus size={20} aria-hidden="true" />
               </button>
               <button type="button" className="icon-btn" onClick={() => escena.current?.girar(45)} aria-label="Girar a la derecha">
@@ -178,7 +210,7 @@ export default function Explorar() {
               </button>
             </div>
           )}
-          <div className="ex-overlay" aria-live="polite">
+          <div ref={setEncima} className="ex-overlay" aria-live="polite">
             {parte && <Tarjeta parte={parte} onClose={() => setSel(null)} />}
           </div>
         </div>
@@ -198,7 +230,12 @@ export default function Explorar() {
         </div>
       )}
 
-      {en3d && (
+      {modo === 'siento' && (
+        <LoQueSiento onSenal={onSenal} onAbierta={onAbierta} encima={en3d ? encima : null} still={still} />
+      )}
+      {modo === 'dicc' && <MiDiccionario />}
+
+      {en3d && modo === 'tocar' && (
         <div className="ex-capas" role="group" aria-label="Capas que se ven">
           {CAPAS.map((c) => (
             <button
@@ -214,29 +251,31 @@ export default function Explorar() {
         </div>
       )}
 
-      <section className="ex-partes" aria-labelledby="ex-partes-title">
-        <h2 id="ex-partes-title" className="section-title">
-          {en3d ? 'O elige una parte' : 'Elige una parte'}
-        </h2>
-        <div className="chips">
-          {PARTES.map((p) => (
-            <button
-              key={p.id}
-              type="button"
-              className={`chip${sel === p.id ? ' selected' : ''}`}
-              aria-pressed={sel === p.id}
-              onClick={() => elegir(p.id)}
-            >
-              {p.nombre}
-            </button>
-          ))}
-        </div>
-        {!en3d && parte && (
-          <div ref={tarjeta2d}>
-            <Tarjeta parte={parte} onClose={() => setSel(null)} />
+      {modo === 'tocar' && (
+        <section className="ex-partes" aria-labelledby="ex-partes-title">
+          <h2 id="ex-partes-title" className="section-title">
+            {en3d ? 'O elige una parte' : 'Elige una parte'}
+          </h2>
+          <div className="chips">
+            {PARTES.map((p) => (
+              <button
+                key={p.id}
+                type="button"
+                className={`chip${sel === p.id ? ' selected' : ''}`}
+                aria-pressed={sel === p.id}
+                onClick={() => elegir(p.id)}
+              >
+                {p.nombre}
+              </button>
+            ))}
           </div>
-        )}
-      </section>
+          {!en3d && parte && (
+            <div ref={tarjeta2d}>
+              <Tarjeta parte={parte} onClose={() => setSel(null)} />
+            </div>
+          )}
+        </section>
+      )}
 
       <p className="disclaimer">
         Es una explicación sencilla, no un diagnóstico. Este cuerpo no es el tuyo: no mide nada. Si fijarte en el

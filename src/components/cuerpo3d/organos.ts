@@ -17,6 +17,8 @@ export type ParteId =
   | 'amigdala'
   | 'vago'
   | 'pulmones'
+  | 'via'
+  | 'diafragma'
   | 'corazon'
   | 'estomago'
   | 'intestinos'
@@ -26,6 +28,44 @@ export type ParteId =
 
 /** Capas que se prenden y apagan. «nervios» es la alarma y el freno: amígdala y nervio vago. */
 export type Capa = 'piel' | 'esqueleto' | 'organos' | 'nervios'
+
+/**
+ * Lo que la escena muestra en cada paso de una ficha de «Lo que siento». En naranja la alarma, en
+ * verde el freno; las señales son puntos que corren por un camino. Sin parpadeos: todo se enciende
+ * y se apaga despacio. Este tipo vive aquí (sin three) para que los datos no carguen la escena.
+ */
+export type Organo3D =
+  | 'cerebro'
+  | 'amigdala'
+  | 'pulmones'
+  | 'via'
+  | 'diafragma'
+  | 'corazon'
+  | 'estomago'
+  | 'intestinos'
+  | 'suprarrenales'
+  | 'esqueleto'
+  | 'vago'
+
+export type Flujo = 'alarma-supra' | 'supra-corazon' | 'corazon-alarma' | 'alarma-panza' | 'pulmon-alarma' | 'vago'
+
+export type Senal = {
+  /** A dónde se acerca la cámara; sin foco, el cuerpo entero. */
+  foco?: Organo3D[]
+  /** Encendidos en naranja: la alarma. */
+  alarma?: Organo3D[]
+  /** Encendidos en verde: el freno. */
+  calma?: Organo3D[]
+  /** Los pulmones se iluminan con el aire. */
+  brillo?: Organo3D[]
+  flujos?: Flujo[]
+  respira?: 'lenta' | 'normal' | 'rapida'
+  /** Se ve el aire entrar y salir. */
+  aire?: boolean
+  bpm?: number
+  /** Una banda de luz que baja por la piel y los huesos: el apagado del sueño o la tensión. */
+  ola?: 'alarma' | 'freno'
+}
 
 export type Parte = {
   id: ParteId
@@ -73,7 +113,7 @@ export const PARTES: Parte[] = [
     capa: 'nervios',
     que: 'Un cable largo que baja del cerebro por el cuello hasta el corazón, los pulmones y la panza. Es la línea principal del freno del cuerpo.',
     porque:
-      'La ansiedad pisa el acelerador; el vago es el freno, y siempre está ahí. También lleva al cerebro lo que pasa en la panza y el pecho, por eso el cuerpo y el ánimo se contagian.',
+      'La ansiedad pisa el acelerador; el {{vago|vago}} es el freno, y siempre está ahí. También lleva al cerebro lo que pasa en la panza y el pecho, por eso el cuerpo y el ánimo se contagian.',
     ayuda:
       'Soltar el aire más largo de lo que lo tomas. Al exhalar, el corazón baja un poco su ritmo: es el freno trabajando. No hace falta ningún truco raro, solo respirar despacio un rato.',
     ir: { to: '/calma', label: 'Respirar despacio' },
@@ -82,10 +122,28 @@ export const PARTES: Parte[] = [
     id: 'pulmones',
     nombre: 'Pulmones',
     capa: 'organos',
-    que: 'Dos esponjas que meten aire y sacan el gas que sobra. Los mueve el diafragma, un músculo debajo de ellos.',
+    que: 'Dos esponjas que meten aire y sacan el gas que sobra. Los mueve el {{diafragma}}, un músculo debajo de ellos.',
     porque:
-      'Con los nervios se respira rápido y arriba, en el pecho. No te falta oxígeno: sacas de más otro gas, el dióxido de carbono, y eso da mareo y hormigueo en dedos y boca.',
+      'Con los nervios se respira rápido y arriba, en el pecho. No te falta oxígeno: sacas de más otro gas, el {{co2}}, y eso da mareo y hormigueo en dedos y boca.',
     ayuda: 'Soltar el aire despacio, no jalar más. Poner una mano en la panza y sentir que se infla al tomar aire.',
+    ir: { to: '/calma', label: 'Respirar despacio' },
+  },
+  {
+    id: 'via',
+    nombre: 'Tráquea y bronquios',
+    capa: 'organos',
+    que: 'El tubo por donde baja el aire, que abajo se divide en ramas, una para cada pulmón. Al final de las ramas están los {{alveolos}}.',
+    porque: 'Con los nervios se puede sentir la garganta cerrada o un nudo, aunque el aire sigue pasando todo el tiempo.',
+    ayuda: 'Tragar saliva, beber agua a sorbos y soltar el aire largo. Si de verdad no entra el aire o se hinchan los labios o la lengua, llama a emergencias.',
+    ir: { to: '/calma', label: 'Respirar despacio' },
+  },
+  {
+    id: 'diafragma',
+    nombre: 'Diafragma',
+    capa: 'organos',
+    que: 'El músculo en forma de cúpula debajo de los pulmones. Al bajar, mete el aire; sigue trabajando aunque duermas o no lo pienses.',
+    porque: 'Con la tensión se queda arriba, apretado, y la respiración se vuelve corta y por el pecho.',
+    ayuda: 'Una mano en la panza: siente que se infla al tomar aire y baja al soltarlo. Eso es el diafragma moviéndose.',
     ir: { to: '/calma', label: 'Respirar despacio' },
   },
   {
@@ -94,7 +152,7 @@ export const PARTES: Parte[] = [
     capa: 'organos',
     que: 'Un músculo del tamaño de tu puño que mueve la sangre por todo el cuerpo, sin descanso y sin que lo pienses.',
     porque:
-      'La adrenalina lo hace latir más rápido y más fuerte para llevar sangre a brazos y piernas. Sentirlo así no quiere decir que esté fallando: con la ansiedad, el cerebro le sube el volumen a lo que sientes por dentro.',
+      'La {{adrenalina}} lo hace latir más rápido y más fuerte para llevar sangre a brazos y piernas. Sentirlo así no quiere decir que esté fallando: con la ansiedad, el cerebro le sube el volumen a lo que sientes por dentro.',
     ayuda:
       'Exhalar largo y esperar: el latido baja solo en unos minutos. Si el dolor de pecho no se quita o se va al brazo, la mandíbula o la espalda, llama a emergencias.',
     ir: { to: '/cuerpo?ver=panico', label: 'Ver qué pasa en el pánico' },
@@ -124,9 +182,9 @@ export const PARTES: Parte[] = [
     id: 'rinones',
     nombre: 'Riñones y suprarrenales',
     capa: 'organos',
-    que: 'Los riñones limpian la sangre. Encima de cada uno hay una glándula chiquita, la suprarrenal, que suelta las hormonas de la alarma.',
+    que: 'Los riñones limpian la sangre. Encima de cada uno hay una glándula chiquita, la {{suprarrenales|suprarrenal}}, que suelta las hormonas de la alarma.',
     porque:
-      'Hay dos alarmas. La adrenalina es el chispazo: llega en segundos y se gasta en minutos, por eso el pánico sube y baja. El cortisol es la alarma lenta: con el estrés de semanas se queda encendido en bajito y cansa.',
+      'Hay dos alarmas. La {{adrenalina}} es el chispazo: llega en segundos y se gasta en minutos, por eso el pánico sube y baja. El {{cortisol}} es la alarma lenta: con el estrés de semanas se queda encendido en bajito y cansa.',
     ayuda: 'Para el chispazo, esperar y exhalar: pasa. Para la alarma lenta, pausas de verdad durante el día, moverse y dormir a horas parecidas.',
     ir: { to: '/cuerpo?ver=estres', label: 'Ver qué hace el estrés' },
   },

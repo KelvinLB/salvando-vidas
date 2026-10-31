@@ -2,7 +2,10 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import BodyEntry from '../components/BodyEntry'
 import PageHeader from '../components/PageHeader'
-import { buzz } from '../lib/storage'
+import RespirarPorDentro from '../components/RespirarPorDentro'
+import type { Aire } from '../components/cuerpo3d/escena'
+import { PESO_3D, revisar3d } from '../components/cuerpo3d/soporte'
+import { buzz, useStored } from '../lib/storage'
 
 type Phase = { label: string; seconds: number; scale: number }
 
@@ -39,14 +42,25 @@ const PATTERNS: { id: string; name: string; hint: string; phases: Phase[] }[] = 
   },
 ]
 
+const AIRE: Record<string, Aire['tipo']> = { Inhala: 'toma', Exhala: 'suelta', Sostén: 'sostiene' }
+
 export function Breathing({
   initial = PATTERNS[0].id,
   autoStart = false,
+  porDentro = false,
 }: {
   initial?: string
   /** En una crisis no hay que pedir un toque más: la respiración arranca sola. */
   autoStart?: boolean
+  /** Ofrece ver la respiración en el pecho en 3D. En Pánico no: ahí basta el círculo. */
+  porDentro?: boolean
 }) {
+  const [vista, setVista] = useStored<'circulo' | 'dentro'>('respirar-vista', 'circulo')
+  // Se revisa una vez: si el teléfono no puede con el 3D, ni se ofrece.
+  const [motivo] = useState(() => (porDentro ? revisar3d() : 'sin-webgl'))
+  const [fallo, setFallo] = useState(false)
+  const puede3d = motivo !== 'sin-webgl' && motivo !== 'debil' && !fallo
+  const dentro = puede3d && vista === 'dentro'
   const [patternId, setPatternId] = useState(initial)
   const [running, setRunning] = useState(autoStart)
   const [index, setIndex] = useState(0)
@@ -81,6 +95,15 @@ export function Breathing({
     setRunning(true)
   }
 
+  const etiqueta = running ? (
+    <>
+      <strong>{phase.label}</strong>
+      <span>{left}</span>
+    </>
+  ) : (
+    <strong>Listo cuando tú lo estés</strong>
+  )
+
   return (
     <section className="card center">
       <div className="chips" role="radiogroup" aria-label="Tipo de respiración">
@@ -101,25 +124,61 @@ export function Breathing({
       </div>
       <p className="muted">{pattern.hint}</p>
 
-      <div className="breath-stage" aria-live="polite">
-        <div
-          className="breath-circle"
-          style={{
-            transform: `scale(${running ? phase.scale : 0.7})`,
-            transitionDuration: `${running ? phase.seconds : 0.6}s`,
-          }}
-        />
-        <div className="breath-label">
-          {running ? (
-            <>
-              <strong>{phase.label}</strong>
-              <span>{left}</span>
-            </>
-          ) : (
-            <strong>Listo cuando tú lo estés</strong>
-          )}
+      {puede3d && (
+        <div className="chips breath-vista" role="radiogroup" aria-label="Cómo ver la respiración">
+          {(
+            [
+              ['circulo', 'Círculo'],
+              ['dentro', 'Por dentro'],
+            ] as const
+          ).map(([id, nombre]) => (
+            <button
+              key={id}
+              role="radio"
+              aria-checked={vista === id}
+              className={`chip ${vista === id ? 'selected' : ''}`}
+              onClick={() => setVista(id)}
+            >
+              {nombre}
+            </button>
+          ))}
         </div>
-      </div>
+      )}
+      {puede3d && vista === 'dentro' && motivo === 'datos' && (
+        <p className="muted breath-3d-nota">Tienes el ahorro de datos encendido: el pecho en 3D baja {PESO_3D} una sola vez.</p>
+      )}
+
+      {dentro ? (
+        <RespirarPorDentro
+          aire={{ tipo: running ? (AIRE[phase.label] ?? 'sostiene') : 'quieto', segundos: phase.seconds }}
+          paso={running ? `${patternId}-${cycles}-${index}` : 'quieto'}
+          onFalla={() => setFallo(true)}
+        >
+          <div className="breath-label" aria-live="polite">
+            {etiqueta}
+          </div>
+        </RespirarPorDentro>
+      ) : (
+        <div className="breath-stage" aria-live="polite">
+          <div
+            className="breath-circle"
+            style={{
+              transform: `scale(${running ? phase.scale : 0.7})`,
+              transitionDuration: `${running ? phase.seconds : 0.6}s`,
+            }}
+          />
+          <div className="breath-label">{etiqueta}</div>
+        </div>
+      )}
+      {dentro && (
+        <p className="muted breath-3d-nota">
+          Al tomar aire, el diafragma baja y los pulmones se llenan. Al soltarlo despacio, el nervio
+          vago frena un poquito al corazón: por eso exhalar largo calma.
+        </p>
+      )}
+      {fallo && vista === 'dentro' && (
+        <p className="muted breath-3d-nota">Esta vez no se pudo mostrar por dentro. Seguimos con el círculo.</p>
+      )}
 
       {running && cycles > 0 && (
         <p className="muted">
@@ -195,7 +254,7 @@ export default function Calma() {
         <h2>¿Es un ataque de pánico?</h2>
         <p className="muted">Te guiamos paso a paso para atravesarlo.</p>
       </Link>
-      <Breathing />
+      <Breathing porDentro />
       <Link to="/nervios" className="card link-card">
         <h2>Entender mis nervios</h2>
         <p className="muted">Seis lecciones cortas: qué es el pánico y por qué no es peligroso.</p>

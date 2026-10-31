@@ -24,6 +24,11 @@ export default function Redes() {
         </details>
       ))}
 
+      <Link to="/acompanar" className="card link-card">
+        <h2>¿Alguien escribió en el grupo que está mal?</h2>
+        <p className="muted">Qué contestarle, qué evitar y mensajes listos que llevan la línea de ayuda.</p>
+      </Link>
+
       <p className="disclaimer">
         Si algo de lo que leíste te hizo dudar de tu tratamiento, no lo dejes por tu cuenta: llévale la
         duda a tu médico. Esa pregunta también cabe en tu consulta.

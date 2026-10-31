@@ -142,6 +142,17 @@ export default function Ayuda() {
         </p>
       </section>
 
+      {/* Pendiente de revisión con psicóloga. En los grupos hay quien escribe en privado para
+          aprovecharse de alguien que está mal. */}
+      <section className="callout info" aria-labelledby="ayuda-privado">
+        <h2 id="ayuda-privado">Si alguien te escribe en privado</h2>
+        <p>
+          Quien ayuda de verdad no te pide dinero, fotos ni secretos, y no promete curarte. Las
+          líneas de apoyo de aquí arriba son gratis y oficiales. Si algo de un mensaje te incomoda,
+          puedes no contestar y bloquear.
+        </p>
+      </section>
+
       <CrisisPlan />
 
       <section className="card soft">
@@ -169,6 +180,11 @@ export default function Ayuda() {
           </Link>
         </div>
       </section>
+
+      <Link to="/acompanar" className="card link-card">
+        <h2>¿Alguien que quieres está mal?</h2>
+        <p className="muted">Qué decirle, qué no y mensajes listos para mandarle.</p>
+      </Link>
     </div>
   )
 }

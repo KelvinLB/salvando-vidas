@@ -39,6 +39,12 @@
   --body-dim: #dcd8d3;
   --skin-light: #f4ece2;
   --skin-shade: #dccbb8;
+  /* Escenario de las escenas 3D de vidrio: oscuro en los dos temas, como una sala con la luz
+     baja, porque el vidrio solo brilla en los bordes. */
+  --escena-bg-1: #1d3a37;
+  --escena-bg-2: #0f1c1b;
+  --escena-ink: #eef7f3;
+  --escena-ink-2: #b9cec7;
   --font-display: 'Fraunces Variable', Georgia, 'Times New Roman', serif;
   --font-body: 'Inter Variable', system-ui, -apple-system, 'Segoe UI', sans-serif;
   color-scheme: light;
@@ -6279,4 +6285,31 @@ html.diary-open {
 .page-loading {
   padding: 32px 0;
   text-align: center;
+}
+
+/* ---------- Cuando alguien que quieres está mal ---------- */
+
+.ac-frases {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.ac-frases li {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.ac-mensaje p {
+  margin: 0;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: var(--surface-soft);
+  line-height: 1.5;
+  user-select: text;
+}
+.ac-mensaje .row {
+  align-items: center;
 }
