@@ -828,6 +828,43 @@ input[type='checkbox'][role='switch']:checked::after {
   font-size: 2.4rem;
   font-weight: 300;
 }
+.breath-fase {
+  animation: breath-fase 0.3s ease-out;
+}
+@keyframes breath-fase {
+  from {
+    opacity: 0;
+  }
+}
+/* En vez de la cuenta: una línea que avanza a lo largo de la fase, sin números que cambien. */
+.breath-label .breath-progreso {
+  display: block;
+  width: 72px;
+  height: 3px;
+  margin-top: 8px;
+  overflow: hidden;
+  border-radius: 2px;
+  background: color-mix(in srgb, currentColor 22%, transparent);
+}
+.breath-avance {
+  display: block;
+  height: 100%;
+  background: currentColor;
+  transform-origin: left;
+  animation: breath-avance linear forwards;
+}
+@keyframes breath-avance {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+.breath-segundos {
+  justify-content: center;
+  font-weight: 400;
+}
 
 /* ---------- Música y videos ---------- */
 
@@ -1336,9 +1373,9 @@ audio {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  /* El círculo de respiración (y la mascota cuando respira contigo) se quedan: su movimiento
-     lento es la guía. */
-  *:not(.breath-circle):not(.pet-breath),
+  /* El círculo de respiración, su línea de avance y la mascota cuando respira contigo se quedan:
+     su movimiento lento es la guía. */
+  *:not(.breath-circle):not(.breath-avance):not(.pet-breath),
   *::before,
   *::after {
     transition-duration: 0.01ms !important;

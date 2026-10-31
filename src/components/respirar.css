@@ -51,6 +51,10 @@
 .breath-3d .breath-label span {
   font-size: 1.6rem;
 }
+.breath-3d .breath-label .breath-progreso {
+  align-self: center;
+  margin-top: 0;
+}
 .breath-3d-nota {
   max-width: 34ch;
   margin: 0 auto;

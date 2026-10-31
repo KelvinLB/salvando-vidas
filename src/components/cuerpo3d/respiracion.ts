@@ -1,12 +1,19 @@
 // «Respirar por dentro»: el pecho del modelo de «Explorar por dentro» visto como vidrio, siguiendo
 // el mismo ritmo que el círculo de Calma. Al tomar aire, el diafragma baja, los pulmones se llenan y
-// el aire (turquesa) baja por la tráquea y se reparte; al soltarlo sale tibio y el nervio vago lleva
-// el freno hacia abajo.
+// el aire (turquesa) baja por la tráquea, se reparte y los va llenando de abajo hacia arriba; al
+// soltarlo el nivel baja, el aire sale tibio y el nervio vago lleva el freno hacia abajo.
 //
 // Sin parpadeos: el cuerpo no se mece, los colores no laten y nada brilla de golpe. Cuidados para
 // teléfonos sencillos como en escena.ts: pixelRatio con tope, a lo mucho 30 cuadros por segundo,
 // pausa fuera de pantalla o con la app en segundo plano, y un solo cuadro cuando no hay respiración.
-// Con «reducir movimiento» se mueven solo los pulmones y el aire, igual que el círculo, que es la guía.
+// Con «reducir movimiento» nada se mueve: solo sube y baja el nivel del aire, que es la guía.
+//
+// Para que respirar con ella cueste lo menos posible (ver «Animación que invita a respirar»): el
+// nivel del aire es lo único que marca el tiempo; arranca y llega suave, y nunca se llena hasta el
+// tope, porque el esfuerzo se contagia antes que la calma. Dos marcas tenues y fijas enseñan hasta
+// dónde sube y hasta dónde baja. Al sostener, todo se queda quieto. El corazón no late mientras se
+// respira (sería un segundo ritmo que pelea por la mirada), la luz no sube con el aire, y el aire
+// de salida es durazno apagado, no naranja fuerte.
 import {
   AmbientLight,
   Box3,
@@ -45,8 +52,8 @@ type Opciones = {
 }
 
 const AIRE = new Color('#5fe3e0')
-const TIBIO = new Color('#ffb36b')
-const FRENO = new Color('#6fe0a8')
+const TIBIO = new Color('#d1966d')
+const FRENO = new Color('#97ccae')
 const suave = (x: number) => x * x * (3 - 2 * x)
 const entre = (x: number) => Math.min(1, Math.max(0, x))
 
@@ -110,10 +117,50 @@ export async function crearRespiracion(canvas: HTMLCanvasElement, opts: Opciones
   })
   pulmones.renderOrder = 3
   soloPiezasGrandes(pulmones.geometry)
+  // Cómo se van llenando: un nivel de aire turquesa que sube desde abajo al tomar aire y baja al
+  // soltarlo, con la superficie un poco más clara para que se lea bien dónde va. Las alturas van en
+  // el mundo.
+  const nivel = {
+    uNivel: { value: bPul.min.y },
+    uBordeNivel: { value: 0.03 * (bPul.max.y - bPul.min.y) },
+    uLleno: { value: AIRE },
+    // Marcas fijas de lleno y de vacío.
+    uMarcaArriba: { value: bPul.max.y },
+    uMarcaAbajo: { value: bPul.min.y },
+  }
+  pulmones.material.onBeforeCompile = (sh) => {
+    Object.assign(sh.uniforms, nivel)
+    sh.vertexShader = sh.vertexShader
+      .replace('#include <common>', '#include <common>\nvarying float vAltura;')
+      .replace('#include <project_vertex>', '#include <project_vertex>\nvAltura = (modelMatrix * vec4(transformed, 1.0)).y;')
+    sh.fragmentShader = sh.fragmentShader
+      .replace(
+        '#include <common>',
+        '#include <common>\nvarying float vAltura;\nuniform float uNivel;\nuniform float uBordeNivel;\nuniform vec3 uLleno;\nuniform float uMarcaArriba;\nuniform float uMarcaAbajo;',
+      )
+      .replace(
+        '#include <emissivemap_fragment>',
+        `#include <emissivemap_fragment>
+        float lleno = 1.0 - smoothstep(uNivel - uBordeNivel, uNivel + uBordeNivel, vAltura);
+        diffuseColor.rgb = mix(diffuseColor.rgb, uLleno, 0.55 * lleno);
+        diffuseColor.a = mix(diffuseColor.a, 0.8, lleno);
+        totalEmissiveRadiance += uLleno * 0.12 * lleno;
+        float raya = 1.0 - smoothstep(0.0015, 0.0045, abs(vAltura - uNivel));
+        diffuseColor.rgb = mix(diffuseColor.rgb, vec3(0.86, 1.0, 0.98), 0.6 * raya);
+        diffuseColor.a = max(diffuseColor.a, 0.85 * raya);
+        float marca = max(
+          1.0 - smoothstep(0.001, 0.0035, abs(vAltura - uMarcaArriba)),
+          1.0 - smoothstep(0.001, 0.0035, abs(vAltura - uMarcaAbajo))
+        );
+        diffuseColor.rgb = mix(diffuseColor.rgb, vec3(0.92, 0.97, 0.95), 0.45 * marca);
+        diffuseColor.a = max(diffuseColor.a, 0.6 * marca);`,
+      )
+  }
   corazon.material = new MeshStandardMaterial({ color: '#d4675a', roughness: 0.5 })
 
   const cP = bPul.getCenter(new Vector3())
-  const cH = bCor.getCenter(new Vector3())
+  // Los pulmones crecen desde arriba: hacia abajo, siguiendo al diafragma, y un poco a los lados.
+  const arribaPul = new Vector3(cP.x, bPul.max.y, cP.z)
   const ancho = bPul.max.x - bPul.min.x
   const altoPul = bPul.max.y - bPul.min.y
 
@@ -164,31 +211,44 @@ export async function crearRespiracion(canvas: HTMLCanvasElement, opts: Opciones
     while (p.lengthSq() > 1)
     const destino = new Vector3(
       cP.x + (lado ? 1 : -1) * ancho * 0.25 + p.x * ancho * 0.2,
-      cP.y + p.y * altoPul * 0.4,
+      cP.y + p.y * altoPul * (p.y > 0 ? 0.4 : 0.22), // abajo, al centro, el pulmón se recorta: que no se salga
       cP.z + p.z * (bPul.max.z - bPul.min.z) * 0.33,
     )
     return { lado, destino, retraso: azar() * 0.3 }
   })
 
-  // Cámara fija de frente al pecho, del cuello al diafragma.
-  const mira = new Vector3(cP.x, (bPul.max.y + 0.09 + domoY - 0.03) / 2, cP.z)
-  const altoVista = bPul.max.y + 0.09 - (domoY - 0.03)
+  // Cámara fija de frente al pecho, del cuello al diafragma, con lugar abajo para la fase: el
+  // diafragma es lo primero que se mueve y no debe quedar tapado.
+  const arribaVista = bPul.max.y + 0.08
+  const abajoVista = domoY - 0.11
+  const mira = new Vector3(cP.x, (arribaVista + abajoVista) / 2, cP.z)
+  const altoVista = arribaVista - abajoVista
 
   // ---------- Bucle ----------
   let aire: Aire = { tipo: 'quieto', segundos: 1 }
   let desde = performance.now()
   let llenadoInicio = 0.35
   let llenado = 0.35
-  let latido = 0
   let raf = 0
   let ultimo = 0
   let visible = true
   const pt = new Vector3()
   const base = { pos: pulmones.position.clone(), scale: pulmones.scale.clone() }
-  const baseCor = { pos: corazon.position.clone(), scale: corazon.scale.clone() }
-  const escalar = (m: Mesh, b: typeof base, c: Vector3, k: number) => {
-    m.scale.copy(b.scale).multiplyScalar(k)
-    m.position.copy(b.pos).multiplyScalar(k).addScaledVector(c, 1 - k)
+  const k3 = new Vector3()
+  /** Altura del nivel: de casi vacío (siempre queda un poco de aire) a lleno sin llegar al tope. */
+  const alturaNivel = (llenado: number, crece: number) => {
+    const abajo = arribaPul.y - altoPul * (1 + 0.045 * crece)
+    return abajo + (arribaPul.y - abajo) * (0.12 + 0.66 * llenado)
+  }
+  nivel.uMarcaArriba.value = alturaNivel(1, opts.still ? 0 : 1)
+  nivel.uMarcaAbajo.value = alturaNivel(0, 0)
+  const escalar = (m: Mesh, b: typeof base, c: Vector3, k: Vector3) => {
+    m.scale.copy(b.scale).multiply(k)
+    m.position.set(
+      b.pos.x * k.x + c.x * (1 - k.x),
+      b.pos.y * k.y + c.y * (1 - k.y),
+      b.pos.z * k.z + c.z * (1 - k.z),
+    )
   }
 
   const resize = () => {
@@ -200,7 +260,8 @@ export async function crearRespiracion(canvas: HTMLCanvasElement, opts: Opciones
     // Que el pecho quepa a lo alto y a lo ancho.
     const mitad = Math.tan((camera.fov * Math.PI) / 360)
     const dist = Math.max(altoVista / 2 / mitad, (ancho * 0.75) / camera.aspect / mitad) * 1.08
-    camera.position.set(mira.x, mira.y + 0.02, mira.z + dist)
+    // Un poco desde arriba, como cuando te miras el pecho; la cámara nunca se mueve con la respiración.
+    camera.position.set(mira.x, mira.y + dist * 0.17, mira.z + dist)
     camera.lookAt(mira)
     camera.updateProjectionMatrix()
     const escala = (h * renderer.getPixelRatio()) / (2 * mitad)
@@ -211,19 +272,23 @@ export async function crearRespiracion(canvas: HTMLCanvasElement, opts: Opciones
 
   const cuadro = (now: number) => {
     const p = entre((now - desde) / 1000 / aire.segundos)
-    const e = suave(p)
+    // Al soltar, el aire sale más rápido al principio y llega despacio al fondo, como pasa de verdad.
+    const e = suave(aire.tipo === 'suelta' ? 1 - (1 - p) ** 1.6 : p)
     if (aire.tipo === 'toma') llenado = llenadoInicio + (1 - llenadoInicio) * e
     else if (aire.tipo === 'suelta') llenado = llenadoInicio * (1 - e)
 
-    escalar(pulmones, base, cP, 1 + 0.05 * llenado)
-    moverDiafragma(domo, domoY, llenado)
-    ;(pulmones.material as MeshStandardMaterial).emissiveIntensity = 0.25 * llenado
+    // Crecen hacia abajo con el diafragma, que es lo que se mueve primero al respirar bien.
+    const crece = opts.still ? 0 : llenado
+    escalar(pulmones, base, arribaPul, k3.set(1 + 0.03 * crece, 1 + 0.045 * crece, 1 + 0.03 * crece))
+    moverDiafragma(domo, domoY, crece)
+    nivel.uNivel.value = alturaNivel(llenado, crece)
 
-    // El aire entra en turquesa y sale tibio; mientras se sostiene, se queda donde está.
-    const hayAire = aire.tipo !== 'quieto'
+    // El aire entra en turquesa y sale tibio; mientras se sostiene, se queda donde está. Con «reducir
+    // movimiento» no hay partículas: basta el nivel.
+    const hayAire = aire.tipo !== 'quieto' && !opts.still
     aireMat.uniforms.uOp.value = hayAire ? 1 : 0
     if (hayAire) {
-      if (aire.tipo === 'suelta') aireMat.uniforms.uColor.value.copy(AIRE).lerp(TIBIO, suave(entre(p * 1.6)))
+      if (aire.tipo === 'suelta') aireMat.uniforms.uColor.value.copy(AIRE).lerp(TIBIO, suave(entre(p * 3)))
       else if (aire.tipo === 'toma') aireMat.uniforms.uColor.value.copy(AIRE)
       particulas.forEach((s, i) => {
         let l: number
@@ -241,7 +306,7 @@ export async function crearRespiracion(canvas: HTMLCanvasElement, opts: Opciones
 
     // El freno baja por el vago al soltar el aire (sin «reducir movimiento»).
     const freno = !opts.still && aire.tipo === 'suelta'
-    vagoMat.uniforms.uOp.value = freno ? Math.sin(p * Math.PI) : 0
+    vagoMat.uniforms.uOp.value = freno ? 0.7 * Math.sin(p * Math.PI) : 0
     if (freno) {
       for (let i = 0; i < NV; i++) {
         const u = entre(p * 1.1 - i * 0.012)
@@ -253,13 +318,6 @@ export async function crearRespiracion(canvas: HTMLCanvasElement, opts: Opciones
       vagoGeo.attributes.aA.needsUpdate = true
     }
 
-    // Latido tranquilo: un poquito más rápido al tomar aire y más lento al soltarlo.
-    if (!opts.still) {
-      const bpm = aire.tipo === 'toma' ? 68 : aire.tipo === 'suelta' ? 62 : 65
-      latido = (latido + ((now - (ultimo || now)) / 1000) * (bpm / 60)) % 1
-      const golpe = Math.exp(-((latido - 0.1) ** 2) / 0.002) + 0.5 * Math.exp(-((latido - 0.27) ** 2) / 0.0016)
-      escalar(corazon, baseCor, cH, 1 + 0.02 * golpe)
-    }
     renderer.render(scene, camera)
   }
 

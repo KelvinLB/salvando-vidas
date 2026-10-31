@@ -20,6 +20,15 @@ const PATTERNS: { id: string; name: string; hint: string; phases: Phase[] }[] = 
     ],
   },
   {
+    id: 'pareja',
+    name: 'Pareja 5-5',
+    hint: 'El mismo tiempo para tomar y soltar el aire. Si el 4-6 se te hace largo, prueba esta.',
+    phases: [
+      { label: 'Inhala', seconds: 5, scale: 1 },
+      { label: 'Exhala', seconds: 5, scale: 0.55 },
+    ],
+  },
+  {
     id: 'caja',
     name: 'Caja 4-4-4-4',
     hint: 'Ritmo parejo para ordenar la mente.',
@@ -43,6 +52,18 @@ const PATTERNS: { id: string; name: string; hint: string; phases: Phase[] }[] = 
 ]
 
 const AIRE: Record<string, Aire['tipo']> = { Inhala: 'toma', Exhala: 'suelta', Sostén: 'sostiene' }
+/** Lo que se lee en pantalla: una invitación, no una orden. */
+const DECIR: Record<string, string> = { Inhala: 'Toma aire', Exhala: 'Suelta el aire', Sostén: 'Quédate así' }
+/** Las respiraciones con sostén piden más; se ofrecen para cuando ya practicaste. */
+const CON_SOSTEN = ['caja', '478']
+
+// Las primeras vueltas van un poco más rápido y el ritmo se alarga solo hasta el patrón: seguir un
+// ritmo muy lento desde el principio cuesta y deja con hambre de aire.
+const RAMPA = [0.7, 0.8, 0.9]
+const duracion = (ph: Phase, ciclo: number) => Math.max(2, Math.round(ph.seconds * (RAMPA[ciclo] ?? 1)))
+/** Segundos que llevan las vueltas ya completas. */
+const llevas = (phases: Phase[], ciclos: number) =>
+  Array.from({ length: ciclos }, (_, c) => phases.reduce((t, ph) => t + duracion(ph, c), 0)).reduce((a, b) => a + b, 0)
 
 export function Breathing({
   initial = PATTERNS[0].id,
@@ -56,6 +77,8 @@ export function Breathing({
   porDentro?: boolean
 }) {
   const [vista, setVista] = useStored<'circulo' | 'dentro'>('respirar-vista', 'circulo')
+  // Los números que cambian cada segundo distraen del ritmo: por omisión, solo una línea que avanza.
+  const [verSegundos, setVerSegundos] = useStored('respirar-segundos', false)
   // Se revisa una vez: si el teléfono no puede con el 3D, ni se ofrece.
   const [motivo] = useState(() => (porDentro ? revisar3d() : 'sin-webgl'))
   const [fallo, setFallo] = useState(false)
@@ -65,12 +88,13 @@ export function Breathing({
   const [running, setRunning] = useState(autoStart)
   const [index, setIndex] = useState(0)
   const [left, setLeft] = useState(() =>
-    autoStart ? PATTERNS.find((p) => p.id === initial)!.phases[0].seconds : 0,
+    autoStart ? duracion(PATTERNS.find((p) => p.id === initial)!.phases[0], 0) : 0,
   )
   const [cycles, setCycles] = useState(0)
 
   const pattern = PATTERNS.find((p) => p.id === patternId)!
   const phase = pattern.phases[index]
+  const segundos = duracion(phase, cycles)
 
   useEffect(() => {
     if (!running) return
@@ -79,26 +103,35 @@ export function Breathing({
       const timer = setTimeout(() => {
         if (next === 0) setCycles((c) => c + 1)
         setIndex(next)
-        setLeft(pattern.phases[next].seconds)
+        setLeft(duracion(pattern.phases[next], next === 0 ? cycles + 1 : cycles))
         buzz(20)
       }, 0)
       return () => clearTimeout(timer)
     }
     const timer = setTimeout(() => setLeft((s) => s - 1), 1000)
     return () => clearTimeout(timer)
-  }, [running, left, index, pattern])
+  }, [running, left, index, pattern, cycles])
 
   const start = () => {
     setIndex(0)
-    setLeft(pattern.phases[0].seconds)
+    setLeft(duracion(pattern.phases[0], 0))
     setCycles(0)
     setRunning(true)
   }
 
+  const paso = `${patternId}-${cycles}-${index}`
   const etiqueta = running ? (
     <>
-      <strong>{phase.label}</strong>
-      <span>{left}</span>
+      <strong key={paso} className="breath-fase">
+        {DECIR[phase.label] ?? phase.label}
+      </strong>
+      {verSegundos ? (
+        <span>{left}</span>
+      ) : (
+        <span className="breath-progreso" aria-hidden="true">
+          <i key={paso} className="breath-avance" style={{ animationDuration: `${segundos}s` }} />
+        </span>
+      )}
     </>
   ) : (
     <strong>Listo cuando tú lo estés</strong>
@@ -123,6 +156,12 @@ export function Breathing({
         ))}
       </div>
       <p className="muted">{pattern.hint}</p>
+      {CON_SOSTEN.includes(patternId) && (
+        <p className="muted small">
+          Va mejor cuando ya practicaste. Si en un sostén te falta el aire, suéltalo; también puedes regresar a Calma 4-6
+          o respirar a tu ritmo.
+        </p>
+      )}
 
       {puede3d && (
         <div className="chips breath-vista" role="radiogroup" aria-label="Cómo ver la respiración">
@@ -150,8 +189,8 @@ export function Breathing({
 
       {dentro ? (
         <RespirarPorDentro
-          aire={{ tipo: running ? (AIRE[phase.label] ?? 'sostiene') : 'quieto', segundos: phase.seconds }}
-          paso={running ? `${patternId}-${cycles}-${index}` : 'quieto'}
+          aire={{ tipo: running ? (AIRE[phase.label] ?? 'sostiene') : 'quieto', segundos }}
+          paso={running ? paso : 'quieto'}
           onFalla={() => setFallo(true)}
         >
           <div className="breath-label" aria-live="polite">
@@ -164,7 +203,7 @@ export function Breathing({
             className="breath-circle"
             style={{
               transform: `scale(${running ? phase.scale : 0.7})`,
-              transitionDuration: `${running ? phase.seconds : 0.6}s`,
+              transitionDuration: `${running ? segundos : 0.6}s`,
             }}
           />
           <div className="breath-label">{etiqueta}</div>
@@ -172,22 +211,36 @@ export function Breathing({
       )}
       {dentro && (
         <p className="muted breath-3d-nota">
-          Al tomar aire, el diafragma baja y los pulmones se llenan. Al soltarlo despacio, el nervio
-          vago frena un poquito al corazón: por eso exhalar largo calma.
+          Respira con ellos: el aire sube cuando lo tomas y baja cuando lo sueltas. Al soltarlo despacio,
+          el nervio vago frena un poquito al corazón: por eso exhalar largo calma.
         </p>
       )}
       {fallo && vista === 'dentro' && (
         <p className="muted breath-3d-nota">Esta vez no se pudo mostrar por dentro. Seguimos con el círculo.</p>
       )}
 
+      {!running && (
+        <p className="muted small">
+          Respira suave, sin llenarte del todo. Empezamos un poco más rápido y el ritmo se va haciendo lento solo. Con
+          práctica se vuelve más fácil.
+        </p>
+      )}
       {running && cycles > 0 && (
         <p className="muted">
           {cycles} {cycles === 1 ? 'ciclo' : 'ciclos'}. Lo estás haciendo bien.
+          {cycles >= 3 && ' Si prefieres, sigue a tu ritmo: también sirve.'}
         </p>
+      )}
+      {running && llevas(pattern.phases, cycles) >= 120 && (
+        <p className="muted small">Ya llevas un par de minutos. Puedes parar cuando quieras o seguir un poco más.</p>
       )}
       <button className="btn big" onClick={running ? () => setRunning(false) : start}>
         {running ? 'Pausar' : 'Empezar'}
       </button>
+      <label className="toggle breath-segundos">
+        <input type="checkbox" role="switch" checked={verSegundos} onChange={(e) => setVerSegundos(e.target.checked)} />
+        Ver los segundos
+      </label>
     </section>
   )
 }
