@@ -1,0 +1,4 @@
+/* Lo que se dice en redes: el enlace de cada tarjeta, a su tamaño y no de orilla a orilla. */
+.redes .myth .btn {
+  align-self: flex-start;
+}

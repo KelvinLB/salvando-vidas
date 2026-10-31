@@ -2,12 +2,11 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import BodyEntry from '../components/BodyEntry'
 import CompanionView from '../components/Companion'
-import DayPlanCard from '../components/DayPlanCard'
 import Filas from '../components/Filas'
-import { DEFAULT_COMPANION, LIKES, companionName, likePhrase } from '../data/companion'
-import { FAITH_MESSAGES, GENTLE_MESSAGES, MICRO_MISSIONS, MOODS } from '../data/content'
+import { DEFAULT_COMPANION, companionName } from '../data/companion'
+import { FAITH_MESSAGES, GENTLE_MESSAGES, MOODS } from '../data/content'
 import { moodFromScale, useCompanion } from '../lib/companion'
-import { useDayPlans } from '../lib/dayplan'
+import { planDone, useDayPlans } from '../lib/dayplan'
 import { type Letter, type MoodEntry, pick, today, useAddress, useStored } from '../lib/storage'
 
 function greeting() {
@@ -31,26 +30,6 @@ const isNight = () => {
   return h >= 22 || h < 6
 }
 
-function LikeCard({ like, name }: { like: (typeof LIKES)[number]; name: string }) {
-  const body = (
-    <>
-      <h2>
-        {like.emoji} {likePhrase(name, like)}
-      </h2>
-      <p className="muted">¿Le damos un rato? Aunque hoy no den ganas, a veces lo conocido ayuda.</p>
-    </>
-  )
-  return like.to ? (
-    <Link to={like.to} className="card link-card">
-      {body}
-    </Link>
-  ) : (
-    <a href={like.href} target="_blank" rel="noopener noreferrer" className="card link-card">
-      {body}
-    </a>
-  )
-}
-
 export default function Inicio() {
   const [faith] = useStored('fe', false)
   // Si la mascota ya flota en la pantalla, no se repite aquí arriba.
@@ -58,7 +37,6 @@ export default function Inicio() {
   const say = useAddress()
   const messages = faith ? [...GENTLE_MESSAGES, ...FAITH_MESSAGES] : GENTLE_MESSAGES
   const [message, setMessage] = useState(() => pick(messages))
-  const [mission, setMission] = useState(() => pick(MICRO_MISSIONS))
   const [moods, setMoods] = useStored<MoodEntry[]>('moods', [])
   const [letter] = useStored<Letter | null>('carta', null)
   const todayMood = moods.find((m) => m.date === today())?.mood
@@ -66,10 +44,7 @@ export default function Inicio() {
   const { today: todayPlan, tomorrow: tomorrowPlan } = useDayPlans()
   const evening = new Date().getHours() >= 18
   const name = companion ? companionName(companion) : ''
-  const [like] = useState(() => {
-    const liked = LIKES.filter((l) => companion?.likes.includes(l.id))
-    return liked.length ? pick(liked) : undefined
-  })
+  const tareas = todayPlan?.tasks.filter((t) => t.done).length ?? 0
 
   const saveMood = (mood: number) => {
     setMoods((prev) => [...prev.filter((m) => m.date !== today()), { date: today(), mood }])
@@ -77,9 +52,10 @@ export default function Inicio() {
     if (companion) setCompanionMood(moodFromScale(mood))
   }
 
-  // En el teléfono todo va en una columna, en el orden de lo más urgente a lo que puede esperar
-  // (cada pieza lleva su lugar con `order`). En computadora se abre en dos columnas: a la izquierda
-  // lo de este momento (pánico, cómo te sientes, tu día) y a la derecha lo demás.
+  // Una sola pregunta al frente: «¿Cómo te sientes hoy?». Arriba de ella, solo la ayuda para el
+  // pánico (y la de la noche, a esa hora); debajo, cuatro atajos y unas pocas puertas. Tu día, la
+  // misión pequeña y lo que le gusta a tu mascota viven en «Mi día». En computadora se abre en dos
+  // columnas: a la izquierda lo de este momento y a la derecha lo demás.
   return (
     <div className="inicio">
       <section className="hero inicio-hero">
@@ -144,7 +120,7 @@ export default function Inicio() {
                   Hablar con alguien
                 </Link>
                 {letter ? (
-                  <Link to="/mi-espacio/caja" className="btn ghost">
+                  <Link to="/mi-espacio/caja?c=carta" className="btn ghost">
                     💌 Leer la carta que te escribiste
                   </Link>
                 ) : (
@@ -162,37 +138,10 @@ export default function Inicio() {
           )}
         </section>
 
-        <div className="inicio-dia">
-          {todayPlan ? (
-            <DayPlanCard plan={todayPlan} compact />
-          ) : evening && !tomorrowPlan ? (
-            <Link to="/mi-dia" className="card link-card">
-              <h2>📝 Deja listo tu mañana</h2>
-              <p className="muted">Tres cosas pequeñas y un premio. Así, al despertar, no tienes que decidir nada.</p>
-            </Link>
-          ) : !evening ? (
-            <Link to="/mi-dia" className="card link-card">
-              <h2>¿Hoy cuesta levantarse?</h2>
-              <p className="muted">Un plan pequeño, con un premio al final, ayuda a dar el primer paso.</p>
-            </Link>
-          ) : null}
-          {companion && like && <LikeCard like={like} name={name} />}
-        </div>
-
-        <section className="card soft inicio-mision">
-          <h2>Una pequeña misión</h2>
-          <p className="mission">{mission}</p>
-          <button className="btn ghost small" onClick={() => setMission(pick(MICRO_MISSIONS))}>
-            Dame otra
-          </button>
-        </section>
+        <BodyEntry soloSiMarcaste />
       </div>
 
       <div className="inicio-col">
-        <div className="inicio-cuerpo">
-          <BodyEntry />
-        </div>
-
         <nav className="inicio-atajos" aria-labelledby="inicio-atajos-title">
           <h2 id="inicio-atajos-title" className="section-title">
             Para este momento
@@ -213,6 +162,17 @@ export default function Inicio() {
           className="inicio-mas"
           label="Más para ti"
           filas={[
+            {
+              to: '/mi-dia',
+              title: 'Mi día',
+              text: todayPlan
+                ? planDone(todayPlan)
+                  ? 'Día logrado ✓'
+                  : `${tareas} de ${todayPlan.tasks.length} cosas hechas hoy`
+                : evening && !tomorrowPlan
+                  ? 'Deja listo tu mañana: tres cosas pequeñas y un premio.'
+                  : '¿Hoy cuesta levantarse? Un plan pequeño, con un premio al final.',
+            },
             {
               to: '/diario',
               title: '¿No sabes bien qué sientes?',

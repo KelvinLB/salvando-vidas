@@ -7,10 +7,12 @@ import BodyStories from '../components/BodyStories'
 import Senal from '../components/senal/Senal'
 import { AREAS } from '../data/bodyCheck'
 import { STORIES } from '../data/bodyStories'
+import './tu-cuerpo.css'
 
 // Tu cuerpo por dentro: «Lo que siento» para marcar dónde se siente y bajarle, y
 // «Cómo funciona» para ver paso a paso qué pasa con cada condición y seguir la señal de la
-// alarma por el cuerpo hasta que el freno la apaga.
+// alarma por el cuerpo hasta que el freno la apaga. Lo principal es la figura para marcar; lo
+// demás (aflojar, la señal, el 3D, las preguntas) va en una sola tarjeta de filas, a un toque.
 
 const prefersStill = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
@@ -29,6 +31,9 @@ export default function Cuerpo() {
   const [mode, setMode] = useState<Mode>((story || senal) && !zone ? 'funciona' : 'siento')
   // Pide bajar hasta «Sigue la señal» en cuanto esté en la pantalla.
   const [toSenal, setToSenal] = useState(senal ? 1 : 0)
+  // «Aflojar» se abre a un toque; si llegan con /cuerpo#aflojar, ya viene abierto.
+  const [aflojar, setAflojar] = useState(hash === '#aflojar')
+  const [toAflojar, setToAflojar] = useState(0)
 
   useEffect(() => {
     if (hash) document.getElementById(hash.slice(1))?.scrollIntoView({ block: 'start' })
@@ -42,6 +47,19 @@ export default function Cuerpo() {
     )
     return () => cancelAnimationFrame(id)
   }, [toSenal, still])
+
+  useEffect(() => {
+    if (!toAflojar) return
+    const id = requestAnimationFrame(() =>
+      document.getElementById('aflojar')?.scrollIntoView({ block: 'start', behavior: still ? 'auto' : 'smooth' }),
+    )
+    return () => cancelAnimationFrame(id)
+  }, [toAflojar, still])
+
+  const openAflojar = () => {
+    setAflojar(true)
+    setToAflojar((n) => n + 1)
+  }
 
   const openSenal = () => {
     setMode('funciona')
@@ -75,17 +93,7 @@ export default function Cuerpo() {
       </div>
 
       {mode === 'siento' ? (
-        <>
-          <BodyCheck still={still} onStory={openStory} initialArea={zone} />
-          {/* Pendiente de revisión con psicóloga (textos de las dos tarjetas nuevas). */}
-          <button type="button" className="card link-card sg-go" onClick={openSenal}>
-            <span className="sg-go-title">Sigue la señal</span>
-            <span className="muted">
-              Mira cómo viaja la alarma por el cuerpo, del cerebro al corazón, y cómo la frena el aire
-              que sueltas despacio.
-            </span>
-          </button>
-        </>
+        <BodyCheck still={still} onStory={openStory} initialArea={zone} />
       ) : (
         <>
           <BodyStories key={story ?? 'ninguna'} initial={story} still={still} />
@@ -93,19 +101,63 @@ export default function Cuerpo() {
         </>
       )}
 
-      <Link to="/explorar" className="card link-card">
-        <h2>Explorar</h2>
-        <p className="muted">
-          Tu cuerpo por dentro, en 3D: gira el cuerpo y acércate a cada parte. Se descarga al abrirlo.
-        </p>
-      </Link>
+      {/* Pendiente de revisión con psicóloga (textos de «Sigue la señal» y «Aflojar»). */}
+      <h2 className="section-title filas-titulo">Más para tu cuerpo</h2>
+      <ul className="card filas cuerpo-mas" aria-label="Más para tu cuerpo">
+        {!aflojar && (
+          <li>
+            <button type="button" className="fila" onClick={openAflojar}>
+              <span className="tile-emoji fila-emoji" aria-hidden="true">
+                🌿
+              </span>
+              <span>
+                <strong>Aflojar donde lo sientes</strong>
+                <small>La mandíbula, los hombros, el pecho: elige dónde lo notas y lo aflojamos juntos, en un minuto.</small>
+              </span>
+            </button>
+          </li>
+        )}
+        {mode === 'siento' && (
+          <li>
+            <button type="button" className="fila" onClick={openSenal}>
+              <span className="tile-emoji fila-emoji" aria-hidden="true">
+                ⚡
+              </span>
+              <span>
+                <strong>Sigue la señal</strong>
+                <small>
+                  Mira cómo viaja la alarma por el cuerpo, del cerebro al corazón, y cómo la frena el aire que
+                  sueltas despacio.
+                </small>
+              </span>
+            </button>
+          </li>
+        )}
+        <li>
+          <Link to="/explorar" className="fila">
+            <span className="tile-emoji fila-emoji" aria-hidden="true">
+              🧭
+            </span>
+            <span>
+              <strong>Explorar</strong>
+              <small>Tu cuerpo por dentro, en 3D: gira el cuerpo y acércate a cada parte. Se descarga al abrirlo.</small>
+            </span>
+          </Link>
+        </li>
+        <li>
+          <Link to="/mascota" className="fila">
+            <span className="tile-emoji fila-emoji" aria-hidden="true">
+              🐾
+            </span>
+            <span>
+              <strong>¿No sabes bien qué es?</strong>
+              <small>Responde unas preguntas con tu mascota y te decimos qué se parece más a lo que vives.</small>
+            </span>
+          </Link>
+        </li>
+      </ul>
 
-      <Link to="/mascota" className="card link-card">
-        <h2>¿No sabes bien qué es?</h2>
-        <p className="muted">Responde unas preguntas con tu mascota y te decimos qué se parece más a lo que vives.</p>
-      </Link>
-
-      <BodyRelease />
+      {aflojar && <BodyRelease />}
 
       <p className="disclaimer">
         Es una explicación sencilla, no un diagnóstico. Si algo de esto te pasa seguido, vale la pena

@@ -1,5 +1,6 @@
 import { type CSSProperties, useState } from 'react'
 import { Link } from 'react-router-dom'
+import Capitulos, { useCapitulo } from '../components/Capitulos'
 import PageHeader from '../components/PageHeader'
 import RiskNotice from '../components/RiskNotice'
 import { soundsLikeRisk } from '../lib/risk'
@@ -82,76 +83,115 @@ const RIGHT_NOW = [
   { emoji: '⏳', text: 'Espera para responder. Lo que se escribe o se dice con el enojo arriba casi siempre se lamenta después.' },
 ]
 
+// Si el enojo podría lastimar a alguien: se ve en la pantalla principal y en cada tema.
+function PideAyuda() {
+  return (
+    <div className="callout warm">
+      <p>
+        Si sientes que podrías lastimar a alguien o lastimarte, aléjate de la situación ahora y pide
+        ayuda.
+      </p>
+      <Link to="/ayuda" className="btn">
+        Hablar con alguien ahora
+      </Link>
+    </div>
+  )
+}
+
+// LA cosa de esta pantalla es sacar el enojo escribiéndolo y rompiéndolo; lo demás (bajarlo con
+// el cuerpo, entender qué pasa, qué hacer después) son temas que se abren aparte.
 export default function Enojo() {
+  const capitulo = useCapitulo()
+
   return (
     <div className="stack">
-      <PageHeader
-        title="Cuando el enojo no se va"
-        subtitle="Enojarte no te hace mala persona. Pero cargarlo mucho tiempo cansa al cuerpo y a la mente."
+      <Capitulos
+        label="Más sobre el enojo"
+        antes={
+          <>
+            <PageHeader
+              title="Cuando el enojo no se va"
+              subtitle="Enojarte no te hace mala persona. Pero cargarlo mucho tiempo cansa al cuerpo y a la mente."
+            />
+            <TearItUp />
+            <PideAyuda />
+            <h2 className="section-title">Si quieres más</h2>
+          </>
+        }
+        capitulos={[
+          {
+            id: 'bajarlo',
+            emoji: '🌬️',
+            title: 'Para bajarlo ahora',
+            text: 'Cinco cosas para hacer ya: aire, puños, moverte, agua fría y esperar.',
+            content: (
+              <section className="card">
+                <ul className="helped">
+                  {RIGHT_NOW.map((r) => (
+                    <li key={r.text}>
+                      <span aria-hidden="true">{r.emoji}</span>
+                      <span>
+                        {r.text}{' '}
+                        {r.to && (
+                          <Link to={r.to} className="small">
+                            {r.action}
+                          </Link>
+                        )}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            ),
+          },
+          {
+            id: 'cuerpo',
+            emoji: '🫀',
+            title: 'Lo que pasa en el cuerpo',
+            text: 'Por qué el enojo que dura cansa, y por qué se recupera.',
+            content: (
+              <section className="card">
+                <p>
+                  El enojo prepara al cuerpo para defenderse: acelera el corazón, tensa los músculos y libera
+                  hormonas del estrés. Si dura días o semanas, el cuerpo se queda en alerta. Eso agota, nubla las
+                  ideas y hace ver amenazas donde no las hay.
+                </p>
+                <p>
+                  No es «carácter fuerte»: es un cuerpo sobrecargado. Y no es para asustarse: cuando el cuerpo
+                  descansa y se atiende, se recupera.
+                </p>
+                <p className="muted small">
+                  En la depresión y la ansiedad la irritabilidad es muy común, sobre todo en los hombres: a veces
+                  la tristeza sale como enojo.
+                </p>
+                <Link to="/cuerpo?ver=estres" className="btn small ghost">
+                  Ver cómo reacciona el cuerpo
+                </Link>
+              </section>
+            ),
+          },
+          {
+            id: 'despues',
+            emoji: '🌱',
+            title: 'Cuando ya bajó',
+            text: 'Qué necesitabas en ese momento, y cuándo contárselo a alguien.',
+            content: (
+              <section className="card soft">
+                <p>
+                  Pregúntate qué necesitabas en ese momento: ¿que te escucharan?, ¿descansar?, ¿poner un límite?
+                  El enojo casi siempre cuida algo importante. Si está contigo casi todos los días, cuéntaselo a
+                  un especialista: también se trata.
+                </p>
+                <Link to="/diario" className="btn ghost">
+                  Escribir lo que pasó
+                </Link>
+              </section>
+            ),
+          },
+        ]}
       />
 
-      <section className="card">
-        <h2>Lo que pasa en el cuerpo</h2>
-        <p>
-          El enojo prepara al cuerpo para defenderse: acelera el corazón, tensa los músculos y libera
-          hormonas del estrés. Si dura días o semanas, el cuerpo se queda en alerta. Eso agota, nubla las
-          ideas y hace ver amenazas donde no las hay.
-        </p>
-        <p>
-          No es «carácter fuerte»: es un cuerpo sobrecargado. Y no es para asustarse: cuando el cuerpo
-          descansa y se atiende, se recupera.
-        </p>
-        <p className="muted small">
-          En la depresión y la ansiedad la irritabilidad es muy común, sobre todo en los hombres: a veces
-          la tristeza sale como enojo.
-        </p>
-        <Link to="/cuerpo?ver=estres" className="btn small ghost">
-          Ver cómo reacciona el cuerpo
-        </Link>
-      </section>
-
-      <TearItUp />
-
-      <section className="card">
-        <h2>Para bajarlo ahora</h2>
-        <ul className="helped">
-          {RIGHT_NOW.map((r) => (
-            <li key={r.text}>
-              <span aria-hidden="true">{r.emoji}</span>
-              <span>
-                {r.text}{' '}
-                {r.to && (
-                  <Link to={r.to} className="small">
-                    {r.action}
-                  </Link>
-                )}
-              </span>
-            </li>
-          ))}
-        </ul>
-      </section>
-
-      <section className="card soft">
-        <h2>Cuando ya bajó</h2>
-        <p>
-          Pregúntate qué necesitabas en ese momento: ¿que te escucharan?, ¿descansar?, ¿poner un límite?
-          El enojo casi siempre cuida algo importante. Si está contigo casi todos los días, cuéntaselo a
-          un especialista: también se trata.
-        </p>
-        <Link to="/diario" className="btn ghost">
-          Escribir lo que pasó
-        </Link>
-      </section>
-
-      <div className="callout warm">
-        <p>
-          Si sientes que podrías lastimar a alguien o lastimarte, aléjate de la situación ahora y pide
-          ayuda.
-        </p>
-        <Link to="/ayuda" className="btn">
-          Hablar con alguien ahora
-        </Link>
-      </div>
+      {capitulo && <PideAyuda />}
     </div>
   )
 }

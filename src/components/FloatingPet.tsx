@@ -77,7 +77,7 @@ export default function FloatingPet() {
   const bursts = useBursts()
   const { waiting } = useGift()
 
-  const shown = !!companion && on && !NOT_ON.includes(pathname)
+  const shown = !!companion && on && !NOT_ON.includes(pathname) && !pathname.startsWith('/explorar/')
   const name = companion ? companionName(companion) : ''
 
   const b = bounds()

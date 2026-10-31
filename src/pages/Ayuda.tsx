@@ -40,7 +40,9 @@ export default function Ayuda() {
         </a>
       </section>
 
-      {reachable.length > 0 || notes.length > 0 ? (
+      {/* Con personas de confianza, ellas van primero; sin ellas, los teléfonos de las líneas
+          suben justo debajo de emergencias, a la vista, y el «¿no tienes a nadie?» va después. */}
+      {(reachable.length > 0 || notes.length > 0) && (
         <section className="card">
           <h2>{reachable.length === 1 ? 'Tu persona de confianza' : 'Tus personas de confianza'}</h2>
           {reachable.length > 0 && (
@@ -79,14 +81,6 @@ export default function Ayuda() {
               </ul>
             </>
           )}
-        </section>
-      ) : (
-        <section className="card soft">
-          <h2>¿Sientes que no tienes a nadie?</h2>
-          <p>
-            Las líneas de apoyo están justo para eso: alguien te escucha aunque no te conozca. No
-            tienes que estar en peligro para llamar; también puedes llamar solo para platicar.
-          </p>
         </section>
       )}
 
@@ -141,6 +135,16 @@ export default function Ayuda() {
           . Números verificados en {VERIFIED_ON}; pueden cambiar.
         </p>
       </section>
+
+      {reachable.length === 0 && notes.length === 0 && (
+        <section className="card soft">
+          <h2>¿Sientes que no tienes a nadie?</h2>
+          <p>
+            Las líneas de apoyo están justo para eso: alguien te escucha aunque no te conozca. No
+            tienes que estar en peligro para llamar; también puedes llamar solo para platicar.
+          </p>
+        </section>
+      )}
 
       {/* Pendiente de revisión con psicóloga. En los grupos hay quien escribe en privado para
           aprovecharse de alguien que está mal. */}

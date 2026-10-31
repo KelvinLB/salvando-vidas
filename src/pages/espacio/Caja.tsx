@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { ImagePlus, X } from 'lucide-react'
+import Capitulos from '../../components/Capitulos'
 import PageHeader from '../../components/PageHeader'
 import PinPad from '../../components/PinPad'
 import { type Thought, listThoughts, saveThought } from '../../lib/db'
@@ -10,7 +11,8 @@ import { type JournalEntry, type Letter, type MoodEntry, newId, today, useAddres
 // Mi caja de esperanza: lo que sostiene a la persona, guardado para los días en que cuesta
 // recordarlo. Sus razones, las fotos de sus recuerdos y una carta escrita en un día bueno para
 // leerla en uno malo. Se basa en la «caja de esperanza» que se usa en terapia; los textos
-// deben pasar por la revisión de un psicólogo.
+// deben pasar por la revisión de un psicólogo. Cada cosa (razones, fotos, carta) tiene su propio
+// capítulo; arriba del índice, la caja dice qué hay adentro.
 
 const REASON_IDEAS = ['Mi familia', 'Mi mascota', 'Ver crecer a ', 'Un lugar que quiero conocer: ', 'Algo que quiero aprender: ', 'Una persona que me quiere: ']
 
@@ -66,7 +68,6 @@ function Reasons() {
 
   return (
     <section className="card field">
-      <h2>💛 Mis razones para seguir</h2>
       <p className="muted">
         Las cosas, personas y sueños que hacen que valga la pena seguir. Pueden ser grandes o muy
         pequeñas: el café de la mañana, ver crecer a mi sobrina, una serie que no he terminado.
@@ -149,7 +150,6 @@ function Photos({ onCount }: { onCount: (n: number) => void }) {
 
   return (
     <section className="card field">
-      <h2>📷 Fotos que me hacen bien</h2>
       <p className="muted">
         Las personas, los lugares y los momentos que quieres tener a la mano. Son los recuerdos con foto
         de tu diario; las que agregues aquí también quedan en él, en la página de hoy.
@@ -216,7 +216,6 @@ function LetterCard({ low }: { low: boolean }) {
   if (letter && !editing) {
     return (
       <section className={`card field letter-card ${low ? 'today' : ''}`}>
-        <h2>💌 Una carta para mí</h2>
         {low && <p>Hoy es un día pesado. Esto te lo escribiste para un día así:</p>}
         <blockquote className="letter">
           <p className="pre">{letter.text}</p>
@@ -244,7 +243,6 @@ function LetterCard({ low }: { low: boolean }) {
 
   return (
     <section className="card field letter-card">
-      <h2>💌 Una carta para mí</h2>
       <p className="muted">
         Escríbela en un día bueno, para leerla en uno difícil. Cuéntate lo que hoy sabes y ese día quizá
         se te olvide: lo que te ha ayudado, quién te quiere, que ya has salido de días así.
@@ -297,14 +295,52 @@ export default function Caja() {
   // En un día pesado, la carta va primero.
   const low = mood !== undefined && mood <= 2
 
+  // Las fotos se cuentan aquí también: en el índice, su capítulo todavía no está abierto.
+  useEffect(() => {
+    listThoughts().then((all) => setPhotos(all.filter((t) => t.photo).length))
+  }, [])
+
+  const carta = {
+    id: 'carta',
+    emoji: '💌',
+    title: 'Una carta para mí',
+    text: letter
+      ? low
+        ? 'Hoy es un día pesado. Esto te lo escribiste para un día así'
+        : 'Tu carta, para leerla en un día difícil'
+      : 'Escríbela en un día bueno, para leerla en uno difícil',
+    content: <LetterCard low={low} />,
+  }
+
   return (
     <div className="stack">
-      <PageHeader title="Mi caja de esperanza" subtitle="Lo que te sostiene, guardado para los días en que cuesta recordarlo." />
-      <Box reasons={reasons.length} photos={photos} letter={!!letter} />
-      {low && letter && <LetterCard low />}
-      <Reasons />
-      <Photos onCount={setPhotos} />
-      {!(low && letter) && <LetterCard low={low} />}
+      <Capitulos
+        label="Lo que hay en tu caja"
+        antes={
+          <>
+            <PageHeader title="Mi caja de esperanza" subtitle="Lo que te sostiene, guardado para los días en que cuesta recordarlo." />
+            <Box reasons={reasons.length} photos={photos} letter={!!letter} />
+          </>
+        }
+        capitulos={[
+          ...(low && letter ? [carta] : []),
+          {
+            id: 'razones',
+            emoji: '💛',
+            title: 'Mis razones para seguir',
+            text: reasons.length ? (reasons.length === 1 ? '1 razón guardada' : `${reasons.length} razones guardadas`) : 'Las cosas, personas y sueños que hacen que valga la pena',
+            content: <Reasons />,
+          },
+          {
+            id: 'fotos',
+            emoji: '📷',
+            title: 'Fotos que me hacen bien',
+            text: photos ? (photos === 1 ? '1 foto' : `${photos} fotos`) : 'Las personas, los lugares y los momentos que quieres tener a la mano',
+            content: <Photos onCount={setPhotos} />,
+          },
+          ...(low && letter ? [] : [carta]),
+        ]}
+      />
     </div>
   )
 }

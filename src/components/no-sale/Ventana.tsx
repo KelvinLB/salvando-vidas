@@ -306,6 +306,8 @@ export default function Ventana({ still, onTalk, ref }: Props) {
     queue: [] as { pts: Point[]; say: boolean }[],
     centers: [] as [number, number][],
     raf: 0,
+    // Pedazos que se ganaron con la ventana aún sin medir (recién montada): se limpian al medirla.
+    owed: 0,
   })
   const [hint, setHint] = useState(() => s.current.wipes.length === 0)
   const talk = useRef(onTalk)
@@ -421,6 +423,10 @@ export default function Ventana({ still, onTalk, ref }: Props) {
 
   const patch = (say: boolean) => {
     const st = s.current
+    if (!st.W) {
+      st.owed++
+      return
+    }
     const center = foggiest()
     if (!center) return
     const pts = spiral(center)
@@ -464,6 +470,10 @@ export default function Ventana({ still, onTalk, ref }: Props) {
       if (!st.primed) {
         st.primed = true
         progress(false)
+      }
+      while (st.owed > 0) {
+        st.owed--
+        patch(false)
       }
     }
     const ro = new ResizeObserver(size)

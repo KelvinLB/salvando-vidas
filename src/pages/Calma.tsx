@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import BodyEntry from '../components/BodyEntry'
 import Filas from '../components/Filas'
 import PageHeader from '../components/PageHeader'
 import RespirarPorDentro from '../components/RespirarPorDentro'
@@ -198,19 +197,21 @@ export function Breathing({
           <div className="breath-label">{etiqueta}</div>
         </div>
       )}
-      {dentro && (
-        <p className="muted breath-3d-nota">
-          Respira con ellos: el aire sube cuando lo tomas y baja cuando lo sueltas. Al soltarlo despacio,
-          el nervio vago frena un poquito al corazón: por eso exhalar largo calma.
-        </p>
-      )}
       {fallo && <p className="muted breath-3d-nota">Esta vez no se pudieron mostrar los pulmones. Seguimos con un círculo.</p>}
 
       {!running && (
-        <p className="muted small">
-          Respira suave, sin llenarte del todo. Empezamos un poco más rápido y el ritmo se va haciendo lento solo. Con
-          práctica se vuelve más fácil.
-        </p>
+        <>
+          <p className="muted small">Respira suave, sin llenarte del todo. El ritmo se va haciendo lento solo.</p>
+          {/* Lo que explica va a un toque: mientras respiras, solo los pulmones y el botón. */}
+          <details className="breath-porque">
+            <summary>¿Por qué calma?</summary>
+            <p className="muted small">
+              {dentro && 'Respira con los pulmones: el aire sube cuando lo tomas y baja cuando lo sueltas. '}Al soltar el
+              aire despacio, el nervio vago frena un poquito al corazón: por eso exhalar largo calma. Empezamos un poco más
+              rápido para que no te falte el aire, y con práctica se vuelve más fácil.
+            </p>
+          </details>
+        </>
       )}
       {running && cycles > 0 && (
         <p className="muted">
@@ -246,10 +247,10 @@ function Grounding() {
   if (step === -1) {
     return (
       <section className="card">
-        <h2>Volver al presente: 5-4-3-2-1</h2>
+        <h2>5-4-3-2-1</h2>
         <p className="muted">
-          Cuando los pensamientos van muy rápido, usar los sentidos ayuda a regresar al aquí y
-          ahora.
+          Vas a nombrar cinco cosas que ves, cuatro que tocas, tres sonidos, dos olores y una cosa que
+          saboreas o algo bueno de ti. Una a la vez, sin prisa.
         </p>
         <button className="btn" onClick={() => setStep(0)}>
           Empezar
@@ -286,8 +287,9 @@ function Grounding() {
   )
 }
 
-// En el teléfono: pánico, la respiración y lo demás debajo, en una sola tarjeta de filas. En
-// computadora, el pánico y la respiración van a la izquierda y lo demás a la derecha.
+// Una sola cosa al frente: respirar. Lo demás son puertas, cada una a su propia pantalla, en dos
+// listas cortas: lo que sirve ahorita y lo que sirve para entender y practicar. En computadora, la
+// respiración va a la izquierda y las puertas a la derecha.
 export default function Calma() {
   return (
     <div className="pagina-ancha calma">
@@ -300,26 +302,46 @@ export default function Calma() {
         <Breathing porDentro />
       </div>
       <div className="columna">
-        <Grounding />
-        <BodyEntry />
-        <section className="stack tight" aria-labelledby="calma-mas-title">
-          <h2 id="calma-mas-title" className="section-title">
-            Más para calmarte
+        <section className="stack tight" aria-labelledby="calma-ahorita-title">
+          <h2 id="calma-ahorita-title" className="section-title">
+            Para ahorita
           </h2>
           <Filas
-            label="Más para calmarte"
+            label="Para ahorita"
             filas={[
-              { to: '/nervios', title: 'Entender mis nervios', text: 'Seis lecciones cortas: qué es el pánico y por qué no es peligroso.' },
-              { to: '/nervios/practicar', title: 'Practicar con el cuerpo', text: 'Ejercicios cortos para perderle el miedo a lo que el pánico hace sentir.' },
-              { to: '/enojo', title: '¿Es enojo lo que no se va?', text: 'Escríbelo, rómpelo y bájale al cuerpo la alerta.' },
+              { to: '/calma/presente', emoji: '🌿', title: 'Volver al presente', text: '5-4-3-2-1: los sentidos te regresan al aquí y ahora.' },
+              { to: '/cuerpo', emoji: '🫀', title: '¿Dónde lo sientes?', text: 'Toca la figura y te decimos qué puede estar pasando.' },
+              { to: '/noche', emoji: '🌙', title: '¿No puedes dormir?', text: 'Sonidos, relajación y un lugar para vaciar la cabeza.' },
+            ]}
+          />
+        </section>
+        <section className="stack tight" aria-labelledby="calma-entender-title">
+          <h2 id="calma-entender-title" className="section-title">
+            Para entender y practicar
+          </h2>
+          <Filas
+            label="Para entender y practicar"
+            filas={[
+              { to: '/nervios', emoji: '🧠', title: 'Entender mis nervios', text: 'Seis lecciones cortas: qué es el pánico y por qué no es peligroso.' },
+              { to: '/nervios/practicar', emoji: '🤸', title: 'Practicar con el cuerpo', text: 'Ejercicios cortos para perderle el miedo a lo que el pánico hace sentir.' },
+              { to: '/enojo', emoji: '🔥', title: '¿Es enojo lo que no se va?', text: 'Escríbelo, rómpelo y bájale al cuerpo la alerta.' },
               // Pendientes de revisión con psicóloga: Lo que no sale y Para escuchar.
-              { to: '/lo-que-no-sale', title: 'Lo que no sale', text: 'Cuando quieres llorar y no puedes, o todo se siente sin sentido.' },
-              { to: '/escuchar', title: 'Para escuchar', text: 'Reflexiones cortas con voz, para un día pesado.' },
-              { to: '/noche', title: '¿No puedes dormir?', text: 'Sonidos, relajación y un lugar para vaciar la cabeza.' },
+              { to: '/lo-que-no-sale', emoji: '💧', title: 'Lo que no sale', text: 'Cuando quieres llorar y no puedes, o todo se siente sin sentido.' },
+              { to: '/escuchar', emoji: '🎧', title: 'Para escuchar', text: 'Reflexiones cortas con voz, para un día pesado.' },
             ]}
           />
         </section>
       </div>
+    </div>
+  )
+}
+
+/** 5-4-3-2-1 en su propia pantalla, sin nada más alrededor. */
+export function Presente() {
+  return (
+    <div className="stack">
+      <PageHeader title="Volver al presente" subtitle="Cuando los pensamientos van muy rápido, los sentidos te regresan al aquí y ahora." />
+      <Grounding />
     </div>
   )
 }

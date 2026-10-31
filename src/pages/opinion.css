@@ -1,0 +1,30 @@
+/* Tu opinión: una pregunta a la vez, con «Siguiente» abajo y lo demás como enlace discreto. */
+.op-paso {
+  margin: 4px 0 -4px;
+}
+.op-pie {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 8px;
+}
+.op-pie > p {
+  margin: 0;
+  text-align: center;
+}
+.op-ya,
+.op-atras {
+  align-self: center;
+  padding: 8px 12px;
+  border: 0;
+  background: none;
+  color: var(--muted);
+  font: inherit;
+  font-size: 0.95rem;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+.op-ya {
+  color: var(--primary);
+}

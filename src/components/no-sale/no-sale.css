@@ -1,8 +1,7 @@
 /* ---------- Lo que no sale ----------
-   La ventana empañada con el barrio detrás, los pasos alrededor (palabras, frasco y carta),
-   la brújula y las canciones. En el teléfono es una sola columna; en pantallas anchas la
-   ventana va a la izquierda y los pasos a la derecha. Las animaciones se quedan dentro de su
-   tarjeta y se apagan con movimiento reducido. */
+   La ventana empañada con el barrio detrás y, debajo, la lista de pasos (palabras, frasco,
+   carta, brújula y canciones): cada uno abre su propia pantalla. Las animaciones se quedan
+   dentro de su tarjeta y se apagan con movimiento reducido. */
 
 :root {
   /* El vaho del vidrio y el marco de madera de la ventana. */
@@ -51,24 +50,19 @@
 .ns-permiso {
   gap: 14px;
 }
-.ns-options .chip {
+.ns-solo {
+  align-self: flex-start;
   font-size: 0.94rem;
 }
 
-/* ---------- Ventana y pasos ---------- */
+/* Dentro de su propia pantalla, cada paso ya lleva su título arriba: el de la tarjeta sobra. */
+.capitulo .ns-step-title,
+.capitulo #ns-brujula-t,
+.capitulo #ns-canciones-t {
+  display: none;
+}
 
-.ns-play {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  min-width: 0;
-}
-.ns-side {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  min-width: 0;
-}
+/* ---------- Ventana y pasos ---------- */
 
 .ns-win-card {
   padding: 16px;
@@ -537,23 +531,6 @@ a.ns-song-title {
   cursor: pointer;
   box-shadow: 0 8px 22px -10px rgb(0 0 0 / 0.35);
   backdrop-filter: blur(10px);
-}
-
-/* En pantallas anchas la ventana sale del ancho de la columna y los pasos van a su derecha. */
-@media (min-width: 980px) {
-  .ns-play {
-    --ns-wide: min(1000px, calc(100vw - 48px));
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) 340px;
-    align-items: start;
-    width: var(--ns-wide);
-    margin-inline: calc((100% - var(--ns-wide)) / 2);
-  }
-  /* La ventana se queda a la vista mientras se hacen los pasos de la derecha. */
-  .ns-win-card {
-    position: sticky;
-    top: calc(var(--topbar-h, 60px) + 12px);
-  }
 }
 
 @media (prefers-reduced-motion: reduce) {

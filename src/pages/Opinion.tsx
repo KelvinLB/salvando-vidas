@@ -1,10 +1,11 @@
-import { useEffect, useState } from 'react'
+import { type ReactNode, useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import PageHeader from '../components/PageHeader'
 import RiskNotice from '../components/RiskNotice'
 import { type Feedback, flushFeedback, sendFeedback } from '../lib/feedback'
 import { soundsLikeRisk } from '../lib/risk'
 import { newId } from '../lib/storage'
+import './opinion.css'
 
 const HELPED = [
   { id: 'si', label: 'Sí' },
@@ -29,6 +30,22 @@ export default function Opinion() {
   const [form, setForm] = useState(empty)
   const [result, setResult] = useState<'sent' | 'queued' | null>(null)
   const [sending, setSending] = useState(false)
+  // La pregunta que se ve. Lo contestado vive en `form`, así que ir y volver no borra nada.
+  const [paso, setPaso] = useState(0)
+  const titulo = useRef<HTMLHeadingElement>(null)
+  const cambio = useRef(false)
+
+  // Al cambiar de pregunta, se sube y el lector de pantalla cae en la pregunta nueva (no al llegar).
+  useEffect(() => {
+    if (!cambio.current) return
+    window.scrollTo(0, 0)
+    titulo.current?.focus({ preventScroll: true })
+  }, [paso])
+
+  const irA = (n: number) => {
+    cambio.current = true
+    setPaso(n)
+  }
 
   useEffect(() => {
     flushFeedback()
@@ -48,6 +65,7 @@ export default function Opinion() {
     setSending(false)
     setResult(sent ? 'sent' : 'queued')
     setForm(empty())
+    setPaso(0)
   }
 
   if (result) {
@@ -70,11 +88,94 @@ export default function Opinion() {
     )
   }
 
+  // Una pregunta a la vez. Todas son opcionales: «Siguiente» avanza aunque se deje en blanco.
+  const preguntas: { id: string; content: ReactNode }[] = [
+    {
+      id: 'ayudo',
+      content: (
+        <section className="card">
+          <h2 ref={titulo} tabIndex={-1}>¿La app te ayudó hoy?</h2>
+          <div className="chips">
+            {HELPED.map((h) => (
+              <button
+                key={h.id}
+                className={`chip ${form.helped === h.id ? 'selected' : ''}`}
+                aria-pressed={form.helped === h.id}
+                onClick={() => set('helped', form.helped === h.id ? null : h.id)}
+              >
+                {h.label}
+              </button>
+            ))}
+          </div>
+        </section>
+      ),
+    },
+    {
+      id: 'sirvio',
+      content: (
+        <section className="card">
+          <h2 ref={titulo} tabIndex={-1}>¿Qué te sirvió?</h2>
+          <div className="chips">
+            {SECTIONS.map((s) => (
+              <button
+                key={s}
+                className={`chip ${form.useful.includes(s) ? 'selected' : ''}`}
+                aria-pressed={form.useful.includes(s)}
+                onClick={() => toggleUseful(s)}
+              >
+                {s}
+              </button>
+            ))}
+          </div>
+        </section>
+      ),
+    },
+    {
+      id: 'falta',
+      content: (
+        <label className="card field">
+          <h2 ref={titulo} tabIndex={-1}>¿Qué te hizo falta o qué cambiarías?</h2>
+          <textarea rows={4} value={form.missing} onChange={(e) => set('missing', e.target.value)} />
+          <small className="muted">No escribas nombres ni datos que te identifiquen dentro del texto.</small>
+        </label>
+      ),
+    },
+    {
+      id: 'historia',
+      content: (
+        <section className="card field">
+          <h2 ref={titulo} tabIndex={-1}>Tu historia (opcional)</h2>
+          <small className="muted">
+            ¿Qué te ayudó a ti en un momento difícil? Tu experiencia puede darle esperanza a alguien
+            que hoy está donde tú estuviste.
+          </small>
+          <textarea rows={5} value={form.story} onChange={(e) => set('story', e.target.value)} aria-label="Tu historia" />
+          <label className="toggle">
+            <input type="checkbox" checked={form.shareStory} onChange={(e) => set('shareStory', e.target.checked)} />
+            Acepto que se comparta como testimonio anónimo
+          </label>
+          <small className="muted">No escribas nombres ni datos que te identifiquen dentro del texto.</small>
+        </section>
+      ),
+    },
+    {
+      id: 'contacto',
+      content: (
+        <label className="card field">
+          <h2 ref={titulo} tabIndex={-1}>Contacto (opcional)</h2>
+          <small className="muted">Solo si quieres que te escribamos. Puedes dejarlo vacío y será totalmente anónimo.</small>
+          <input type="email" inputMode="email" value={form.contact} onChange={(e) => set('contact', e.target.value)} placeholder="correo@ejemplo.com" />
+        </label>
+      ),
+    },
+  ]
+  const ultima = paso === preguntas.length - 1
+
   return (
     <div className="stack">
       <PageHeader
         title="Tu opinión"
-        subtitle="Esta app la hacemos entre todos. Cuéntanos qué te sirve, qué no y qué te hace falta."
+        subtitle={paso === 0 ? 'Esta app la hacemos entre todos. Cuéntanos qué te sirve, qué no y qué te hace falta.' : undefined}
       />
 
       <div className="callout info">
@@ -84,80 +185,51 @@ export default function Opinion() {
         </p>
       </div>
 
-      <section className="card">
-        <h2>¿La app te ayudó hoy?</h2>
-        <div className="chips">
-          {HELPED.map((h) => (
-            <button
-              key={h.id}
-              className={`chip ${form.helped === h.id ? 'selected' : ''}`}
-              aria-pressed={form.helped === h.id}
-              onClick={() => set('helped', form.helped === h.id ? null : h.id)}
-            >
-              {h.label}
-            </button>
-          ))}
-        </div>
-      </section>
+      <p className="eyebrow op-paso">
+        Pregunta {paso + 1} de {preguntas.length}
+      </p>
 
-      <section className="card">
-        <h2>¿Qué te sirvió?</h2>
-        <div className="chips">
-          {SECTIONS.map((s) => (
-            <button
-              key={s}
-              className={`chip ${form.useful.includes(s) ? 'selected' : ''}`}
-              aria-pressed={form.useful.includes(s)}
-              onClick={() => toggleUseful(s)}
-            >
-              {s}
-            </button>
-          ))}
-        </div>
-      </section>
-
-      <label className="card field">
-        <h2>¿Qué te hizo falta o qué cambiarías?</h2>
-        <textarea rows={4} value={form.missing} onChange={(e) => set('missing', e.target.value)} />
-      </label>
-
-      <section className="card field">
-        <h2>Tu historia (opcional)</h2>
-        <small className="muted">
-          ¿Qué te ayudó a ti en un momento difícil? Tu experiencia puede darle esperanza a alguien
-          que hoy está donde tú estuviste.
-        </small>
-        <textarea rows={5} value={form.story} onChange={(e) => set('story', e.target.value)} />
-        <label className="toggle">
-          <input type="checkbox" checked={form.shareStory} onChange={(e) => set('shareStory', e.target.checked)} />
-          Acepto que se comparta como testimonio anónimo
-        </label>
-      </section>
+      {preguntas[paso].content}
 
       {risk && <RiskNotice />}
 
-      <label className="card field">
-        <h2>Contacto (opcional)</h2>
-        <small className="muted">Solo si quieres que te escribamos. Puedes dejarlo vacío y será totalmente anónimo.</small>
-        <input type="email" inputMode="email" value={form.contact} onChange={(e) => set('contact', e.target.value)} placeholder="correo@ejemplo.com" />
-      </label>
-
-      <p className="muted small">No escribas nombres ni datos que te identifiquen dentro del texto.</p>
-
-      <button className="btn big" onClick={submit} disabled={!canSend || sending}>
-        {sending ? (
+      <div className="op-pie">
+        {ultima ? (
           <>
-            Enviando
-            <span className="loader-dots" aria-hidden="true">
-              <i />
-              <i />
-              <i />
-            </span>
+            <button className="btn big" onClick={submit} disabled={!canSend || sending}>
+              {sending ? (
+                <>
+                  Enviando
+                  <span className="loader-dots" aria-hidden="true">
+                    <i />
+                    <i />
+                    <i />
+                  </span>
+                </>
+              ) : (
+                'Enviar'
+              )}
+            </button>
+            {!canSend && <p className="muted small">Contesta al menos una pregunta para poder enviarla.</p>}
           </>
         ) : (
-          'Enviar'
+          <>
+            <button className="btn big" onClick={() => irA(paso + 1)}>
+              Siguiente
+            </button>
+            {canSend && (
+              <button type="button" className="link-btn op-ya" onClick={submit} disabled={sending}>
+                Enviar ya, así como está
+              </button>
+            )}
+          </>
         )}
-      </button>
+        {paso > 0 && (
+          <button type="button" className="link-btn op-atras" onClick={() => irA(paso - 1)}>
+            Volver a la pregunta anterior
+          </button>
+        )}
+      </div>
     </div>
   )
 }

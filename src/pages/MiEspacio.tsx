@@ -117,7 +117,7 @@ export default function MiEspacio() {
       />
 
       {low && letter && (
-        <Link to="/mi-espacio/caja" className="card link-card emergency-soft">
+        <Link to="/mi-espacio/caja?c=carta" className="card link-card emergency-soft">
           <h2>💌 Tienes una carta tuya para hoy</h2>
           <p className="muted">La escribiste en un día bueno, justo para un día así.</p>
         </Link>

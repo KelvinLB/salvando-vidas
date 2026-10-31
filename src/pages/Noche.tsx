@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
+import Capitulos, { useCapitulo } from '../components/Capitulos'
 import PageHeader from '../components/PageHeader'
 import RiskNotice from '../components/RiskNotice'
 import { saveThought } from '../lib/db'
@@ -28,8 +29,7 @@ function Relax() {
   }, [index])
 
   return (
-    <section className="card">
-      <h2>Relajar el cuerpo</h2>
+    <section className="card" aria-label="Relajar el cuerpo">
       {index < 0 ? (
         <>
           <p className="muted">
@@ -98,50 +98,100 @@ function EmptyHead() {
   )
 }
 
+// Las líneas que atienden de noche: arriba en la pantalla principal y debajo de cada tema.
+function PideAyuda() {
+  return (
+    <Link to="/ayuda" className="card link-card">
+      <h2>¿Quieres platicar con alguien ahora?</h2>
+      <p className="muted">
+        Hay líneas que atienden toda la noche, gratis. Puedes llamar solo para hablar, aunque no
+        sea una emergencia.
+      </p>
+    </Link>
+  )
+}
+
+// LA cosa de esta pantalla es vaciar la cabeza; relajar el cuerpo, los sonidos y lo demás se
+// abren aparte, cada uno con su propio botón.
 export default function Noche() {
+  const capitulo = useCapitulo()
+
   return (
     <div className="stack">
-      <PageHeader
-        title="¿No puedes dormir?"
-        subtitle="Las noches pesan más. No eres la única persona despierta sintiéndose así a esta hora."
+      <Capitulos
+        label="Más para la noche"
+        antes={
+          <>
+            <PageHeader
+              title="¿No puedes dormir?"
+              subtitle="Las noches pesan más. No eres la única persona despierta sintiéndose así a esta hora."
+            />
+            <PideAyuda />
+            <EmptyHead />
+            <h2 className="section-title">Más para la noche</h2>
+          </>
+        }
+        capitulos={[
+          {
+            id: 'relajar',
+            emoji: '🛏️',
+            title: 'Relajar el cuerpo',
+            text: 'Tensar y soltar, zona por zona, ya en la cama.',
+            content: <Relax />,
+          },
+          {
+            id: 'sonidos',
+            emoji: '🌧️',
+            title: 'Sonidos y respiración',
+            text: 'Lluvia o mar, o la respiración 4-7-8.',
+            content: (
+              <div className="grid">
+                <Link to="/musica" className="tile">
+                  <span className="tile-emoji" aria-hidden="true">🌧️</span>
+                  <strong>Sonidos para dormir</strong>
+                  <small>Lluvia o mar, con apagado automático</small>
+                </Link>
+                <Link to="/calma" className="tile">
+                  <span className="tile-emoji" aria-hidden="true">🫧</span>
+                  <strong>Respiración 4-7-8</strong>
+                  <small>Ayuda a soltar la tensión</small>
+                </Link>
+              </div>
+            ),
+          },
+          {
+            id: 'manana',
+            emoji: '📝',
+            title: 'Deja listo tu mañana',
+            text: 'Tres cosas pequeñas y un premio, decididos hoy.',
+            content: (
+              <section className="card">
+                <p>Decide hoy tres cosas pequeñas y un premio. Así mañana no tienes que pensarlo.</p>
+                <Link to="/mi-dia" className="btn">
+                  Ir a Mi día
+                </Link>
+              </section>
+            ),
+          },
+          {
+            id: 'mucho-rato',
+            emoji: '🕰️',
+            title: 'Si llevas mucho rato sin dormir',
+            text: 'Qué hacer si pasan unos 20 minutos y el sueño no llega.',
+            content: (
+              <section className="card soft">
+                <ul className="plain">
+                  <li>Después de unos 20 minutos, levántate y haz algo tranquilo con poca luz. Vuelve a la cama cuando te dé sueño.</li>
+                  <li>Baja el brillo de la pantalla o deja el teléfono lejos.</li>
+                  <li>Si llevas varios días durmiendo mal, coméntalo con tu médico: el sueño también se trata.</li>
+                </ul>
+              </section>
+            ),
+          },
+        ]}
       />
 
-      <Link to="/ayuda" className="card link-card">
-        <h2>¿Quieres platicar con alguien ahora?</h2>
-        <p className="muted">
-          Hay líneas que atienden toda la noche, gratis. Puedes llamar solo para hablar, aunque no
-          sea una emergencia.
-        </p>
-      </Link>
-
-      <EmptyHead />
-      <Link to="/mi-dia" className="card link-card">
-        <h2>📝 Deja listo tu mañana</h2>
-        <p className="muted">Decide hoy tres cosas pequeñas y un premio. Así mañana no tienes que pensarlo.</p>
-      </Link>
-      <Relax />
-
-      <div className="grid">
-        <Link to="/musica" className="tile">
-          <span className="tile-emoji" aria-hidden="true">🌧️</span>
-          <strong>Sonidos para dormir</strong>
-          <small>Lluvia o mar, con apagado automático</small>
-        </Link>
-        <Link to="/calma" className="tile">
-          <span className="tile-emoji" aria-hidden="true">🫧</span>
-          <strong>Respiración 4-7-8</strong>
-          <small>Ayuda a soltar la tensión</small>
-        </Link>
-      </div>
-
-      <section className="card soft">
-        <h2>Si llevas mucho rato sin dormir</h2>
-        <ul className="plain">
-          <li>Después de unos 20 minutos, levántate y haz algo tranquilo con poca luz. Vuelve a la cama cuando te dé sueño.</li>
-          <li>Baja el brillo de la pantalla o deja el teléfono lejos.</li>
-          <li>Si llevas varios días durmiendo mal, coméntalo con tu médico: el sueño también se trata.</li>
-        </ul>
-      </section>
+      {capitulo && <PideAyuda />}
     </div>
   )
 }

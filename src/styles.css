@@ -6411,7 +6411,8 @@ html.diary-open {
 
 /* ---------- Inicio ----------
    En el teléfono, una sola columna en orden de urgencia: las dos columnas no existen (display:
-   contents) y cada pieza lleva su lugar. Desde 960px se abren dos columnas y la página se ensancha. */
+   contents) y las piezas siguen el orden en que están escritas. Desde 960px se abren dos columnas
+   y la página se ensancha. */
 .inicio {
   display: flex;
   flex-direction: column;
@@ -6419,45 +6420,6 @@ html.diary-open {
 }
 .inicio-col {
   display: contents;
-}
-.inicio-hero {
-  order: 1;
-}
-.inicio-noche {
-  order: 2;
-}
-.inicio-panico {
-  order: 3;
-}
-.inicio-animo {
-  order: 4;
-}
-.inicio-cuerpo {
-  order: 5;
-}
-.inicio-dia {
-  order: 6;
-}
-.inicio-atajos {
-  order: 7;
-}
-.inicio-mas {
-  order: 8;
-}
-.inicio-mision {
-  order: 9;
-}
-.inicio-pie {
-  order: 10;
-}
-.inicio-dia,
-.inicio-cuerpo {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-.inicio-dia:empty {
-  display: none;
 }
 .inicio-panico {
   padding-block: 16px;
@@ -6591,14 +6553,14 @@ html.diary-open {
   }
 }
 
-.inicio-mision {
+.mision-card {
   gap: 8px;
 }
-.inicio-mision .mission {
+.mision-card .mission {
   margin: 0;
   font-size: 1.1rem;
 }
-.inicio-mision .btn {
+.mision-card .btn {
   align-self: flex-start;
 }
 
@@ -6654,18 +6616,6 @@ html.diary-open {
     padding-inline: max(24px, calc((100% - 1040px) / 2));
   }
 }
-.distraer-pie {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-.distraer-ver {
-  align-self: flex-start;
-}
-/* En el teléfono va al final; en la computadora llena la columna de la izquierda. */
-.distraer .distraer-pie {
-  order: 1;
-}
 @media (min-width: 960px) {
   .mi-espacio > .columna {
     gap: 16px;
@@ -6673,4 +6623,72 @@ html.diary-open {
   .mi-espacio > .columna > .section-title:first-child {
     margin-top: 0;
   }
+}
+
+/* Puertas y capítulos: un tema por pantalla, para no perderse en un scroll largo. */
+.fila > .fila-emoji {
+  display: grid;
+  flex: none;
+  width: 40px;
+  height: 40px;
+  margin: 0;
+  font-size: 1.25rem;
+}
+.filas-titulo {
+  margin: 4px 0 -6px;
+}
+.capitulo {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.capitulo-paso {
+  margin: 0;
+}
+.capitulo-titulo {
+  margin: 0;
+  font-size: 1.45rem;
+}
+.capitulo-pie {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 12px;
+  margin-top: 12px;
+}
+.capitulo-siguiente {
+  justify-content: space-between;
+  text-align: left;
+  gap: 12px;
+}
+.capitulo-siguiente > span:first-child {
+  display: flex;
+  flex-direction: column;
+}
+.capitulo-siguiente small {
+  font-weight: 500;
+  opacity: 0.8;
+}
+.capitulo-indice {
+  align-self: center;
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+.capitulo-indice {
+  padding: 8px 12px;
+  border: 0;
+  background: none;
+  font: inherit;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+.breath-porque summary {
+  cursor: pointer;
+  padding: 4px 0;
+  color: var(--muted);
+  font-size: 0.92rem;
+}
+.breath-porque p {
+  margin: 6px 0 0;
 }

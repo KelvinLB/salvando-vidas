@@ -1,6 +1,12 @@
 {
   "version": 1,
   "skills": {
+    "focus-attention-design": {
+      "source": "owl-listener/inclusive-design-skills",
+      "sourceType": "github",
+      "skillPath": "cognitive-accessibility/skills/focus-attention-design/SKILL.md",
+      "computedHash": "ce69f90aa2e8bdb571c15a9ec5ac7e98da3a07c7aa2ad3f176389f18ad71cb20"
+    },
     "gad7-anxiety-screening": {
       "source": "open-medica/open-medical-skills",
       "sourceType": "github",

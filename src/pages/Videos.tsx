@@ -1,6 +1,10 @@
 import PageHeader from '../components/PageHeader'
 import { FAITH_VIDEOS, MOVIES, VIDEO_TOPICS, youtubeSearch } from '../data/content'
 import { useStored } from '../lib/storage'
+import './videos.css'
+
+// Videos y películas: lo principal es elegir un video corto; las películas quedan cerradas,
+// a un toque, para que la lista larga no compita con los videos.
 
 export default function Videos() {
   const [faith] = useStored('fe', false)
@@ -14,6 +18,7 @@ export default function Videos() {
 
       <section>
         <h2 className="section-title">Videos cortos</h2>
+        <p className="muted small videos-nota">Se abren en YouTube.</p>
         <div className="grid">
           {topics.map((v) => (
             <a
@@ -25,14 +30,15 @@ export default function Videos() {
             >
               <span className="tile-emoji" aria-hidden="true">{v.emoji}</span>
               <strong>{v.title}</strong>
-              <small>Abrir en YouTube</small>
             </a>
           ))}
         </div>
       </section>
 
-      <section className="card">
-        <h2>Películas que reconfortan</h2>
+      <details className="card myth">
+        <summary>
+          <h2>Películas que reconfortan</h2>
+        </summary>
         <ul className="movies">
           {MOVIES.map((m) => (
             <li key={m.title}>
@@ -43,7 +49,7 @@ export default function Videos() {
             </li>
           ))}
         </ul>
-      </section>
+      </details>
     </div>
   )
 }

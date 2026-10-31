@@ -400,7 +400,7 @@ export default function Hueco() {
                   </Link>
                 </>
               ) : (
-                <Link to="/mi-espacio/caja" className="btn small ghost">
+                <Link to="/mi-espacio/caja?c=razones" className="btn small ghost">
                   Guardar una razón para seguir
                 </Link>
               ))}

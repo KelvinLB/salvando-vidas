@@ -1,0 +1,73 @@
+/* Camino al especialista: los pasos como renglones; solo el que sigue se ve abierto. */
+.es-paso {
+  gap: 0;
+  padding-block: 12px;
+  scroll-margin-top: calc(var(--topbar-h, 60px) + 12px);
+}
+.es-paso.abierto {
+  padding-block: 16px 20px;
+}
+.es-paso-cabeza {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.es-paso-cabeza input {
+  flex: none;
+}
+.es-paso-cabeza h2 {
+  flex: 1;
+  margin: 0;
+  font-size: 1.05rem;
+}
+.es-paso.abierto .es-paso-cabeza h2 {
+  font-size: 1.2rem;
+}
+/* El título es el botón que abre o cierra el paso; la flecha dice hacia dónde. */
+.es-paso-titulo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  min-height: 44px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.es-paso-titulo::after {
+  content: '';
+  flex: none;
+  width: 9px;
+  height: 9px;
+  margin: -4px 6px 0 0;
+  border-right: 2px solid var(--muted);
+  border-bottom: 2px solid var(--muted);
+  transform: rotate(45deg);
+}
+.es-paso.abierto .es-paso-titulo::after {
+  margin-top: 4px;
+  transform: rotate(-135deg);
+}
+.es-paso-cuerpo {
+  margin-top: 12px;
+}
+.es-siguiente {
+  margin-top: 8px;
+}
+/* Lo opcional del resumen, a un toque. */
+.es-mas summary {
+  cursor: pointer;
+  padding: 6px 0;
+  color: var(--primary);
+  font-weight: 600;
+}
+.es-mas[open] {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}

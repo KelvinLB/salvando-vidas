@@ -75,6 +75,22 @@ export default function TusPalabras({ spots, hasYo }: { spots: Spot[]; hasYo: bo
     setWriting(false)
   }
 
+  // Mientras no hay notas, solo la pregunta y el botón: lo demás aparece cuando ya escribiste algo.
+  const corta = notes.length === 0 && !writing
+
+  if (corta) {
+    return (
+      <section className="card stack tight body-words">
+        <p className="eyebrow">Tus palabras</p>
+        <h2>¿Cómo lo dirías tú?</h2>
+        <p className="muted">Pega una nota donde lo sientes, como «aquí está el nudo», para contárselo a tu especialista.</p>
+        <button type="button" className="btn ghost" onClick={() => setWriting(true)}>
+          Escribir una nota
+        </button>
+      </section>
+    )
+  }
+
   return (
     <section className="card stack tight body-words">
       <p className="eyebrow">Tus palabras</p>

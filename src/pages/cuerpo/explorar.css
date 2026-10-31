@@ -158,6 +158,13 @@
 .ex-creditos a {
   color: inherit;
 }
+.ex-creditos summary {
+  cursor: pointer;
+  padding: 6px 0;
+}
+.ex-ver-partes {
+  align-self: flex-start;
+}
 
 @media (prefers-reduced-motion: reduce) {
   .ex-loading,
@@ -167,10 +174,6 @@
 }
 
 /* ---------- Lo que siento y Mi diccionario ---------- */
-
-.ex-modos {
-  justify-content: center;
-}
 
 /* Una palabra que se abre: subrayada con puntos, del mismo tamaño que el texto. */
 .dic-term {
@@ -342,26 +345,177 @@
   border-radius: 50%;
 }
 
+/* ---------- Portada ----------
+   El módulo principal en grande, sobre la misma luz baja del cuerpo de vidrio; los demás, en filas. */
+.ex-portada {
+  display: grid;
+  grid-template-columns: 112px minmax(0, 1fr);
+  align-items: center;
+  gap: 16px;
+  padding: 18px 20px 18px 12px;
+  border-radius: var(--radius);
+  background: radial-gradient(90% 90% at 25% 40%, var(--escena-bg-1) 0%, var(--escena-bg-2) 80%);
+  color: var(--escena-ink);
+  text-decoration: none;
+}
+.ex-portada-svg {
+  width: 100%;
+  height: auto;
+  max-height: 200px;
+}
+.ex-portada-texto {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+}
+.ex-portada .eyebrow {
+  margin: 0;
+  color: var(--escena-ink-2);
+}
+.ex-portada strong {
+  font-family: var(--font-display);
+  font-variation-settings: 'SOFT' 100;
+  font-size: 1.45rem;
+  font-weight: 600;
+  line-height: 1.15;
+}
+.ex-portada small {
+  color: var(--escena-ink-2);
+  font-size: 0.95rem;
+  line-height: 1.4;
+}
+.ex-portada-btn {
+  margin-top: 6px;
+  pointer-events: none;
+  /* Claro sobre la escena oscura, en los dos temas. */
+  background: #8fd6cb;
+  color: #0f1c1b;
+  box-shadow: none;
+}
+@media (hover: hover) {
+  .ex-portada:hover .ex-portada-btn {
+    filter: brightness(1.08);
+  }
+}
+
+/* ---------- Capas ----------
+   Interruptores chicos con palomita: se lee de un vistazo qué está prendido, sin pesar tanto como
+   un botón principal. */
+.ex-capas {
+  align-items: center;
+}
+.ex-capas-titulo {
+  margin-right: 2px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--muted);
+}
+.ex-capa {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 36px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-2);
+  font: 500 0.9rem/1 var(--font-body);
+  cursor: pointer;
+}
+.ex-capa.on {
+  border-color: color-mix(in srgb, var(--primary) 45%, transparent);
+  background: var(--primary-soft);
+  color: var(--text);
+}
+
+.ex-partes .section-title {
+  margin: 0 0 10px;
+  font-size: 1rem;
+}
+.ex-ver-partes {
+  align-self: flex-start;
+}
+.ex-pie {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* En la Biblioteca, la equis para guardar el cuerpo (solo en el teléfono, donde sale cuando se pide). */
+.ex-ocultar {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--surface) 82%, transparent);
+  border: 1px solid var(--border);
+}
+
+/* Los títulos de cada apartado de la Biblioteca. */
+.bib-apartado {
+  margin: 0 0 4px;
+  font-size: 1.3rem;
+}
+
+@media (max-width: 959px) {
+  .ex-biblioteca:not(.ver-cuerpo) .ex-col-cuerpo {
+    display: none;
+  }
+}
+
 /* ---------- Dos columnas (pagina-ancha) ----------
-   En el teléfono, los modos van arriba del cuerpo; en computadora, el cuerpo a la izquierda. */
-.explorar > .page-header,
-.explorar .page-header {
-  order: -2;
-}
-.explorar .ex-modos {
-  order: -1;
-}
+   En computadora, el cuerpo a la izquierda y el módulo a la derecha; en la portada, el módulo
+   principal a la izquierda y los demás a la derecha. */
 .ex-col-cuerpo .ex-capas {
   margin-top: 0;
 }
 @media (min-width: 960px) {
-  .ex-col-lado .ex-modos {
-    justify-content: flex-start;
+  .ex-ocultar {
+    display: none;
+  }
+  .ex-portada {
+    grid-template-columns: 180px minmax(0, 1fr);
+    gap: 24px;
+    padding: 28px 32px 28px 20px;
+    min-height: 300px;
+  }
+  .ex-portada-svg {
+    max-height: 280px;
+  }
+  .ex-portada strong {
+    font-size: 1.8rem;
   }
   .ex-col-cuerpo .ex-stage {
     height: min(max(100svh - var(--topbar-h, 60px) - 270px, 440px), 680px);
   }
   .ex-col-cuerpo .ex-overlay .ex-card {
     max-height: calc(min(max(100svh - var(--topbar-h, 60px) - 270px, 440px), 680px) * 0.52);
+  }
+}
+
+/* Las opciones de «Lo que siento» y de la ola son frases: alineadas a la izquierda se leen mejor
+   que centradas, y si ocupan dos renglones, la esquina no se ve como pastilla aplastada. */
+.dic-buscar .chips .chip {
+  text-align: left;
+  border-radius: 16px;
+}
+
+/* En el teléfono, en «Lo que siento» y en la ola el cuerpo es más bajo, para que la pregunta se vea
+   sin bajar tanto; la explicación sale encima del cuerpo de todos modos. */
+@media (max-width: 959px) {
+  .ex-siento .ex-stage,
+  .ex-ansiedad .ex-stage {
+    height: min(52svh, 460px);
+    min-height: 340px;
+  }
+  .ex-siento .ex-overlay .ex-card,
+  .ex-ansiedad .ex-overlay .ex-card {
+    max-height: calc(min(52svh, 460px) * 0.62);
   }
 }

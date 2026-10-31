@@ -1,0 +1,10 @@
+/* Tu cuerpo (pages/Cuerpo.tsx): las filas de «Más para tu cuerpo» que abren algo en la misma
+   pantalla son botones; se ven igual que las que llevan a otra. */
+.cuerpo-mas button.fila {
+  width: 100%;
+  border: 0;
+  background: none;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}

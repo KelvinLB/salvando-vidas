@@ -14,7 +14,8 @@ const BodyModel = lazy(() => import('./BodyModel'))
 
 const prefersStill = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
-export default function BodyEntry() {
+/** Con `soloSiMarcaste`, solo aparece para retomar lo que se marcó hace poco (en Inicio). */
+export default function BodyEntry({ soloSiMarcaste = false }: { soloSiMarcaste?: boolean }) {
   const navigate = useNavigate()
   const [saved] = useStored<BodyNow>('cuerpo-ahora', EMPTY_NOW)
   const [still] = useState(prefersStill)
@@ -24,6 +25,7 @@ export default function BodyEntry() {
   const crisis = reading.red.includes('crisis')
   const medical = reading.red.some((r) => r !== 'crisis')
   const areas = AREAS.filter((a) => reading.picked.some((s) => s.area === a.id)).map((a) => a.label)
+  if (soloSiMarcaste && !marked) return null
 
   return (
     <section className="card body-entry">

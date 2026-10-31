@@ -348,3 +348,66 @@
     transition: none;
   }
 }
+
+/* Las familias en mosaicos chicos: dos por renglón en el teléfono, se leen de un vistazo. */
+.bib-familias {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 150px), 1fr));
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.bib-familias li {
+  display: flex;
+}
+.bib-familia-link {
+  display: grid;
+  flex: 1;
+  grid-template-columns: 26px minmax(0, 1fr);
+  align-content: center;
+  column-gap: 8px;
+  row-gap: 1px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  text-decoration: none;
+}
+@media (hover: hover) {
+  .bib-familia-link:hover {
+    background: var(--surface-soft);
+  }
+}
+.bib-familia-emoji {
+  grid-row: span 2;
+  align-self: start;
+  padding-top: 1px;
+  font-size: 1.15rem;
+  line-height: 1.2;
+}
+.bib-familia-nombre {
+  font-size: 0.95rem;
+  font-weight: 620;
+  line-height: 1.25;
+}
+.bib-familia-n {
+  font-size: 0.82rem;
+  color: var(--muted);
+}
+
+.bib-opciones {
+  padding-block: 4px;
+}
+.bib-opcion + .bib-opcion {
+  border-top: 1px solid var(--border);
+}
+.bib-opcion summary {
+  padding: 14px 0;
+  font-weight: 620;
+  cursor: pointer;
+}
+.bib-opcion[open] {
+  padding-bottom: 14px;
+}

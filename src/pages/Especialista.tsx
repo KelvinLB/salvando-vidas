@@ -2,6 +2,7 @@ import { type ReactNode, useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import PageHeader from '../components/PageHeader'
 import PinPad from '../components/PinPad'
+import './especialista.css'
 import { ANSWERS } from '../data/companion'
 import { MOODS } from '../data/content'
 import { feelingLabel } from '../data/feelings'
@@ -25,7 +26,8 @@ import {
 } from '../lib/storage'
 
 // La ansiedad hace que "ir al doctor" se sienta como una montaña. Aquí se parte
-// en pasos tan pequeños que cada uno se pueda dar en un mal día.
+// en pasos tan pequeños que cada uno se pueda dar en un mal día. Se ve abierto solo el que
+// sigue; los demás quedan como renglones que se abren con un toque.
 
 const SCRIPT =
   'Hola, quisiera agendar una cita. Me he sentido muy mal emocionalmente desde hace un tiempo (tristeza, ansiedad, vacío) y me recomendaron buscar ayuda. ¿Qué días tienen disponibles?'
@@ -244,6 +246,8 @@ export default function Especialista() {
   const [compass] = useCompass()
   const [includeSentido, setIncludeSentido] = useStored(INCLUDE_KEY, false)
   const hasSentido = words.length > 0 || cards.length > 0 || !!compass.action?.text.trim()
+  // Cuántas cosas extra eligió llevar, para verlo sin abrir la lista.
+  const incluidos = [includeNotes, barrioLines.length > 0 && barrio.inSummary, panicLog.length > 0 && includePanic, bodyNotes.length > 0 && includeBody, hasSentido && includeSentido].filter(Boolean).length
   const [thoughts, setThoughts] = useState<Thought[]>([])
   const [copied, setCopied] = useState<string | null>(null)
   // Si el diario tiene clave, sus notas entran al resumen solo después de escribirla.
@@ -271,43 +275,24 @@ export default function Especialista() {
     else copy('resumen', summary)
   }
 
-  const step = (key: string, title: string, children: ReactNode) => (
-    <section className={`card step ${done[key] ? 'done' : ''}`}>
-      <label className="toggle">
-        <input type="checkbox" checked={!!done[key]} onChange={(e) => setDone((d) => ({ ...d, [key]: e.target.checked }))} />
-        <h2>{title}</h2>
-      </label>
-      {children}
-    </section>
-  )
-
-  const completed = Object.values(done).filter(Boolean).length
-
-  return (
-    <div className="stack">
-      <PageHeader
-        title="Camino al especialista"
-        subtitle="Saber que tienes que ir y no poder dar el paso es parte de la ansiedad, no falta de voluntad. Vamos en pasos muy pequeños, uno a la vez."
-      />
-
-      <p className="muted small no-print">
-        {completed === 0 ? 'Marca cada paso cuando lo des. No hay prisa.' : `Llevas ${completed} de 5 pasos. Cada uno cuenta.`}
-      </p>
-
-      {step(
-        'quien',
-        '1. Elegir a quién ir',
+  // Los cinco pasos, cada uno con lo que trae adentro. Solo uno se ve abierto a la vez.
+  const pasos: { key: string; title: string; content: ReactNode }[] = [
+    {
+      key: 'quien',
+      title: '1. Elegir a quién ir',
+      content: (
         <ul className="plain">
           <li><strong>Psiquiatra:</strong> es médico; diagnostica y receta o ajusta medicamentos. Si ya tomas alguno y notas efectos raros, es a quien hay que ir.</li>
           <li><strong>Psicólogo:</strong> da terapia para entender lo que pasa y aprender a manejarlo. Funciona muy bien junto con el psiquiatra.</li>
           <li><strong>Médico general:</strong> un buen primer paso si no sabes por dónde empezar; puede canalizarte.</li>
           <li>Las <Link to="/ayuda">líneas de ayuda</Link> también te orientan sobre dónde atenderte, incluso gratis.</li>
-        </ul>,
-      )}
-
-      {step(
-        'compania',
-        '2. Pedir compañía',
+        </ul>
+      ),
+    },
+    {
+      key: 'compania',
+      title: '2. Pedir compañía',
+      content: (
         <>
           <p className="muted">No tienes que hacerlo sin ayuda. Pídele a alguien que haga la llamada contigo, o por ti.</p>
           {person ? (
@@ -322,24 +307,26 @@ export default function Especialista() {
           ) : (
             <Link to="/mi-espacio/personas" className="btn ghost">Agregar a mis personas de confianza</Link>
           )}
-        </>,
-      )}
-
-      {step(
-        'agendar',
-        '3. Agendar la cita',
+        </>
+      ),
+    },
+    {
+      key: 'agendar',
+      title: '3. Agendar la cita',
+      content: (
         <>
           <p className="muted">Si llamar te paraliza, lee esto tal cual o mándalo por mensaje:</p>
           <blockquote className="script">{SCRIPT}</blockquote>
           <button className="btn ghost" onClick={() => copy('guion', SCRIPT)}>
             {copied === 'guion' ? '¡Copiado!' : 'Copiar mensaje'}
           </button>
-        </>,
-      )}
-
-      {step(
-        'preparar',
-        '4. Preparar la consulta',
+        </>
+      ),
+    },
+    {
+      key: 'preparar',
+      title: '4. Preparar la consulta',
+      content: (
         <>
           <label className="field">
             <strong>Sobre mi tratamiento</strong>
@@ -353,76 +340,140 @@ export default function Especialista() {
             <strong>Mis preguntas</strong>
             <textarea rows={3} value={questions} onChange={(e) => setQuestions(e.target.value)} />
           </label>
-          <div className="chips">
-            {SUGGESTED_QUESTIONS.filter((q) => !questions.includes(q)).map((q) => (
-              <button key={q} className="chip" onClick={() => setQuestions((prev) => (prev.trim() ? `${prev.trim()}\n${q}` : q))}>
-                + {q}
-              </button>
-            ))}
-          </div>
-          <label className="toggle">
-            <input type="checkbox" role="switch" checked={includeNotes} onChange={(e) => setIncludeNotes(e.target.checked)} />
-            Incluir lo que escribí en «Mi diario»
-          </label>
-          {includeNotes &&
-            locked &&
-            (asking ? (
-              <PinPad
-                title="La clave de tu diario"
-                onSubmit={(pin) => (unlock(pin) ? setAsking(false) : 'Esa no es. Intenta otra vez.')}
-                onCancel={() => setAsking(false)}
-              />
-            ) : (
-              <div className="callout info no-print">
-                <p>Tu diario tiene clave: escríbela para agregar tus notas al resumen.</p>
-                <button className="btn small ghost" onClick={() => setAsking(true)}>
-                  Escribir la clave
+          {/* Las ideas de preguntas y lo que se puede sumar al resumen, a un toque: no estorban al escribir. */}
+          <details className="es-mas">
+            <summary>Ideas de preguntas</summary>
+            <div className="chips">
+              {SUGGESTED_QUESTIONS.filter((q) => !questions.includes(q)).map((q) => (
+                <button key={q} className="chip" onClick={() => setQuestions((prev) => (prev.trim() ? `${prev.trim()}\n${q}` : q))}>
+                  + {q}
                 </button>
-              </div>
-            ))}
-          {barrioLines.length > 0 && (
+              ))}
+            </div>
+          </details>
+          <details className="es-mas">
+            <summary>Qué más llevar en el resumen{incluidos ? ` (${incluidos} elegido${incluidos === 1 ? '' : 's'})` : ''}</summary>
             <label className="toggle">
-              <input type="checkbox" role="switch" checked={barrio.inSummary} onChange={(e) => patchBarrio({ inSummary: e.target.checked })} />
-              Incluir lo del barrio (contexto, no diagnóstico)
+              <input type="checkbox" role="switch" checked={includeNotes} onChange={(e) => setIncludeNotes(e.target.checked)} />
+              Incluir lo que escribí en «Mi diario»
             </label>
-          )}
-          {panicLog.length > 0 && (
-            <label className="toggle">
-              <input type="checkbox" role="switch" checked={includePanic} onChange={(e) => setIncludePanic(e.target.checked)} />
-              Incluir lo que temí en mis ataques de pánico y si pasó
-            </label>
-          )}
-          {bodyNotes.length > 0 && (
-            <label className="toggle">
-              <input type="checkbox" role="switch" checked={includeBody} onChange={(e) => setIncludeBody(e.target.checked)} />
-              Incluir mis notas sobre el cuerpo («Tus palabras»)
-            </label>
-          )}
-          {hasSentido && (
-            <label className="toggle">
-              <input type="checkbox" role="switch" checked={includeSentido} onChange={(e) => setIncludeSentido(e.target.checked)} />
-              Incluir lo de «Lo que no sale» (mis palabras, mis cartas del día y lo que me propuse)
-            </label>
-          )}
+            {includeNotes &&
+              locked &&
+              (asking ? (
+                <PinPad
+                  title="La clave de tu diario"
+                  onSubmit={(pin) => (unlock(pin) ? setAsking(false) : 'Esa no es. Intenta otra vez.')}
+                  onCancel={() => setAsking(false)}
+                />
+              ) : (
+                <div className="callout info no-print">
+                  <p>Tu diario tiene clave: escríbela para agregar tus notas al resumen.</p>
+                  <button className="btn small ghost" onClick={() => setAsking(true)}>
+                    Escribir la clave
+                  </button>
+                </div>
+              ))}
+            {barrioLines.length > 0 && (
+              <label className="toggle">
+                <input type="checkbox" role="switch" checked={barrio.inSummary} onChange={(e) => patchBarrio({ inSummary: e.target.checked })} />
+                Incluir lo del barrio (contexto, no diagnóstico)
+              </label>
+            )}
+            {panicLog.length > 0 && (
+              <label className="toggle">
+                <input type="checkbox" role="switch" checked={includePanic} onChange={(e) => setIncludePanic(e.target.checked)} />
+                Incluir lo que temí en mis ataques de pánico y si pasó
+              </label>
+            )}
+            {bodyNotes.length > 0 && (
+              <label className="toggle">
+                <input type="checkbox" role="switch" checked={includeBody} onChange={(e) => setIncludeBody(e.target.checked)} />
+                Incluir mis notas sobre el cuerpo («Tus palabras»)
+              </label>
+            )}
+            {hasSentido && (
+              <label className="toggle">
+                <input type="checkbox" role="switch" checked={includeSentido} onChange={(e) => setIncludeSentido(e.target.checked)} />
+                Incluir lo de «Lo que no sale» (mis palabras, mis cartas del día y lo que me propuse)
+              </label>
+            )}
+          </details>
           <pre className="summary printable">{summary}</pre>
           <div className="row no-print">
             <button className="btn" onClick={share}>{copied === 'resumen' ? '¡Copiado!' : 'Compartir'}</button>
             <button className="btn ghost" onClick={() => window.print()}>Imprimir</button>
           </div>
           <p className="muted small">Puedes enseñárselo al especialista desde tu teléfono. Está bien leer de ahí; muchas personas lo hacen.</p>
-        </>,
-      )}
-
-      {step(
-        'dia',
-        '5. El día de la cita',
+        </>
+      ),
+    },
+    {
+      key: 'dia',
+      title: '5. El día de la cita',
+      content: (
         <ul className="plain">
           <li>Si puedes, ve con alguien de confianza.</li>
           <li>Lleva tu resumen. No tienes que acordarte de todo.</li>
           <li>Di la verdad aunque dé pena: los especialistas escuchan esto todos los días y no te van a juzgar.</li>
           <li>Ir ya es un logro enorme. Date crédito por eso.</li>
-        </ul>,
-      )}
+        </ul>
+      ),
+    },
+  ]
+
+  const completed = Object.values(done).filter(Boolean).length
+  const pendiente = (desde = -1) => pasos.find((p, i) => i > desde && !done[p.key])?.key ?? pasos.find((p) => !done[p.key])?.key ?? null
+
+  // Lo que se abre al llegar es el siguiente paso pendiente; si ya los diste todos, ninguno.
+  const [abierto, setAbierto] = useState<string | null>(() => pendiente())
+  const abrir = (key: string | null) => {
+    setAbierto(key)
+    // Al cerrarse el de arriba, el que se abrió se movería: se lleva a la vista para no perderlo.
+    if (key) requestAnimationFrame(() => document.getElementById(`paso-${key}`)?.scrollIntoView({ block: 'start' }))
+  }
+
+  return (
+    <div className="stack">
+      <PageHeader
+        title="Camino al especialista"
+        subtitle="Saber que tienes que ir y no poder dar el paso es parte de la ansiedad, no falta de voluntad. Vamos en pasos muy pequeños, uno a la vez."
+      />
+
+      <p className="muted small no-print">
+        {completed === 0 ? 'Marca cada paso cuando lo des. No hay prisa.' : `Llevas ${completed} de 5 pasos. Cada uno cuenta.`}
+      </p>
+
+      {pasos.map((p, i) => {
+        const open = abierto === p.key
+        const siguiente = done[p.key] ? pendiente(i) : null
+        return (
+          <section key={p.key} id={`paso-${p.key}`} className={`card step es-paso ${done[p.key] ? 'done' : ''} ${open ? 'abierto' : ''}`}>
+            <div className="es-paso-cabeza">
+              <input
+                type="checkbox"
+                aria-label={`Ya di este paso: ${p.title}`}
+                checked={!!done[p.key]}
+                onChange={(e) => setDone((d) => ({ ...d, [p.key]: e.target.checked }))}
+              />
+              <h2>
+                <button type="button" className="es-paso-titulo" aria-expanded={open} aria-controls={`paso-${p.key}-cuerpo`} onClick={() => abrir(open ? null : p.key)}>
+                  {p.title}
+                </button>
+              </h2>
+            </div>
+            {open && (
+              <div id={`paso-${p.key}-cuerpo`} className="stack tight es-paso-cuerpo">
+                {p.content}
+                {siguiente && (
+                  <button type="button" className={`btn ${p.key === 'preparar' ? 'ghost' : ''} es-siguiente no-print`} onClick={() => abrir(siguiente)}>
+                    Siguiente: {pasos.find((x) => x.key === siguiente)?.title}
+                  </button>
+                )}
+              </div>
+            )}
+          </section>
+        )
+      })}
     </div>
   )
 }

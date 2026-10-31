@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react'
-import { Download, LockKeyhole, Send, Upload } from 'lucide-react'
+import { Download, Send, Upload } from 'lucide-react'
+import Capitulos from '../../components/Capitulos'
 import PageHeader from '../../components/PageHeader'
 import PinPad from '../../components/PinPad'
 import ReminderCard from '../../components/ReminderCard'
@@ -11,7 +12,8 @@ import { SOUNDS_KEY } from '../../lib/petfx'
 import { type Address, clearAll, today, useStored } from '../../lib/storage'
 
 // Ajustes: cómo te acompaña la app y qué pasa con tus datos. Ya no está al mismo nivel que lo
-// personal: se llega por el engrane de Mi espacio.
+// personal: se llega por el engrane de Mi espacio. Cada grupo de ajustes es un capítulo, con lo
+// que más se cambia primero, para no tener que bajar por todos para encontrar uno.
 
 const RESTORED = 'sv:copia-recuperada'
 
@@ -35,9 +37,6 @@ function DiaryKeyCard() {
 
   return (
     <section className="card field">
-      <strong>
-        <LockKeyhole size={18} aria-hidden="true" /> Clave para mi diario
-      </strong>
       <small className="muted">
         Cuatro números que se piden al abrir tu diario, para que nadie que tome tu teléfono lo lea. No hay forma de
         recuperarla si la olvidas, así que elige una que recuerdes.
@@ -181,7 +180,6 @@ function BackupCard() {
 
   return (
     <section className="card field">
-      <strong>Tu copia de seguridad</strong>
       <small className="muted">
         Todo en un archivo: tu diario con sus fotos y audios, tu plan, tu caja de esperanza, tu mascota. Sirve para
         cambiar de teléfono o por si se borra la app. No pasa por ningún servidor: el archivo es tuyo.
@@ -262,99 +260,145 @@ export default function Ajustes() {
 
   return (
     <div className="stack">
-      <PageHeader title="Ajustes" />
+      <Capitulos
+        label="Ajustes"
+        antes={<PageHeader title="Ajustes" subtitle="Cómo te acompaña la app y qué pasa con tus datos." />}
+        capitulos={[
+          {
+            id: 'trato',
+            emoji: '💬',
+            title: 'Cómo te hablamos',
+            text: 'En femenino o masculino, tu país y el contenido de fe',
+            content: (
+              <>
+                <label className="card field">
+                  <strong>¿Cómo prefieres que te hablemos?</strong>
+                  <select value={address} onChange={(e) => setAddress(e.target.value as Address)}>
+                    <option value="ambos">No estás sola, no estás solo</option>
+                    <option value="femenino">En femenino: no estás sola</option>
+                    <option value="masculino">En masculino: no estás solo</option>
+                  </select>
+                </label>
 
-      <h2 className="section-title">Cómo te acompaña la app</h2>
-      <label className="card field">
-        <strong>¿Cómo prefieres que te hablemos?</strong>
-        <select value={address} onChange={(e) => setAddress(e.target.value as Address)}>
-          <option value="ambos">No estás sola, no estás solo</option>
-          <option value="femenino">En femenino: no estás sola</option>
-          <option value="masculino">En masculino: no estás solo</option>
-        </select>
-      </label>
+                <label className="card field">
+                  <strong>Mi país</strong>
+                  <small className="muted">Para mostrarte las líneas de ayuda correctas y completar los números de WhatsApp.</small>
+                  <select value={country} onChange={(e) => setCountry(e.target.value)}>
+                    {COUNTRIES.map((c) => (
+                      <option key={c.code} value={c.code}>
+                        {c.name}
+                      </option>
+                    ))}
+                  </select>
+                </label>
 
-      <label className="card field">
-        <strong>Mi país</strong>
-        <small className="muted">Para mostrarte las líneas de ayuda correctas y completar los números de WhatsApp.</small>
-        <select value={country} onChange={(e) => setCountry(e.target.value)}>
-          {COUNTRIES.map((c) => (
-            <option key={c.code} value={c.code}>
-              {c.name}
-            </option>
-          ))}
-        </select>
-      </label>
+                <label className="card field">
+                  <strong>Contenido de fe</strong>
+                  <small className="muted">Mensajes, música y reflexiones espirituales, para quien le ayudan.</small>
+                  <span className="toggle">
+                    <input type="checkbox" role="switch" checked={faith} onChange={(e) => setFaith(e.target.checked)} />
+                    Mostrar contenido de fe
+                  </span>
+                </label>
+              </>
+            ),
+          },
+          {
+            id: 'mascota',
+            emoji: '🐾',
+            title: 'Tu mascota',
+            text: 'Si flota en todas las pantallas y si hace sonidos',
+            content: (
+              <>
+                <label className="card field">
+                  <strong>Tu mascota flotando</strong>
+                  <small className="muted">
+                    Te acompaña en todas las pantallas, menos en las de crisis. Puedes moverla, esconderla un rato o apagarla aquí.
+                  </small>
+                  <span className="toggle">
+                    <input type="checkbox" role="switch" checked={floating} onChange={(e) => setFloating(e.target.checked)} />
+                    Mostrarla en toda la app
+                  </span>
+                </label>
 
-      <label className="card field">
-        <strong>Contenido de fe</strong>
-        <small className="muted">Mensajes, música y reflexiones espirituales, para quien le ayudan.</small>
-        <span className="toggle">
-          <input type="checkbox" role="switch" checked={faith} onChange={(e) => setFaith(e.target.checked)} />
-          Mostrar contenido de fe
-        </span>
-      </label>
-
-      <label className="card field">
-        <strong>Tu mascota flotando</strong>
-        <small className="muted">
-          Te acompaña en todas las pantallas, menos en las de crisis. Puedes moverla, esconderla un rato o apagarla aquí.
-        </small>
-        <span className="toggle">
-          <input type="checkbox" role="switch" checked={floating} onChange={(e) => setFloating(e.target.checked)} />
-          Mostrarla en toda la app
-        </span>
-      </label>
-
-      <label className="card field">
-        <strong>Los sonidos de tu mascota</strong>
-        <small className="muted">
-          Cuando le haces cariño, el michi ronronea y los demás se ríen bajito; en Android también vibra. En iPhone no
-          suena si el teléfono está en silencio.
-        </small>
-        <span className="toggle">
-          <input type="checkbox" role="switch" checked={sounds} onChange={(e) => setSounds(e.target.checked)} />
-          Con sonidos
-        </span>
-      </label>
-
-      <ReminderCard
-        kind="animo"
-        title="Un recordatorio para ti"
-        text="Un aviso diario en tu calendario para marcar cómo te sientes. Los recordatorios del medicamento están en «Mis medicamentos»."
+                <label className="card field">
+                  <strong>Los sonidos de tu mascota</strong>
+                  <small className="muted">
+                    Cuando le haces cariño, el michi ronronea y los demás se ríen bajito; en Android también vibra. En iPhone no
+                    suena si el teléfono está en silencio.
+                  </small>
+                  <span className="toggle">
+                    <input type="checkbox" role="switch" checked={sounds} onChange={(e) => setSounds(e.target.checked)} />
+                    Con sonidos
+                  </span>
+                </label>
+              </>
+            ),
+          },
+          {
+            id: 'clave',
+            emoji: '🔒',
+            title: 'Clave para mi diario',
+            text: 'Cuatro números para que nadie más lo lea',
+            content: <DiaryKeyCard />,
+          },
+          {
+            id: 'recordatorio',
+            emoji: '🔔',
+            title: 'Recordatorio diario',
+            text: 'Un aviso diario en tu calendario para marcar cómo te sientes',
+            content: (
+              <ReminderCard
+                kind="animo"
+                title="Un recordatorio para ti"
+                text="Un aviso diario en tu calendario para marcar cómo te sientes. Los recordatorios del medicamento están en «Mis medicamentos»."
+              />
+            ),
+          },
+          {
+            id: 'copia',
+            emoji: '💾',
+            title: 'Tu copia de seguridad',
+            text: 'Guardar todo en un archivo o recuperarlo en otro teléfono',
+            content: <BackupCard />,
+          },
+          {
+            id: 'datos',
+            emoji: '📱',
+            title: 'Tus datos',
+            text: 'Todo se queda en este teléfono; aquí puedes borrarlo',
+            content: (
+              <section className="card">
+                <strong>Todo se queda en este teléfono</strong>
+                <p className="muted">
+                  No hay cuentas ni servidores: nadie más puede leer lo que escribes. Solo sale lo que tú decides mandar, como tu
+                  opinión o un mensaje de WhatsApp.
+                </p>
+                {confirming ? (
+                  <div className="row">
+                    <button
+                      className="btn danger"
+                      onClick={() => {
+                        clearAll()
+                        location.reload()
+                      }}
+                    >
+                      Sí, borrar todo
+                    </button>
+                    <button className="btn ghost" onClick={() => setConfirming(false)}>
+                      Cancelar
+                    </button>
+                  </div>
+                ) : (
+                  <button className="btn ghost" onClick={() => setConfirming(true)}>
+                    Borrar todos mis datos
+                  </button>
+                )}
+              </section>
+            ),
+          },
+        ]}
       />
-
-      <h2 className="section-title">Tu privacidad</h2>
-      <DiaryKeyCard />
-      <BackupCard />
-
-      <section className="card">
-        <strong>Todo se queda en este teléfono</strong>
-        <p className="muted">
-          No hay cuentas ni servidores: nadie más puede leer lo que escribes. Solo sale lo que tú decides mandar, como tu
-          opinión o un mensaje de WhatsApp.
-        </p>
-        {confirming ? (
-          <div className="row">
-            <button
-              className="btn danger"
-              onClick={() => {
-                clearAll()
-                location.reload()
-              }}
-            >
-              Sí, borrar todo
-            </button>
-            <button className="btn ghost" onClick={() => setConfirming(false)}>
-              Cancelar
-            </button>
-          </div>
-        ) : (
-          <button className="btn ghost" onClick={() => setConfirming(true)}>
-            Borrar todos mis datos
-          </button>
-        )}
-      </section>
     </div>
   )
 }

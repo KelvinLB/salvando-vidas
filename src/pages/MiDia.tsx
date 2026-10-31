@@ -1,9 +1,12 @@
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import DayPlanCard from '../components/DayPlanCard'
 import PageHeader from '../components/PageHeader'
-import { DAY_TASK_IDEAS, MAX_DAY_TASKS, REWARD_IDEAS } from '../data/content'
+import { LIKES, companionName, likePhrase } from '../data/companion'
+import { DAY_TASK_IDEAS, MAX_DAY_TASKS, MICRO_MISSIONS, REWARD_IDEAS } from '../data/content'
+import { useCompanion } from '../lib/companion'
 import { type DayPlan, tomorrow, useDayPlans } from '../lib/dayplan'
-import { newId, today } from '../lib/storage'
+import { newId, pick, today } from '../lib/storage'
 
 function Planner({ date, initial, onSave, onCancel }: { date: string; initial?: DayPlan; onSave: (p: DayPlan) => void; onCancel: () => void }) {
   const [tasks, setTasks] = useState<string[]>(initial?.tasks.map((t) => t.text) ?? [])
@@ -109,10 +112,36 @@ function Planner({ date, initial, onSave, onCancel }: { date: string; initial?: 
   )
 }
 
+function LikeCard({ like, name }: { like: (typeof LIKES)[number]; name: string }) {
+  const body = (
+    <>
+      <h2>
+        {like.emoji} {likePhrase(name, like)}
+      </h2>
+      <p className="muted">¿Le damos un rato? Aunque hoy no den ganas, a veces lo conocido ayuda.</p>
+    </>
+  )
+  return like.to ? (
+    <Link to={like.to} className="card link-card">
+      {body}
+    </Link>
+  ) : (
+    <a href={like.href} target="_blank" rel="noopener noreferrer" className="card link-card">
+      {body}
+    </a>
+  )
+}
+
 export default function MiDia() {
   const plans = useDayPlans()
   const [editing, setEditing] = useState<string | null>(null)
   const evening = new Date().getHours() >= 18
+  const { companion } = useCompanion()
+  const [mission, setMission] = useState(() => pick(MICRO_MISSIONS))
+  const [like] = useState(() => {
+    const liked = LIKES.filter((l) => companion?.likes.includes(l.id))
+    return liked.length ? pick(liked) : undefined
+  })
 
   const planner = (date: string, initial?: DayPlan) => (
     <Planner
@@ -165,7 +194,7 @@ export default function MiDia() {
                 ))}
               </ul>
               <p className="muted">🎁 Premio: {plans.tomorrow.reward}</p>
-              <p className="muted small">Mañana te lo mostramos en Inicio. Ya no tienes que pensarlo esta noche.</p>
+              <p className="muted small">Mañana lo encuentras en Inicio, en «Mi día». Ya no tienes que pensarlo esta noche.</p>
               <button className="btn small ghost" onClick={() => setEditing(tomorrow())}>
                 Cambiarlo
               </button>
@@ -183,6 +212,16 @@ export default function MiDia() {
           )}
         </section>
       )}
+
+      <section className="card soft mision-card">
+        <h2>Una pequeña misión</h2>
+        <p className="mission">{mission}</p>
+        <button className="btn ghost small" onClick={() => setMission(pick(MICRO_MISSIONS))}>
+          Dame otra
+        </button>
+      </section>
+
+      {companion && like && <LikeCard like={like} name={companionName(companion)} />}
 
       <section className="card soft">
         <h2>Si te levantas por quienes dependen de ti</h2>

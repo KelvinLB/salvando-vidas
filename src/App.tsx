@@ -2,12 +2,13 @@ import { lazy, useEffect } from 'react'
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom'
 import Layout from './components/Layout'
 import Inicio from './pages/Inicio'
-import Calma from './pages/Calma'
+import Calma, { Presente } from './pages/Calma'
 import Ayuda from './pages/Ayuda'
 import Panico from './pages/Panico'
 // Cada pantalla se descarga al abrirla, así ningún archivo pasa del límite de la copia
 // sin internet (2 MB). Las de crisis se quedan en el archivo principal para abrir al instante.
 const Distraer = lazy(() => import('./pages/Distraer'))
+const DistraerTema = lazy(() => import('./pages/Distraer').then((m) => ({ default: m.DistraerTema })))
 const Musica = lazy(() => import('./pages/Musica'))
 const Escuchar = lazy(() => import('./pages/Escuchar'))
 const Videos = lazy(() => import('./pages/Videos'))
@@ -55,7 +56,9 @@ export default function App() {
       <Route element={<Layout />}>
         <Route index element={<Inicio />} />
         <Route path="calma" element={<Calma />} />
+        <Route path="calma/presente" element={<Presente />} />
         <Route path="distraer" element={<Distraer />} />
+        <Route path="distraer/:tema" element={<DistraerTema />} />
         <Route path="musica" element={<Musica />} />
         <Route path="escuchar" element={<Escuchar />} />
         <Route path="videos" element={<Videos />} />
@@ -92,7 +95,7 @@ export default function App() {
         <Route path="cuerpo" element={<Cuerpo />} />
         <Route path="nervios" element={<Nervios />} />
         <Route path="nervios/practicar" element={<Practicar />} />
-        <Route path="explorar" element={<Explorar />} />
+        <Route path="explorar/:modulo?" element={<Explorar />} />
         <Route path="cuerpo/explorar" element={<Navigate to="/explorar" replace />} />
         <Route path="lo-que-no-sale" element={<NoSale />} />
         <Route path="*" element={<Inicio />} />

@@ -1,14 +1,15 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, Navigate, useParams } from 'react-router-dom'
 import CompanionView from '../components/Companion'
+import Filas from '../components/Filas'
 import PageHeader from '../components/PageHeader'
 import { DEFAULT_COMPANION, companionName } from '../data/companion'
 import { WHAT_HELPED } from '../data/content'
 import { useCompanion } from '../lib/companion'
 
 // Distraer: primero se elige cómo estás y cuánto tiempo tienes, y arriba salen las tres o cuatro
-// cosas que mejor encajan, cada una con por qué. Abajo sigue todo, agrupado por lo que ocupa (las
-// manos, la cabeza, la ola, los oídos). Elegir es opcional y no se guarda: es solo para no tener
+// cosas que mejor encajan, cada una con por qué. Lo demás va por tema (las manos, la cabeza, la
+// ola, los oídos), cada uno en su propia pantalla. Elegir es opcional y no se guarda: es solo para no tener
 // que decidir entre once cosas en un mal momento.
 
 type Estado = 'nervios' | 'cabeza' | 'animo' | 'noche' | 'enojo' | 'rato'
@@ -184,12 +185,18 @@ const OPCIONES: Opcion[] = [
   },
 ]
 
-const GRUPOS: { id: Grupo; title: string }[] = [
-  { id: 'manos', title: 'Para las manos' },
-  { id: 'cabeza', title: 'Para la cabeza' },
-  { id: 'ola', title: 'Para cuando llega la ola' },
-  { id: 'escuchar', title: 'Escuchar y ver' },
+const GRUPOS: { id: Grupo; title: string; emoji: string }[] = [
+  { id: 'manos', title: 'Para las manos', emoji: '✋' },
+  { id: 'cabeza', title: 'Para la cabeza', emoji: '🧠' },
+  { id: 'ola', title: 'Para cuando llega la ola', emoji: '🌊' },
+  { id: 'escuchar', title: 'Escuchar y ver', emoji: '🎧' },
 ]
+
+/** Los nombres de lo que hay adentro, para saberlo sin abrir la puerta. */
+const adentro = (g: Grupo) =>
+  OPCIONES.filter((o) => o.grupo === g)
+    .map((o) => o.title)
+    .join(', ')
 
 // Si empatan, primero la página que es justo para eso (la de la noche, la del enojo).
 const rango = (o: Opcion, e: Estado) => Object.keys(o.para).indexOf(e) * 2 + (o.grupo ? 1 : 0)
@@ -215,17 +222,8 @@ function Tile({ o }: { o: Opcion }) {
   )
 }
 
-export default function Distraer() {
-  const { companion, mood } = useCompanion()
-  const [estado, setEstado] = useState<Estado | null>(null)
-  const [tiempo, setTiempo] = useState<Tiempo | null>(null)
-  const [verTodo, setVerTodo] = useState(false)
-  // Con poco tiempo no se sugieren el barrio ni el hueco: son para quedarse un rato. Si van, se
-  // sugieren dos cosas más y no cuatro, para no volver a tener que escoger entre muchas.
-  const conMascota = (!tiempo || tiempo === 15) && (!estado || estado === 'animo' || estado === 'rato')
-  const sugeridas = estado || tiempo ? sugerir(estado, tiempo, conMascota ? 2 : 4) : []
-
-  const anhedonia = (
+function Anhedonia() {
+  return (
     <div className="callout info">
       <strong>¿Sientes que ya nada te entretiene?</strong>
       <p>
@@ -234,8 +232,12 @@ export default function Distraer() {
       </p>
     </div>
   )
+}
 
-  const mascota = (
+/** El barrio y Salir del hueco: su mascota es quien juega. */
+function ConMascota() {
+  const { companion, mood } = useCompanion()
+  return (
     <>
       {/* El barrio va primero: su mascota pasea por la plaza, con vecinos y su propia casa. */}
       <Link to="/barrio" className="tile hole-tile">
@@ -265,8 +267,20 @@ export default function Distraer() {
       </Link>
     </>
   )
+}
 
-  // En computadora: a la izquierda se elige y salen las sugerencias; a la derecha está todo.
+// Una sola pregunta al frente («¿Cómo estás ahorita?») y, si se contesta, unas pocas sugerencias.
+// Todo lo demás son puertas: cada tema abre su propia pantalla con solo esos juegos. En
+// computadora, la pregunta va a la izquierda y las puertas a la derecha.
+export default function Distraer() {
+  const { companion } = useCompanion()
+  const [estado, setEstado] = useState<Estado | null>(null)
+  const [tiempo, setTiempo] = useState<Tiempo | null>(null)
+  // Con poco tiempo no se sugieren el barrio ni el hueco: son para quedarse un rato. Si van, se
+  // sugieren dos cosas más y no cuatro, para no volver a tener que escoger entre muchas.
+  const conMascota = (!tiempo || tiempo === 15) && (!estado || estado === 'animo' || estado === 'rato')
+  const sugeridas = estado || tiempo ? sugerir(estado, tiempo, conMascota ? 2 : 4) : []
+
   return (
     <div className="pagina-ancha distraer">
       <PageHeader
@@ -274,7 +288,6 @@ export default function Distraer() {
         subtitle="A veces lo mejor es darle a la cabeza algo pequeño en qué ocuparse."
       />
       <div className="columna">
-
         <section className="card distraer-elegir" aria-labelledby="distraer-elegir-title">
           <h2 id="distraer-elegir-title">¿Cómo estás ahorita?</h2>
           <div className="chips" role="group" aria-label="Cómo estás">
@@ -304,7 +317,7 @@ export default function Distraer() {
               </button>
             ))}
           </div>
-          {!estado && !tiempo && <p className="muted small">Elegir es opcional. Abajo está todo.</p>}
+          {!estado && !tiempo && <p className="muted small">Elegir es opcional: también puedes ir directo a un tema.</p>}
         </section>
 
         {(estado || tiempo) && (
@@ -312,8 +325,8 @@ export default function Distraer() {
             <h2 id="distraer-para-ti" className="section-title">
               Para ti, ahorita
             </h2>
-            {estado === 'animo' && anhedonia}
-            {conMascota && mascota}
+            {estado === 'animo' && <Anhedonia />}
+            {conMascota && <ConMascota />}
             {sugeridas.map((o) => (
               <Link key={o.to} to={o.to} className="tile distraer-sugerida">
                 <span className="tile-emoji" aria-hidden="true">
@@ -340,51 +353,89 @@ export default function Distraer() {
             </button>
           </section>
         )}
-        <div className="distraer-pie">
-          {estado !== 'animo' && anhedonia}
-
-          <section className="card">
-            <h2>Lo que a otras personas les ha ayudado</h2>
-            <p className="muted small">Ideas de quienes viven con depresión y ansiedad.</p>
-            <ul className="helped">
-              {(verTodo ? WHAT_HELPED : WHAT_HELPED.slice(0, 4)).map((h) => (
-                <li key={h.text}>
-                  <span aria-hidden="true">{h.emoji}</span>
-                  {h.text}
-                </li>
-              ))}
-            </ul>
-            {!verTodo && (
-              <button type="button" className="btn ghost small distraer-ver" onClick={() => setVerTodo(true)}>
-                Ver {WHAT_HELPED.length - 4} ideas más
-              </button>
-            )}
-            <div className="row">
-              <Link to="/opinion" className="btn small ghost">
-                ¿A ti qué te ha ayudado? Cuéntanos
-              </Link>
-              <Link to="/redes" className="btn small ghost">
-                ¿Y lo que se dice en redes?
-              </Link>
-            </div>
-          </section>
-        </div>
       </div>
       <div className="columna">
-        <h2 className="section-title">{estado || tiempo ? 'Todo lo que hay' : 'Con tu mascota'}</h2>
-        {mascota}
-        {GRUPOS.map((g) => (
-          <section key={g.id} className="stack tight" aria-labelledby={`distraer-${g.id}`}>
-            <h2 id={`distraer-${g.id}`} className="section-title">
-              {g.title}
-            </h2>
-            <div className="grid">
-              {OPCIONES.filter((o) => o.grupo === g.id).map((o) => (
-                <Tile key={o.to} o={o} />
-              ))}
-            </div>
-          </section>
+        <section className="stack tight" aria-labelledby="distraer-temas">
+          <h2 id="distraer-temas" className="section-title">
+            Por tema
+          </h2>
+          <Filas
+            label="Por tema"
+            filas={[
+              {
+                to: '/distraer/mascota',
+                emoji: '🐾',
+                title: companion ? `Con ${companionName(companion)}` : 'Con tu mascota',
+                text: 'El barrio, Salir del hueco',
+              },
+              ...GRUPOS.map((g) => ({ to: `/distraer/${g.id}`, emoji: g.emoji, title: g.title, text: adentro(g.id) })),
+              {
+                to: '/distraer/ideas',
+                emoji: '💡',
+                title: 'Lo que a otras personas les ha ayudado',
+                text: 'Ideas de quienes viven con depresión y ansiedad',
+              },
+            ]}
+          />
+        </section>
+      </div>
+    </div>
+  )
+}
+
+/** Cada puerta de Distraer: una pantalla con solo lo de ese tema. */
+export function DistraerTema() {
+  const { tema } = useParams()
+  const { companion } = useCompanion()
+  const grupo = GRUPOS.find((g) => g.id === tema)
+
+  if (tema === 'mascota') {
+    return (
+      <div className="stack">
+        <PageHeader
+          title={companion ? `Con ${companionName(companion)}` : 'Con tu mascota'}
+          subtitle="Juegos para quedarse un rato, sin prisa y sin perder."
+        />
+        <ConMascota />
+      </div>
+    )
+  }
+
+  if (tema === 'ideas') return <Ideas />
+
+  if (!grupo) return <Navigate to="/distraer" replace />
+  return (
+    <div className="stack">
+      <PageHeader title={grupo.title} />
+      <div className="grid">
+        {OPCIONES.filter((o) => o.grupo === grupo.id).map((o) => (
+          <Tile key={o.to} o={o} />
         ))}
+      </div>
+    </div>
+  )
+}
+
+function Ideas() {
+  return (
+    <div className="stack">
+      <PageHeader title="Lo que a otras personas les ha ayudado" subtitle="Ideas de quienes viven con depresión y ansiedad." />
+      <Anhedonia />
+      <ul className="card helped">
+        {WHAT_HELPED.map((h) => (
+          <li key={h.text}>
+            <span aria-hidden="true">{h.emoji}</span>
+            {h.text}
+          </li>
+        ))}
+      </ul>
+      <div className="row">
+        <Link to="/opinion" className="btn small ghost">
+          ¿A ti qué te ha ayudado? Cuéntanos
+        </Link>
+        <Link to="/redes" className="btn small ghost">
+          ¿Y lo que se dice en redes?
+        </Link>
       </div>
     </div>
   )
