@@ -173,153 +173,159 @@ export default function Explorar() {
   const parte = modo === 'tocar' && sel ? parteById(sel) : undefined
 
   return (
-    <div className="stack explorar">
+    <div className="pagina-ancha explorar">
       <PageHeader
         title="Explorar"
         subtitle="Gira el cuerpo con el dedo y toca una parte, abre la biblioteca, o cuéntale lo que sientes y mira qué pasa por dentro."
       />
 
-      <div className="chips ex-modos" role="radiogroup" aria-label="Qué quieres hacer">
-        {MODOS.map((m) => (
-          <button
-            key={m.id}
-            type="button"
-            role="radio"
-            aria-checked={modo === m.id}
-            className={`chip${modo === m.id ? ' selected' : ''}`}
-            onClick={() => {
-              setModo(m.id)
-              setOlaInicial(undefined)
-            }}
-          >
-            {m.label}
-          </button>
-        ))}
-      </div>
-
-      {en3d ? (
-        <div ref={host} className={`ex-stage${parte ? ' con-tarjeta' : ''}`}>
-          {fase.es === 'cargando' && (
-            <p className="ex-loading" role="status">
-              Preparando el cuerpo…
-            </p>
-          )}
-          {fase.es === 'listo' && (
-            <div className="ex-tools">
-              <button type="button" className="icon-btn" onClick={() => escena.current?.girar(-45)} aria-label="Girar a la izquierda">
-                <RotateCcw size={20} aria-hidden="true" />
-              </button>
-              <button
-                type="button"
-                className="icon-btn"
-                onClick={() => {
-                  setSel(null)
-                  escena.current?.enfocar(null)
-                }}
-                aria-label="Ver todo el cuerpo de frente"
-              >
-                <Focus size={20} aria-hidden="true" />
-              </button>
-              <button type="button" className="icon-btn" onClick={() => escena.current?.girar(45)} aria-label="Girar a la derecha">
-                <RotateCw size={20} aria-hidden="true" />
-              </button>
-            </div>
-          )}
-          <div ref={setEncima} className="ex-overlay" aria-live="polite">
-            {parte && <Tarjeta parte={parte} onClose={() => setSel(null)} />}
-          </div>
-        </div>
-      ) : (
-        <div className="callout warm ex-aviso" role="status">
-          <p>{AVISO[fase.motivo]}</p>
-          <div className="ex-aviso-acciones">
-            {fase.motivo !== 'sin-webgl' && (
-              <button type="button" className="btn small" onClick={() => setFase({ es: 'cargando' })}>
-                {{ datos: 'Bajarlo', debil: 'Intentarlo de todos modos', falla: 'Intentar otra vez' }[fase.motivo]}
-              </button>
+      {/* En computadora, el cuerpo se queda a la izquierda, a la vista, y lo que se elige va a la
+          derecha. En el teléfono, los modos van arriba del cuerpo (con `order`). */}
+      <div className="columna fija ex-col-cuerpo">
+        {en3d ? (
+          <div ref={host} className={`ex-stage${parte ? ' con-tarjeta' : ''}`}>
+            {fase.es === 'cargando' && (
+              <p className="ex-loading" role="status">
+                Preparando el cuerpo…
+              </p>
             )}
-            <Link to="/cuerpo" className="btn ghost small">
-              Ir a Tu cuerpo por dentro
-            </Link>
+            {fase.es === 'listo' && (
+              <div className="ex-tools">
+                <button type="button" className="icon-btn" onClick={() => escena.current?.girar(-45)} aria-label="Girar a la izquierda">
+                  <RotateCcw size={20} aria-hidden="true" />
+                </button>
+                <button
+                  type="button"
+                  className="icon-btn"
+                  onClick={() => {
+                    setSel(null)
+                    escena.current?.enfocar(null)
+                  }}
+                  aria-label="Ver todo el cuerpo de frente"
+                >
+                  <Focus size={20} aria-hidden="true" />
+                </button>
+                <button type="button" className="icon-btn" onClick={() => escena.current?.girar(45)} aria-label="Girar a la derecha">
+                  <RotateCw size={20} aria-hidden="true" />
+                </button>
+              </div>
+            )}
+            <div ref={setEncima} className="ex-overlay" aria-live="polite">
+              {parte && <Tarjeta parte={parte} onClose={() => setSel(null)} />}
+            </div>
           </div>
-        </div>
-      )}
-
-      {modo === 'siento' && (
-        <LoQueSiento onSenal={onSenal} onAbierta={onAbierta} encima={en3d ? encima : null} still={still} />
-      )}
-      {modo === 'ansiedad' && (
-        <ComoSeMueve
-          onSenal={onSenal}
-          onAbierta={onAbierta}
-          encima={en3d ? encima : null}
-          still={still}
-          inicial={olaInicial}
-        />
-      )}
-      {modo === 'biblioteca' && <Biblioteca onSenal={onSenal} onOla={onOla} en3d={en3d} still={still} />}
-      {modo === 'dicc' && <MiDiccionario />}
-
-      {en3d && modo === 'tocar' && (
-        <div className="ex-capas" role="group" aria-label="Capas que se ven">
-          {CAPAS.map((c) => (
-            <button
-              key={c.id}
-              type="button"
-              className={`chip${capas[c.id] ? ' selected' : ''}`}
-              aria-pressed={capas[c.id]}
-              onClick={() => setCapas((s) => ({ ...s, [c.id]: !s[c.id] }))}
-            >
-              {c.label}
-            </button>
-          ))}
-        </div>
-      )}
-
-      {modo === 'tocar' && (
-        <section className="ex-partes" aria-labelledby="ex-partes-title">
-          <h2 id="ex-partes-title" className="section-title">
-            {en3d ? 'O elige una parte' : 'Elige una parte'}
-          </h2>
-          <div className="chips">
-            {PARTES.map((p) => (
+        ) : (
+          <div className="callout warm ex-aviso" role="status">
+            <p>{AVISO[fase.motivo]}</p>
+            <div className="ex-aviso-acciones">
+              {fase.motivo !== 'sin-webgl' && (
+                <button type="button" className="btn small" onClick={() => setFase({ es: 'cargando' })}>
+                  {{ datos: 'Bajarlo', debil: 'Intentarlo de todos modos', falla: 'Intentar otra vez' }[fase.motivo]}
+                </button>
+              )}
+              <Link to="/cuerpo" className="btn ghost small">
+                Ir a Tu cuerpo por dentro
+              </Link>
+            </div>
+          </div>
+        )}
+        {en3d && modo === 'tocar' && (
+          <div className="ex-capas" role="group" aria-label="Capas que se ven">
+            {CAPAS.map((c) => (
               <button
-                key={p.id}
+                key={c.id}
                 type="button"
-                className={`chip${sel === p.id ? ' selected' : ''}`}
-                aria-pressed={sel === p.id}
-                onClick={() => elegir(p.id)}
+                className={`chip${capas[c.id] ? ' selected' : ''}`}
+                aria-pressed={capas[c.id]}
+                onClick={() => setCapas((s) => ({ ...s, [c.id]: !s[c.id] }))}
               >
-                {p.nombre}
+                {c.label}
               </button>
             ))}
           </div>
-          {!en3d && parte && (
-            <div ref={tarjeta2d}>
-              <Tarjeta parte={parte} onClose={() => setSel(null)} />
+        )}
+      </div>
+      <div className="columna ex-col-lado">
+        <div className="chips ex-modos" role="radiogroup" aria-label="Qué quieres hacer">
+          {MODOS.map((m) => (
+            <button
+              key={m.id}
+              type="button"
+              role="radio"
+              aria-checked={modo === m.id}
+              className={`chip${modo === m.id ? ' selected' : ''}`}
+              onClick={() => {
+                setModo(m.id)
+                setOlaInicial(undefined)
+              }}
+            >
+              {m.label}
+            </button>
+          ))}
+        </div>
+
+
+        {modo === 'siento' && (
+          <LoQueSiento onSenal={onSenal} onAbierta={onAbierta} encima={en3d ? encima : null} still={still} />
+        )}
+        {modo === 'ansiedad' && (
+          <ComoSeMueve
+            onSenal={onSenal}
+            onAbierta={onAbierta}
+            encima={en3d ? encima : null}
+            still={still}
+            inicial={olaInicial}
+          />
+        )}
+        {modo === 'biblioteca' && <Biblioteca onSenal={onSenal} onOla={onOla} en3d={en3d} still={still} />}
+        {modo === 'dicc' && <MiDiccionario />}
+
+
+        {modo === 'tocar' && (
+          <section className="ex-partes" aria-labelledby="ex-partes-title">
+            <h2 id="ex-partes-title" className="section-title">
+              {en3d ? 'O elige una parte' : 'Elige una parte'}
+            </h2>
+            <div className="chips">
+              {PARTES.map((p) => (
+                <button
+                  key={p.id}
+                  type="button"
+                  className={`chip${sel === p.id ? ' selected' : ''}`}
+                  aria-pressed={sel === p.id}
+                  onClick={() => elegir(p.id)}
+                >
+                  {p.nombre}
+                </button>
+              ))}
             </div>
-          )}
-        </section>
-      )}
+            {!en3d && parte && (
+              <div ref={tarjeta2d}>
+                <Tarjeta parte={parte} onClose={() => setSel(null)} />
+              </div>
+            )}
+          </section>
+        )}
 
-      <p className="disclaimer">
-        Es una explicación sencilla, no un diagnóstico. Este cuerpo no es el tuyo: no mide nada. Si fijarte en el
-        cuerpo te pone peor, está bien parar y <Link to="/calma">solo soltar el aire</Link>.
-      </p>
+        <p className="disclaimer">
+          Es una explicación sencilla, no un diagnóstico. Este cuerpo no es el tuyo: no mide nada. Si fijarte en el
+          cuerpo te pone peor, está bien parar y <Link to="/calma">solo soltar el aire</Link>.
+        </p>
 
-      {/* Crédito que pide la licencia de los modelos (ver public/models/cuerpo/LICENSE-models.txt). */}
-      <p className="ex-creditos">
-        Modelos 3D: BodyParts3D, © The Database Center for Life Science, bajo{' '}
-        <a href="https://creativecommons.org/licenses/by-sa/2.1/jp/deed.es" target="_blank" rel="noreferrer">
-          CC BY-SA 2.1 JP
-        </a>
-        . Los simplificamos y les cambiamos el color; el pulmón, el corazón y el nervio vago están
-        redibujados a partir de ellos. Nuestra versión queda bajo{' '}
-        <a href="https://creativecommons.org/licenses/by-sa/4.0/deed.es" target="_blank" rel="noreferrer">
-          CC BY-SA 4.0
-        </a>
-        . {en3d && 'Después de abrirlo una vez, funciona sin internet.'}
-      </p>
+        {/* Crédito que pide la licencia de los modelos (ver public/models/cuerpo/LICENSE-models.txt). */}
+        <p className="ex-creditos">
+          Modelos 3D: BodyParts3D, © The Database Center for Life Science, bajo{' '}
+          <a href="https://creativecommons.org/licenses/by-sa/2.1/jp/deed.es" target="_blank" rel="noreferrer">
+            CC BY-SA 2.1 JP
+          </a>
+          . Los simplificamos y les cambiamos el color; el pulmón, el corazón y el nervio vago están
+          redibujados a partir de ellos. Nuestra versión queda bajo{' '}
+          <a href="https://creativecommons.org/licenses/by-sa/4.0/deed.es" target="_blank" rel="noreferrer">
+            CC BY-SA 4.0
+          </a>
+          . {en3d && 'Después de abrirlo una vez, funciona sin internet.'}
+        </p>
+      </div>
     </div>
   )
 }

@@ -234,6 +234,23 @@ textarea {
   line-height: 1.15;
   white-space: nowrap;
 }
+/* En teléfonos angostos, el nombre y «Necesito ayuda» se achican para caber en una línea. */
+@media (max-width: 400px) {
+  .brand {
+    font-size: 1rem;
+    white-space: nowrap;
+  }
+  .sos {
+    padding: 8px 12px;
+    font-size: 0.85rem;
+  }
+}
+/* Y si ni así caben, se queda solo el logo: el botón de ayuda importa más que el nombre. */
+@media (max-width: 340px) {
+  .brand span {
+    display: none;
+  }
+}
 /* Con seis pestañas, en teléfonos muy angostos la letra baja un poco para que quepa «Mi espacio». */
 @media (max-width: 350px) {
   .tab {
@@ -6357,4 +6374,303 @@ html.diary-open {
 }
 .ac-mensaje .row {
   align-items: center;
+}
+
+/* ---------- Distraer: elegir cómo estás y cuánto tiempo tienes ---------- */
+.distraer-elegir {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.distraer-elegir h2 {
+  margin: 0;
+}
+.distraer-elegir .eyebrow {
+  margin: 6px 0 0;
+}
+.distraer-elegir p {
+  margin: 0;
+}
+.distraer-sugerida {
+  flex-direction: row;
+  align-items: center;
+  gap: 14px;
+}
+.distraer-sugerida .tile-emoji {
+  flex: none;
+  margin-bottom: 0;
+}
+.distraer-sugerida-texto {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.distraer-limpiar {
+  align-self: flex-start;
+}
+
+/* ---------- Inicio ----------
+   En el teléfono, una sola columna en orden de urgencia: las dos columnas no existen (display:
+   contents) y cada pieza lleva su lugar. Desde 960px se abren dos columnas y la página se ensancha. */
+.inicio {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.inicio-col {
+  display: contents;
+}
+.inicio-hero {
+  order: 1;
+}
+.inicio-noche {
+  order: 2;
+}
+.inicio-panico {
+  order: 3;
+}
+.inicio-animo {
+  order: 4;
+}
+.inicio-cuerpo {
+  order: 5;
+}
+.inicio-dia {
+  order: 6;
+}
+.inicio-atajos {
+  order: 7;
+}
+.inicio-mas {
+  order: 8;
+}
+.inicio-mision {
+  order: 9;
+}
+.inicio-pie {
+  order: 10;
+}
+.inicio-dia,
+.inicio-cuerpo {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.inicio-dia:empty {
+  display: none;
+}
+.inicio-panico {
+  padding-block: 16px;
+}
+.inicio-panico h2 {
+  font-size: 1.15rem;
+}
+.inicio-panico p {
+  margin: 0;
+}
+.inicio .body-entry .body-svg {
+  height: 180px;
+}
+.body-entry-espera {
+  height: 180px;
+}
+
+/* Atajos: cuatro botones en una fila, tan chicos como para no empujar lo demás hacia abajo. */
+.inicio-atajos .section-title {
+  margin: 0 0 10px;
+}
+.atajos {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+.atajo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 12px 4px 10px;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: var(--surface);
+  color: var(--text);
+  font-size: 0.82rem;
+  font-weight: 600;
+  text-align: center;
+  text-decoration: none;
+}
+.atajo .tile-emoji {
+  width: 40px;
+  height: 40px;
+  margin: 0;
+  font-size: 1.25rem;
+}
+
+/* Filas (components/Filas.tsx): varias opciones en una sola tarjeta, cada una con su flecha. */
+.filas {
+  gap: 0;
+  margin: 0;
+  padding: 4px 0;
+  list-style: none;
+}
+.filas li + li {
+  border-top: 1px solid var(--border);
+}
+.fila {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 52px 14px 20px;
+  position: relative;
+  color: var(--text);
+  text-decoration: none;
+}
+.fila::after {
+  content: '';
+  position: absolute;
+  right: 22px;
+  top: 50%;
+  width: 9px;
+  height: 9px;
+  margin-top: -5px;
+  border-top: 2px solid var(--muted);
+  border-right: 2px solid var(--muted);
+  transform: rotate(45deg);
+}
+.fila > span {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.fila strong {
+  font-weight: 620;
+  line-height: 1.3;
+}
+.fila small {
+  color: var(--muted);
+  line-height: 1.35;
+}
+
+/* Páginas anchas: en el teléfono, una columna (las columnas no existen y cada pieza lleva su
+   lugar con `order`); desde 960px, dos columnas y la página se ensancha. */
+.pagina-ancha {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.pagina-ancha > .columna {
+  display: contents;
+}
+@media (min-width: 960px) {
+  .content:has(> .pagina-ancha) {
+    max-width: 1040px;
+  }
+  .pagina-ancha {
+    display: grid;
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+    align-items: start;
+    gap: 20px;
+  }
+  .pagina-ancha > .columna {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    min-width: 0;
+  }
+  .pagina-ancha > :not(.columna) {
+    grid-column: 1 / -1;
+  }
+  .pagina-ancha > *,
+  .pagina-ancha > .columna > * {
+    order: 0;
+  }
+  /* La columna de la acción principal se queda a la vista mientras se baja por la otra. */
+  .pagina-ancha > .columna.fija {
+    position: sticky;
+    top: calc(var(--topbar-h, 60px) + 12px);
+  }
+}
+
+.inicio-mision {
+  gap: 8px;
+}
+.inicio-mision .mission {
+  margin: 0;
+  font-size: 1.1rem;
+}
+.inicio-mision .btn {
+  align-self: flex-start;
+}
+
+/* Computadora: más ancho para Inicio, en dos columnas, con la portada arriba de las dos. */
+@media (min-width: 960px) {
+  .content:has(> .inicio) {
+    max-width: 1040px;
+  }
+  .inicio {
+    display: grid;
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+    align-items: start;
+    gap: 20px;
+  }
+  .inicio-hero,
+  .inicio-pie {
+    grid-column: 1 / -1;
+  }
+  /* Aquí manda el orden del documento: portada, las dos columnas y el pie. */
+  .inicio > * {
+    order: 0;
+  }
+  .inicio-col {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+  .inicio .body-entry .body-svg,
+  .body-entry-espera {
+    height: 200px;
+  }
+}
+
+/* Computadora: la barra de secciones flota centrada, del ancho de lo que se lee, en vez de
+   estirarse de orilla a orilla; y la barra de arriba se alinea con el contenido. */
+@media (min-width: 760px) {
+  .app {
+    padding-bottom: calc(var(--tabbar-h) + 40px);
+  }
+  .tabbar {
+    left: 50%;
+    right: auto;
+    bottom: 16px;
+    width: min(620px, calc(100% - 32px));
+    height: var(--tabbar-h);
+    padding: 6px;
+    transform: translateX(-50%);
+    border: 1px solid var(--border);
+    border-radius: 22px;
+    box-shadow: var(--shadow);
+  }
+  .topbar {
+    padding-inline: max(24px, calc((100% - 1040px) / 2));
+  }
+}
+.distraer-pie {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.distraer-ver {
+  align-self: flex-start;
+}
+/* En el teléfono va al final; en la computadora llena la columna de la izquierda. */
+.distraer .distraer-pie {
+  order: 1;
+}
+@media (min-width: 960px) {
+  .mi-espacio > .columna {
+    gap: 16px;
+  }
+  .mi-espacio > .columna > .section-title:first-child {
+    margin-top: 0;
+  }
 }

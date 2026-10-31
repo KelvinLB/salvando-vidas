@@ -1,6 +1,5 @@
-import { useState } from 'react'
+import { Suspense, lazy, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import BodyModel from './BodyModel'
 import { LevelMeter } from './BodyFrame'
 import { AREAS, BANDS } from '../data/bodyCheck'
 import { type BodyNow, EMPTY_NOW, freshNow, readBody } from '../lib/bodyCheck'
@@ -9,6 +8,9 @@ import { useStored } from '../lib/storage'
 // La entrada a «Tu cuerpo por dentro» desde Inicio y Calma, para que nadie tenga que
 // saber que existe: la figura invita a tocar donde se siente y abre esa zona lista para
 // marcar. Si hace poco marcó algo, lo retoma donde se quedó.
+// La figura (con sus animaciones) se baja aparte: Inicio y Calma abren sin esperarla, y mientras
+// llega se guarda su lugar para que nada brinque.
+const BodyModel = lazy(() => import('./BodyModel'))
 
 const prefersStill = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
@@ -25,14 +27,16 @@ export default function BodyEntry() {
 
   return (
     <section className="card body-entry">
-      <BodyModel
-        fx={marked ? reading.fx : ['breath-slow', 'heart-calm']}
-        tone={reading.tone}
-        heat={reading.heat}
-        tour={!marked}
-        still={still}
-        onRegion={(region) => navigate(`/cuerpo?zona=${region}`)}
-      />
+      <Suspense fallback={<div className="body-entry-espera" aria-hidden="true" />}>
+        <BodyModel
+          fx={marked ? reading.fx : ['breath-slow', 'heart-calm']}
+          tone={reading.tone}
+          heat={reading.heat}
+          tour={!marked}
+          still={still}
+          onRegion={(region) => navigate(`/cuerpo?zona=${region}`)}
+        />
+      </Suspense>
 
       {marked ? (
         <div className="stack tight">

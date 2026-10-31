@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import BodyEntry from '../components/BodyEntry'
+import Filas from '../components/Filas'
 import PageHeader from '../components/PageHeader'
 import RespirarPorDentro from '../components/RespirarPorDentro'
 import type { Aire } from '../components/cuerpo3d/escena'
@@ -285,43 +286,40 @@ function Grounding() {
   )
 }
 
+// En el teléfono: pánico, la respiración y lo demás debajo, en una sola tarjeta de filas. En
+// computadora, el pánico y la respiración van a la izquierda y lo demás a la derecha.
 export default function Calma() {
   return (
-    <div className="stack">
-      <PageHeader title="Calma" subtitle="Sigue el círculo. No hay prisa." />
-      <Link to="/panico" className="card link-card emergency-soft">
-        <h2>¿Es un ataque de pánico?</h2>
-        <p className="muted">Te guiamos paso a paso para atravesarlo.</p>
-      </Link>
-      <Breathing porDentro />
-      <Link to="/nervios" className="card link-card">
-        <h2>Entender mis nervios</h2>
-        <p className="muted">Seis lecciones cortas: qué es el pánico y por qué no es peligroso.</p>
-      </Link>
-      <BodyEntry />
-      <Grounding />
-      <Link to="/nervios/practicar" className="card link-card">
-        <h2>Practicar con el cuerpo</h2>
-        <p className="muted">Ejercicios cortos para perderle el miedo a lo que el pánico hace sentir.</p>
-      </Link>
-      <Link to="/enojo" className="card link-card">
-        <h2>¿Es enojo lo que no se va?</h2>
-        <p className="muted">Escríbelo, rómpelo y bájale al cuerpo la alerta.</p>
-      </Link>
-      {/* Pendiente de revisión con psicóloga. */}
-      <Link to="/lo-que-no-sale" className="card link-card">
-        <h2>Lo que no sale</h2>
-        <p className="muted">Cuando quieres llorar y no puedes, o todo se siente sin sentido.</p>
-      </Link>
-      {/* Pendiente de revisión con psicóloga. */}
-      <Link to="/escuchar" className="card link-card">
-        <h2>Para escuchar</h2>
-        <p className="muted">Reflexiones cortas con voz, para un día pesado.</p>
-      </Link>
-      <Link to="/noche" className="card link-card">
-        <h2>¿No puedes dormir?</h2>
-        <p className="muted">Sonidos, relajación y un lugar para vaciar la cabeza.</p>
-      </Link>
+    <div className="pagina-ancha calma">
+      <PageHeader title="Calma" subtitle="Respira con los pulmones. No hay prisa." />
+      <div className="columna">
+        <Link to="/panico" className="card link-card emergency-soft calma-panico">
+          <h2>¿Es un ataque de pánico?</h2>
+          <p className="muted">Te guiamos paso a paso para atravesarlo.</p>
+        </Link>
+        <Breathing porDentro />
+      </div>
+      <div className="columna">
+        <Grounding />
+        <BodyEntry />
+        <section className="stack tight" aria-labelledby="calma-mas-title">
+          <h2 id="calma-mas-title" className="section-title">
+            Más para calmarte
+          </h2>
+          <Filas
+            label="Más para calmarte"
+            filas={[
+              { to: '/nervios', title: 'Entender mis nervios', text: 'Seis lecciones cortas: qué es el pánico y por qué no es peligroso.' },
+              { to: '/nervios/practicar', title: 'Practicar con el cuerpo', text: 'Ejercicios cortos para perderle el miedo a lo que el pánico hace sentir.' },
+              { to: '/enojo', title: '¿Es enojo lo que no se va?', text: 'Escríbelo, rómpelo y bájale al cuerpo la alerta.' },
+              // Pendientes de revisión con psicóloga: Lo que no sale y Para escuchar.
+              { to: '/lo-que-no-sale', title: 'Lo que no sale', text: 'Cuando quieres llorar y no puedes, o todo se siente sin sentido.' },
+              { to: '/escuchar', title: 'Para escuchar', text: 'Reflexiones cortas con voz, para un día pesado.' },
+              { to: '/noche', title: '¿No puedes dormir?', text: 'Sonidos, relajación y un lugar para vaciar la cabeza.' },
+            ]}
+          />
+        </section>
+      </div>
     </div>
   )
 }

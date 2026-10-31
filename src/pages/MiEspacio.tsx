@@ -104,7 +104,7 @@ export default function MiEspacio() {
   const low = (moods.find((m) => m.date === today())?.mood ?? 3) <= 2
 
   return (
-    <div className="stack">
+    <div className="pagina-ancha mi-espacio">
       <PageHeader
         title="Mi espacio"
         subtitle="Solo tuyo. Privado y guardado en este teléfono."
@@ -123,66 +123,70 @@ export default function MiEspacio() {
         </Link>
       )}
 
-      <HowAmI />
-
-      <h2 className="section-title">Para los días difíciles</h2>
-      <div className="space-list">
-        <Row
-          to="/mi-espacio/plan"
-          emoji="🛟"
-          title="Mi plan de seguridad"
-          status={ready === 0 ? 'Seis preguntas, una a la vez' : ready === PLAN_STEPS.length ? 'Completo' : `${ready} de ${PLAN_STEPS.length} pasos listos`}
-        />
-        <Row
-          to="/mi-espacio/caja"
-          emoji="💛"
-          title="Mi caja de esperanza"
-          status={box.length ? box.join(' · ') : 'Tus razones, tus fotos y una carta para ti'}
-        />
-        <Row
-          to="/mi-espacio/personas"
-          emoji="📞"
-          title="Mis personas"
-          status={named.length ? named.map(firstName).join(', ') : 'A quién llamar con un toque'}
-        />
+      <div className="columna fija">
+        <HowAmI />
       </div>
 
-      <h2 className="section-title">Mi tratamiento</h2>
-      <div className="space-list">
-        <Row
-          to="/especialista"
-          emoji="🩺"
-          title="Camino al especialista"
-          status={walked === 0 ? 'Pasos pequeños y un resumen para tu consulta' : walked >= 5 ? 'Los cinco pasos dados' : `Llevas ${walked} de 5 pasos`}
-        />
-        <Row
-          to="/mi-espacio/medicamentos"
-          emoji="💊"
-          title="Mis medicamentos"
-          status={!meds.length ? 'Lo que tomas y lo que notas' : taken.includes(today()) ? 'Tomado hoy ✓' : '¿Ya lo tomaste hoy?'}
-        />
-      </div>
+      <div className="columna">
+        <h2 className="section-title">Para los días difíciles</h2>
+        <div className="space-list">
+          <Row
+            to="/mi-espacio/plan"
+            emoji="🛟"
+            title="Mi plan de seguridad"
+            status={ready === 0 ? 'Seis preguntas, una a la vez' : ready === PLAN_STEPS.length ? 'Completo' : `${ready} de ${PLAN_STEPS.length} pasos listos`}
+          />
+          <Row
+            to="/mi-espacio/caja"
+            emoji="💛"
+            title="Mi caja de esperanza"
+            status={box.length ? box.join(' · ') : 'Tus razones, tus fotos y una carta para ti'}
+          />
+          <Row
+            to="/mi-espacio/personas"
+            emoji="📞"
+            title="Mis personas"
+            status={named.length ? named.map(firstName).join(', ') : 'A quién llamar con un toque'}
+          />
+        </div>
 
-      <h2 className="section-title">Mi día a día</h2>
-      <div className="space-list">
-        <Row
-          to="/mi-dia"
-          emoji="☀️"
-          title="Mi día"
-          status={
-            !todayPlan
-              ? 'Un plan pequeño con premio al final'
-              : planDone(todayPlan)
-                ? 'Día logrado ✓'
-                : `${tasksDone} de ${todayPlan.tasks.length} cosas hechas hoy`
-          }
-        />
-        <Row
-          to="/mascota"
-          emoji="🐾"
-          title="Mi mascota"
-          status={companion ? `${companionName(companion)} te acompaña` : 'Alguien que te represente'}
-        />
+        <h2 className="section-title">Mi tratamiento</h2>
+        <div className="space-list">
+          <Row
+            to="/especialista"
+            emoji="🩺"
+            title="Camino al especialista"
+            status={walked === 0 ? 'Pasos pequeños y un resumen para tu consulta' : walked >= 5 ? 'Los cinco pasos dados' : `Llevas ${walked} de 5 pasos`}
+          />
+          <Row
+            to="/mi-espacio/medicamentos"
+            emoji="💊"
+            title="Mis medicamentos"
+            status={!meds.length ? 'Lo que tomas y lo que notas' : taken.includes(today()) ? 'Tomado hoy ✓' : '¿Ya lo tomaste hoy?'}
+          />
+        </div>
+
+        <h2 className="section-title">Mi día a día</h2>
+        <div className="space-list">
+          <Row
+            to="/mi-dia"
+            emoji="☀️"
+            title="Mi día"
+            status={
+              !todayPlan
+                ? 'Un plan pequeño con premio al final'
+                : planDone(todayPlan)
+                  ? 'Día logrado ✓'
+                  : `${tasksDone} de ${todayPlan.tasks.length} cosas hechas hoy`
+            }
+          />
+          <Row
+            to="/mascota"
+            emoji="🐾"
+            title="Mi mascota"
+            status={companion ? `${companionName(companion)} te acompaña` : 'Alguien que te represente'}
+          />
+        </div>
       </div>
 
       <p className="space-more">

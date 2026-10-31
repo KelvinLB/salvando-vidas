@@ -94,7 +94,7 @@ export const WHAT_HELPED = [
   { emoji: '🧸', text: 'Cuidar o jugar con alguien (niños, una mascota): recordar que tu presencia hace falta.' },
   { emoji: '🎶', text: 'Poner tu música favorita y cantar mientras limpias.' },
   { emoji: '☀️', text: 'Salir a tomar el sol un rato, aunque sea en la puerta.' },
-  { emoji: '🌳', text: 'Caminar, de preferencia entre árboles o descalzo sobre el pasto.' },
+  { emoji: '🌳', text: 'Caminar, de preferencia entre árboles o sin zapatos sobre el pasto.' },
   { emoji: '💧', text: 'En plena crisis, agua fría en la cara, las muñecas y el cuello.' },
   { emoji: '💬', text: 'Hablar con alguien de cualquier otra cosa.' },
   { emoji: '📝', text: 'Planear la noche anterior una o dos cosas pequeñas, con un premio al final.' },

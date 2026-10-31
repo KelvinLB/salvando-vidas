@@ -341,3 +341,27 @@
   height: 12px;
   border-radius: 50%;
 }
+
+/* ---------- Dos columnas (pagina-ancha) ----------
+   En el teléfono, los modos van arriba del cuerpo; en computadora, el cuerpo a la izquierda. */
+.explorar > .page-header,
+.explorar .page-header {
+  order: -2;
+}
+.explorar .ex-modos {
+  order: -1;
+}
+.ex-col-cuerpo .ex-capas {
+  margin-top: 0;
+}
+@media (min-width: 960px) {
+  .ex-col-lado .ex-modos {
+    justify-content: flex-start;
+  }
+  .ex-col-cuerpo .ex-stage {
+    height: min(max(100svh - var(--topbar-h, 60px) - 270px, 440px), 680px);
+  }
+  .ex-col-cuerpo .ex-overlay .ex-card {
+    max-height: calc(min(max(100svh - var(--topbar-h, 60px) - 270px, 440px), 680px) * 0.52);
+  }
+}
