@@ -6,6 +6,7 @@ import { type BarrioEvent, readBarrio } from '../../lib/barrio'
 import { soundsLikeRisk } from '../../lib/risk'
 import { localDate, today } from '../../lib/storage'
 import './missions.css'
+import CaraAnimo from '../../components/CaraAnimo'
 
 // Piezas que comparten las misiones del barrio: lo que dice cada vecino, las caritas del ánimo,
 // la escala del miedo y lo que la persona escribe con sus palabras (siempre se revisa por si
@@ -47,7 +48,9 @@ export function MoodFaces({ label, onPick }: { label: string; onPick: (mood: num
     <div className="moods bm-moods" role="group" aria-label={label}>
       {MOODS.map((m) => (
         <button key={m.value} type="button" className="mood" onClick={() => onPick(m.value)}>
-          <span aria-hidden="true">{m.emoji}</span>
+          <span aria-hidden="true">
+            <CaraAnimo cara={m.value as 1 | 2 | 3 | 4 | 5} />
+          </span>
           <small>{m.label}</small>
         </button>
       ))}

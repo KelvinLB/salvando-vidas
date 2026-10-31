@@ -364,7 +364,8 @@
 .bib-familia-link {
   display: grid;
   flex: 1;
-  grid-template-columns: 26px minmax(0, 1fr);
+  grid-template-columns: 36px minmax(0, 1fr);
+  align-items: center;
   align-content: center;
   column-gap: 8px;
   row-gap: 1px;
@@ -382,10 +383,14 @@
 }
 .bib-familia-emoji {
   grid-row: span 2;
-  align-self: start;
-  padding-top: 1px;
+  align-self: center;
   font-size: 1.15rem;
   line-height: 1.2;
+}
+.bib-familia-emoji.icono-puerta {
+  width: 36px;
+  height: 36px;
+  margin: 0;
 }
 .bib-familia-nombre {
   font-size: 0.95rem;

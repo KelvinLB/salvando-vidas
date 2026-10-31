@@ -6,6 +6,7 @@ import PageHeader from '../components/PageHeader'
 import { DEFAULT_COMPANION, companionName } from '../data/companion'
 import { WHAT_HELPED } from '../data/content'
 import { useCompanion } from '../lib/companion'
+import { IconoPuerta } from '../lib/iconos'
 
 // Distraer: primero se elige cómo estás y cuánto tiempo tienes, y arriba salen las tres o cuatro
 // cosas que mejor encajan, cada una con por qué. Lo demás va por tema (las manos, la cabeza, la
@@ -213,9 +214,7 @@ function sugerir(estado: Estado | null, tiempo: Tiempo | null, cuantas: number) 
 function Tile({ o }: { o: Opcion }) {
   return (
     <Link to={o.to} className="tile">
-      <span className="tile-emoji" aria-hidden="true">
-        {o.emoji}
-      </span>
+      <IconoPuerta emoji={o.emoji} />
       <strong>{o.title}</strong>
       <small>{o.text}</small>
     </Link>
@@ -329,9 +328,7 @@ export default function Distraer() {
             {conMascota && <ConMascota />}
             {sugeridas.map((o) => (
               <Link key={o.to} to={o.to} className="tile distraer-sugerida">
-                <span className="tile-emoji" aria-hidden="true">
-                  {o.emoji}
-                </span>
+                <IconoPuerta emoji={o.emoji} />
                 <span className="distraer-sugerida-texto">
                   <strong>{o.title}</strong>
                   <small>{(estado && o.para[estado]) || o.text}</small>

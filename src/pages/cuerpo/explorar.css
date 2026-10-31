@@ -1,6 +1,7 @@
 /* ---------- Explorar (3D) ----------
-   El lienzo ocupa el escenario; la tarjeta de cada parte aparece abajo, encima del lienzo, y la
-   cámara sube el cuerpo para dejarle espacio. En 2D, la tarjeta va debajo de la lista. */
+   El lienzo ocupa el escenario; la explicación de cada parte sube abajo como una hoja de vidrio,
+   encima del lienzo, y la cámara sube el cuerpo para dejarle espacio. En 2D, la tarjeta va debajo
+   de la lista. */
 
 .ex-stage {
   position: relative;
@@ -13,6 +14,25 @@
   scroll-margin: 76px 0 calc(var(--tabbar-h) + 12px);
   /* El cuerpo es de vidrio: brilla en los bordes y necesita la luz baja (--escena-*). */
   background: radial-gradient(90% 70% at 50% 35%, var(--escena-bg-1) 0%, var(--escena-bg-2) 75%);
+  /* Lo que flota sobre la escena es vidrio oscuro en los dos temas, porque la escena siempre es oscura. */
+  --glass-bg: rgb(20 30 28 / 0.5);
+  --glass-blur: blur(22px) saturate(170%);
+  --glass-border: rgb(255 255 255 / 0.14);
+  --glass-shadow: 0 12px 32px rgb(0 0 0 / 0.4), inset 0 1px 0 rgb(255 255 255 / 0.18),
+    inset 0 -1px 0 rgb(0 0 0 / 0.25);
+  --glass-lens: rgb(255 255 255 / 0.14);
+  --glass-lens-shadow: inset 0 1px 0 rgb(255 255 255 / 0.2);
+}
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .ex-stage {
+    --glass-bg: rgb(20 32 29 / 0.94);
+  }
+}
+@media (prefers-reduced-transparency: reduce) {
+  .ex-stage {
+    --glass-bg: #142320;
+    --glass-blur: none;
+  }
 }
 .ex-canvas {
   display: block;
@@ -47,19 +67,18 @@
   position: absolute;
   top: 10px;
   right: 10px;
+  z-index: 1;
   display: flex;
   gap: 2px;
   padding: 2px;
   border-radius: 999px;
-  background: color-mix(in srgb, var(--surface) 82%, transparent);
-  border: 1px solid var(--border);
 }
 .ex-tools .icon-btn {
   display: grid;
   place-items: center;
   width: 42px;
   height: 42px;
-  color: var(--text-2);
+  color: var(--escena-ink);
 }
 
 .ex-overlay {
@@ -67,6 +86,7 @@
   left: 10px;
   right: 10px;
   bottom: 10px;
+  z-index: 2;
   pointer-events: none;
 }
 .ex-overlay .ex-card {
@@ -129,12 +149,6 @@
   margin-top: 12px;
 }
 
-.ex-capas {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
 .ex-partes .chips {
   margin-top: 12px;
 }
@@ -164,6 +178,92 @@
 }
 .ex-ver-partes {
   align-self: flex-start;
+}
+
+/* La hoja de vidrio de «Tocar el cuerpo»: texto claro sobre el vidrio oscuro. Los colores de la app se
+   cambian aquí adentro para que las palabras que se abren y el botón se lean sobre la escena. */
+.ex-overlay .ex-hoja {
+  --text: var(--escena-ink);
+  --text-2: var(--escena-ink-2);
+  --muted: var(--escena-ink-2);
+  --primary: #8fd6cb;
+  --primary-ink: #0f1c1b;
+  --primary-soft: rgb(143 214 203 / 0.16);
+  --surface: #142320;
+  --border: rgb(255 255 255 / 0.14);
+  --stone: rgb(255 255 255 / 0.28);
+  gap: 6px;
+  max-height: calc(min(68svh, 600px) * 0.46);
+  padding: 14px 18px 18px;
+  border-radius: 24px;
+  border: 1px solid var(--glass-border);
+  background: var(--glass-bg);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  box-shadow: var(--glass-shadow);
+  color: var(--text);
+}
+.ex-hoja h2 {
+  font-size: 1.25rem;
+  font-weight: 800;
+  letter-spacing: -0.015em;
+}
+.ex-hoja h2:focus {
+  outline: none;
+}
+.ex-hoja h2:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 3px;
+  border-radius: 6px;
+}
+.ex-hoja h3 {
+  letter-spacing: 0.06em;
+}
+.ex-hoja p {
+  font-size: 0.95rem;
+}
+.ex-hoja .ex-card-head .icon-btn {
+  color: var(--escena-ink);
+}
+
+/* Las capas: una píldora de vidrio arriba de la escena; la capa prendida se marca con un lente y letra
+   blanca, la apagada queda tenue. */
+.ex-stage .ex-capas {
+  position: absolute;
+  top: 62px;
+  left: 50%;
+  z-index: 1;
+  display: flex;
+  gap: 2px;
+  max-width: calc(100% - 20px);
+  padding: 3px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  border-radius: 22px;
+  transform: translateX(-50%);
+  white-space: nowrap;
+}
+.ex-stage .ex-capa {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 4px;
+  min-height: 34px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 17px;
+  background: none;
+  color: rgb(185 206 199 / 0.85);
+  font: 600 0.82rem/1 var(--font-body);
+  text-decoration: line-through rgb(185 206 199 / 0.6);
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+.ex-stage .ex-capa.on {
+  background: var(--glass-lens);
+  box-shadow: var(--glass-lens-shadow);
+  color: #fff;
+  text-decoration: none;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -399,37 +499,6 @@
   }
 }
 
-/* ---------- Capas ----------
-   Interruptores chicos con palomita: se lee de un vistazo qué está prendido, sin pesar tanto como
-   un botón principal. */
-.ex-capas {
-  align-items: center;
-}
-.ex-capas-titulo {
-  margin-right: 2px;
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: var(--muted);
-}
-.ex-capa {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  min-height: 36px;
-  padding: 6px 12px;
-  border-radius: 999px;
-  border: 1px solid var(--border);
-  background: var(--surface);
-  color: var(--text-2);
-  font: 500 0.9rem/1 var(--font-body);
-  cursor: pointer;
-}
-.ex-capa.on {
-  border-color: color-mix(in srgb, var(--primary) 45%, transparent);
-  background: var(--primary-soft);
-  color: var(--text);
-}
-
 .ex-partes .section-title {
   margin: 0 0 10px;
   font-size: 1rem;
@@ -448,13 +517,13 @@
   position: absolute;
   top: 10px;
   left: 10px;
+  z-index: 1;
   display: grid;
   place-items: center;
-  width: 42px;
-  height: 42px;
+  width: 44px;
+  height: 44px;
   border-radius: 999px;
-  background: color-mix(in srgb, var(--surface) 82%, transparent);
-  border: 1px solid var(--border);
+  color: var(--escena-ink);
 }
 
 /* Los títulos de cada apartado de la Biblioteca. */
@@ -472,9 +541,6 @@
 /* ---------- Dos columnas (pagina-ancha) ----------
    En computadora, el cuerpo a la izquierda y el módulo a la derecha; en la portada, el módulo
    principal a la izquierda y los demás a la derecha. */
-.ex-col-cuerpo .ex-capas {
-  margin-top: 0;
-}
 @media (min-width: 960px) {
   .ex-ocultar {
     display: none;
@@ -496,6 +562,27 @@
   }
   .ex-col-cuerpo .ex-overlay .ex-card {
     max-height: calc(min(max(100svh - var(--topbar-h, 60px) - 270px, 440px), 680px) * 0.52);
+  }
+  /* En «Tocar el cuerpo» las capas van dentro del escenario, así que puede ser un poco más alto. */
+  .ex-cuerpo .ex-col-cuerpo .ex-stage {
+    height: min(max(100svh - var(--topbar-h, 60px) - 220px, 440px), 680px);
+  }
+  .ex-cuerpo .ex-col-cuerpo .ex-overlay .ex-card {
+    max-height: calc(min(max(100svh - var(--topbar-h, 60px) - 220px, 440px), 680px) * 0.52);
+  }
+  /* En la computadora la hoja flota en la esquina de abajo a la derecha, de media altura, para que la
+     parte elegida (que la cámara sube) se siga viendo; las capas suben al renglón de los botones de girar. */
+  .ex-cuerpo .ex-overlay {
+    left: auto;
+    right: 12px;
+    bottom: 12px;
+    width: min(310px, calc(100% - 24px));
+  }
+  .ex-stage .ex-capas {
+    top: 10px;
+    left: 10px;
+    max-width: calc(100% - 170px);
+    transform: none;
   }
 }
 

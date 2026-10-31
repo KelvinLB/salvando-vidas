@@ -14,6 +14,7 @@ import { usePlan } from '../lib/plan'
 import { lastDays, moodTrend } from '../lib/progress'
 import { type JournalEntry, type Letter, type Medication, type MoodEntry, today, useStored } from '../lib/storage'
 import { TrendBadge } from './espacio/ComoVoy'
+import { IconoPuerta } from '../lib/iconos'
 
 // Mi espacio: lo personal, ordenado por para qué sirve. Cada renglón dice cómo va, para que
 // se entienda sin entrar. Los ajustes quedan aparte, detrás del engrane.
@@ -30,9 +31,7 @@ const OLD_TABS: Record<string, string> = {
 function Row({ to, emoji, title, status }: { to: string; emoji: string; title: string; status: string }) {
   return (
     <Link to={to} className="space-row">
-      <span className="tile-emoji" aria-hidden="true">
-        {emoji}
-      </span>
+      <IconoPuerta emoji={emoji} />
       <span className="space-text">
         <strong>{title}</strong>
         <small>{status}</small>

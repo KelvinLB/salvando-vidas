@@ -1,8 +1,9 @@
-import { type SyntheticEvent, useState } from 'react'
+import { Pause, Play, RotateCcw, RotateCw } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import Capitulos from '../components/Capitulos'
 import PageHeader from '../components/PageHeader'
-import { SERIES, VOZ } from '../data/escuchar'
+import { type Reflexion, SERIES, VOZ } from '../data/escuchar'
+import { minutos, useEscucha, useTiempo } from '../lib/escucha'
 import { useStored } from '../lib/storage'
 
 // El texto de cada reflexión sale de su guion, sin las notas (#) ni las marcas de pausa.
@@ -35,17 +36,61 @@ const PUERTAS: Record<string, { id: string; emoji: string }> = {
   Fe: { id: 'fe', emoji: '🙏' },
 }
 
-// Solo suena una a la vez: al darle play a otra, la anterior se pausa.
-function soloUna(e: SyntheticEvent<HTMLAudioElement>) {
-  document.querySelectorAll('audio').forEach((a) => {
-    if (a !== e.currentTarget) a.pause()
-  })
+// Suena en el reproductor de la app (lib/escucha), así que sigue si la persona se va a otra
+// pantalla y solo suena una a la vez.
+function Reproductor({ r, serie }: { r: Reflexion; serie: string }) {
+  const { pista, sonando, cargando, tocar, mover, ir } = useEscucha()
+  const { t, d } = useTiempo()
+  const esta = pista?.id === r.id
+  const suena = esta && sonando
+
+  return (
+    <div className="escucha-reproductor">
+      <div className="row">
+        <button
+          type="button"
+          className={`btn small${esta ? '' : ' ghost'}`}
+          onClick={() => tocar({ id: r.id, title: r.title, serie })}
+          aria-label={`${suena ? 'Pausar' : esta ? 'Seguir escuchando' : 'Escuchar'} «${r.title}»`}
+        >
+          {suena ? <Pause size={16} aria-hidden="true" /> : <Play size={16} aria-hidden="true" />}
+          {esta && cargando ? 'Abriendo…' : suena ? 'Pausar' : esta ? 'Seguir' : 'Escuchar'}
+        </button>
+        {esta && (
+          <>
+            <button type="button" className="icon-btn" onClick={() => mover(-15)} aria-label="Regresar 15 segundos">
+              <RotateCcw size={18} aria-hidden="true" />
+            </button>
+            <button type="button" className="icon-btn" onClick={() => mover(15)} aria-label="Adelantar 15 segundos">
+              <RotateCw size={18} aria-hidden="true" />
+            </button>
+          </>
+        )}
+      </div>
+      {esta && d > 0 && (
+        <label className="escucha-avance">
+          <span className="visually-hidden">Parte de la reflexión</span>
+          <input
+            type="range"
+            min={0}
+            max={Math.ceil(d)}
+            step={1}
+            value={Math.floor(t)}
+            onChange={(e) => ir(Number(e.target.value))}
+            aria-valuetext={`${minutos(t)} de ${minutos(d)}`}
+          />
+          <span className="muted small" aria-hidden="true">
+            {minutos(t)} / {minutos(d)}
+          </span>
+        </label>
+      )}
+    </div>
+  )
 }
 
 export default function Escuchar() {
   const [faith] = useStored('fe', false)
-  // Audios que no cargaron: casi siempre es que no hay internet y aún no se habían guardado.
-  const [sinCargar, setSinCargar] = useState<string[]>([])
+  const { fallidas, reintentar } = useEscucha()
 
   return (
     <div className="stack">
@@ -60,52 +105,48 @@ export default function Escuchar() {
             <p className="muted small">Estas reflexiones acompañan. No sustituyen la atención de un profesional.</p>
           </>
         }
-        capitulos={SERIES.filter((s) => !s.fe || faith).map((serie) => ({
-          id: PUERTAS[serie.title]?.id ?? serie.title,
-          emoji: PUERTAS[serie.title]?.emoji,
-          title: serie.title,
-          // En el índice, qué reflexiones hay adentro.
-          text: serie.items.map((r) => r.title).join(' · '),
-          content: (
-            <section className="card stack" aria-label={serie.title}>
-              {serie.items.map((r) => (
-                <div key={r.id} className="stack">
-                  <div>
-                    <h3>{r.title}</h3>
-                    <p className="muted">{r.about}</p>
+        capitulos={SERIES.filter((s) => !s.fe || faith).map((serie) => {
+          const id = PUERTAS[serie.title]?.id ?? serie.title
+          return {
+            id,
+            emoji: PUERTAS[serie.title]?.emoji,
+            title: serie.title,
+            // En el índice, qué reflexiones hay adentro.
+            text: serie.items.map((r) => r.title).join(' · '),
+            content: (
+              <section className="card stack" aria-label={serie.title}>
+                {serie.items.map((r) => (
+                  <div key={r.id} className="stack">
+                    <div>
+                      <h3>{r.title}</h3>
+                      <p className="muted">{r.about}</p>
+                    </div>
+                    {fallidas.includes(r.id) ? (
+                      <p className="small">
+                        No se pudo abrir. Si no tienes internet, se guarda en tu teléfono la primera vez que la
+                        escuchas conectado.{' '}
+                        <button className="btn small" onClick={() => reintentar(r.id)}>
+                          Intentar otra vez
+                        </button>
+                      </p>
+                    ) : (
+                      <Reproductor r={r} serie={id} />
+                    )}
+                    {r.ayuda && (
+                      <Link to="/ayuda" className="btn small">
+                        Ver las líneas de ayuda
+                      </Link>
+                    )}
+                    <details>
+                      <summary className="small">Leer el texto</summary>
+                      <p className="small">{texto(r.id)}</p>
+                    </details>
                   </div>
-                  {sinCargar.includes(r.id) ? (
-                    <p className="small">
-                      No se pudo abrir. Si no tienes internet, se guarda en tu teléfono la primera vez que la
-                      escuchas conectado.{' '}
-                      <button className="btn small" onClick={() => setSinCargar((l) => l.filter((x) => x !== r.id))}>
-                        Intentar otra vez
-                      </button>
-                    </p>
-                  ) : (
-                    <audio
-                      controls
-                      preload="none"
-                      src={`/audio/escuchar/${r.id}.m4a`}
-                      onPlay={soloUna}
-                      onError={() => setSinCargar((l) => [...l, r.id])}
-                      style={{ width: '100%' }}
-                    />
-                  )}
-                  {r.ayuda && (
-                    <Link to="/ayuda" className="btn small">
-                      Ver las líneas de ayuda
-                    </Link>
-                  )}
-                  <details>
-                    <summary className="small">Leer el texto</summary>
-                    <p className="small">{texto(r.id)}</p>
-                  </details>
-                </div>
-              ))}
-            </section>
-          ),
-        }))}
+                ))}
+              </section>
+            ),
+          }
+        })}
       />
 
       <section className="card soft">

@@ -1,6 +1,5 @@
 import { Link } from 'react-router-dom'
 import CrisisPlan, { PlanItem, useCrisisPlan } from '../components/CrisisPlan'
-import { BackLink } from '../components/PageHeader'
 import {
   COUNTRIES,
   OTHER_COUNTRIES_URL,
@@ -22,7 +21,6 @@ export default function Ayuda() {
 
   return (
     <div className="stack">
-      <BackLink />
       <section className="hero help">
         <h1>Aquí hay ayuda, ahora mismo.</h1>
         <p>

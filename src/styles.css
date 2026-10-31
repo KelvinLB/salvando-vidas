@@ -32,6 +32,8 @@
   --glass-shine: linear-gradient(180deg, rgb(255 255 255 / 0.6), rgb(255 255 255 / 0) 50%);
   --glass-lens: rgb(255 255 255 / 0.8);
   --glass-lens-shadow: inset 0 1px 0 #fff, 0 1px 4px rgb(17 20 19 / 0.1);
+  /* El círculo suave detrás del ícono de cada puerta. */
+  --icono-bg: #eef1ef;
   --orb-sage: #cfe3d9;
   --orb-peach: #f7d8c2;
   --orb-sky: #d8e2f2;
@@ -90,6 +92,7 @@
     --glass-shine: linear-gradient(180deg, rgb(255 255 255 / 0.08), rgb(255 255 255 / 0) 55%);
     --glass-lens: rgb(255 255 255 / 0.12);
     --glass-lens-shadow: inset 0 1px 0 rgb(255 255 255 / 0.2);
+    --icono-bg: #18211e;
     --orb-sage: #1f3029;
     --orb-peach: #3a2a20;
     --orb-sky: #1f2836;
@@ -197,7 +200,10 @@ textarea {
 
 /* ---------- Estructura ---------- */
 
+/* flow-root: el margen de arriba de la barra flotante se queda dentro de .app, así una página
+   que cabe en la pantalla no baja unos pixeles de más. */
 .app {
+  display: flow-root;
   min-height: 100dvh;
   padding-bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom));
 }
@@ -232,6 +238,32 @@ textarea {
 }
 .brand img {
   border-radius: 9px;
+}
+/* Más adentro de una pestaña, en lugar de la marca va «volver» con el nombre de a dónde regresa. */
+.topbar-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  min-width: 0;
+  min-height: 44px;
+  margin-left: -4px;
+  padding: 0 14px 0 8px;
+  border: 0;
+  border-radius: 22px;
+  background: none;
+  color: var(--text);
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  cursor: pointer;
+}
+.topbar-back span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.topbar-back:active {
+  background: var(--glass-lens);
 }
 
 .sos {
@@ -354,25 +386,6 @@ textarea {
   flex-direction: column;
   gap: 6px;
   padding-top: 8px;
-}
-
-.back {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  width: fit-content;
-  min-height: 44px;
-  margin: -8px 0 -4px -6px;
-  padding: 0 12px 0 6px;
-  border: 0;
-  border-radius: 999px;
-  background: none;
-  color: var(--primary);
-  font-weight: 700;
-  cursor: pointer;
-}
-.back:active {
-  background: var(--primary-soft);
 }
 
 /* La portada es solo letra sobre el fondo: sin cajas ni decoración. */
@@ -568,7 +581,8 @@ textarea {
   border-color: var(--primary);
   background: var(--primary-soft);
 }
-/* El emoji va sobre una placa redonda, para que todos se vean del mismo tamaño. */
+/* El ícono (o el emoji, si es contenido) va sobre una placa redonda, para que todos se vean del
+   mismo tamaño. */
 .tile-emoji {
   display: grid;
   place-items: center;
@@ -579,6 +593,13 @@ textarea {
   background: var(--surface-soft);
   font-size: 1.45rem;
   line-height: 1;
+}
+/* Las puertas llevan un ícono de línea verde en un círculo suave, como en el diseño. */
+.tile-emoji.icono-puerta {
+  width: 40px;
+  height: 40px;
+  background: var(--icono-bg);
+  color: var(--primary);
 }
 
 /* ---------- Formularios ---------- */
@@ -747,12 +768,12 @@ input[type='checkbox'][role='switch']:checked::after {
 .mood span {
   display: grid;
   place-items: center;
-  width: min(54px, 100%);
+  width: min(52px, 100%);
   aspect-ratio: 1;
   border: 1px solid var(--stone);
   border-radius: 50%;
-  font-size: 1.6rem;
-  transition: background 0.2s, border-color 0.2s;
+  color: var(--text);
+  transition: background 0.2s, border-color 0.2s, color 0.2s;
 }
 .mood small {
   font-size: 0.72rem;
@@ -762,6 +783,7 @@ input[type='checkbox'][role='switch']:checked::after {
 .mood.selected span {
   border-color: var(--primary);
   background: var(--primary-soft);
+  color: var(--primary);
 }
 .mood.selected small {
   color: var(--primary);
@@ -981,32 +1003,6 @@ input[type='checkbox'][role='switch']:checked::after {
 }
 .slide-tile.empty {
   background: transparent;
-  cursor: default;
-}
-
-.bubbles {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 10px;
-}
-.bubble {
-  aspect-ratio: 1;
-  border: 0;
-  border-radius: 50%;
-  background: radial-gradient(circle at 30% 30%, #ffffffcc 0 12%, transparent 13%),
-    radial-gradient(circle, #a7d8e8, #6fbfb3);
-  box-shadow: inset 0 -6px 12px rgb(0 0 0 / 0.12);
-  cursor: pointer;
-  transition: transform 0.15s, opacity 0.3s;
-}
-.bubble:active {
-  transform: scale(0.9);
-}
-.bubble.popped {
-  background: var(--surface-soft);
-  box-shadow: inset 0 2px 6px rgb(0 0 0 / 0.12);
-  transform: scale(0.85);
-  opacity: 0.6;
   cursor: default;
 }
 
@@ -3869,8 +3865,8 @@ html.diary-open {
 }
 .space-row .tile-emoji {
   flex: none;
-  width: 44px;
-  height: 44px;
+  width: 40px;
+  height: 40px;
   margin: 0;
   font-size: 1.35rem;
 }
@@ -6473,7 +6469,7 @@ html.diary-open {
   width: 56px;
   height: 56px;
   margin: 0;
-  background: var(--surface-soft);
+  background: var(--icono-bg);
   font-size: 1.4rem;
   transition: transform 0.12s;
 }

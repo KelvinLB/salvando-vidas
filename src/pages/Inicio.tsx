@@ -8,6 +8,8 @@ import { FAITH_MESSAGES, GENTLE_MESSAGES, MOODS } from '../data/content'
 import { moodFromScale, useCompanion } from '../lib/companion'
 import { planDone, useDayPlans } from '../lib/dayplan'
 import { type Letter, type MoodEntry, pick, today, useAddress, useStored } from '../lib/storage'
+import { IconoPuerta } from '../lib/iconos'
+import CaraAnimo from '../components/CaraAnimo'
 
 function greeting() {
   const h = new Date().getHours()
@@ -103,7 +105,9 @@ export default function Inicio() {
                 className={`mood ${todayMood === m.value ? 'selected' : ''}`}
                 onClick={() => saveMood(m.value)}
               >
-                <span aria-hidden="true">{m.emoji}</span>
+                <span aria-hidden="true">
+                  <CaraAnimo cara={m.value as 1 | 2 | 3 | 4 | 5} />
+                </span>
                 <small>{m.label}</small>
               </button>
             ))}
@@ -149,9 +153,7 @@ export default function Inicio() {
           <div className="atajos">
             {SHORTCUTS.map((s) => (
               <Link key={s.to} to={s.to} className="atajo">
-                <span className="tile-emoji" aria-hidden="true">
-                  {s.emoji}
-                </span>
+                <IconoPuerta emoji={s.emoji} size={24} />
                 {s.title}
               </Link>
             ))}
@@ -164,6 +166,7 @@ export default function Inicio() {
           filas={[
             {
               to: '/mi-dia',
+              emoji: '☀️',
               title: 'Mi día',
               text: todayPlan
                 ? planDone(todayPlan)
@@ -175,11 +178,13 @@ export default function Inicio() {
             },
             {
               to: '/diario',
+              emoji: '📝',
               title: '¿No sabes bien qué sientes?',
               text: 'Te ayudamos a ponerle nombre, y puedes escribirlo o decirlo en voz alta.',
             },
             {
               to: '/especialista',
+              emoji: '🩺',
               title: 'Sé que debería ir al especialista, pero no puedo',
               text: 'Es la ansiedad, no falta de voluntad. Vamos paso a paso.',
             },

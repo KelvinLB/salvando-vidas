@@ -3,6 +3,7 @@ import PageHeader from '../components/PageHeader'
 import { FAITH_PLAYLISTS, PLAYLISTS, youtubeSearch } from '../data/content'
 import { type Player, type SoundId, SOUNDS, play } from '../lib/audio'
 import { useStored } from '../lib/storage'
+import { IconoPuerta } from '../lib/iconos'
 
 const TIMERS = [0, 10, 20, 30, 60]
 
@@ -58,7 +59,7 @@ export default function Musica() {
               aria-pressed={active === s.id}
               onClick={() => toggle(s.id)}
             >
-              <span className="tile-emoji" aria-hidden="true">{s.emoji}</span>
+              <IconoPuerta emoji={s.emoji} />
               <strong>{s.title}</strong>
               <small>{active === s.id ? 'Sonando · toca para parar' : 'Toca para escuchar'}</small>
             </button>

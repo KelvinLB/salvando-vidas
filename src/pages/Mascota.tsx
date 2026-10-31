@@ -46,6 +46,7 @@ import { useGift } from '../lib/gifts'
 import { MOMENTS, type Moment, markMoment, plantStage, useMoments } from '../lib/moments'
 import { hop, petSound, still, useBursts, usePeriod } from '../lib/petfx'
 import { type JournalEntry, type MoodEntry, newId, pick, today, useStored } from '../lib/storage'
+import CaraAnimo from '../components/CaraAnimo'
 
 const listJoin = (items: string[]) => new Intl.ListFormat('es', { type: 'conjunction' }).format(items)
 
@@ -804,7 +805,9 @@ export default function Mascota() {
               className={`mood ${mood === m.id ? 'selected' : ''}`}
               onClick={() => setMood(m.id)}
             >
-              <span aria-hidden="true">{m.emoji}</span>
+              <span aria-hidden="true">
+                <CaraAnimo cara={m.id} />
+              </span>
               <small>{m.label}</small>
             </button>
           ))}

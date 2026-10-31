@@ -10,6 +10,7 @@ import { useStored } from '../../../lib/storage'
 import Ficha from './Ficha'
 import { Mini } from './Figura'
 import './biblioteca.css'
+import { IconoPuerta } from '../../../lib/iconos'
 
 // «Biblioteca» en Explorar: la colección de objetos (uno por cada cosa que hoy se conoce), con el
 // cuerpo de vidrio para elegir dónde lo sientes, y cuatro apartados más: dos que se confunden, a quién
@@ -440,9 +441,7 @@ export default function Biblioteca({
               ].map((x) => (
                 <li key={x.id}>
                   <Link to={{ search: `?f=${x.id}` }} className="bib-familia-link">
-                    <span className="bib-familia-emoji" aria-hidden="true">
-                      {x.emoji}
-                    </span>
+                    <IconoPuerta emoji={x.emoji} className="bib-familia-emoji" size={18} />
                     <span className="bib-familia-nombre">{x.nombre}</span>
                     <span className="bib-familia-n">{cuantos(x.n)}</span>
                   </Link>

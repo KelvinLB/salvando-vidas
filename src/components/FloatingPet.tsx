@@ -47,10 +47,13 @@ const GAME_MS = 15000
 
 const clamp = (n: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, n))
 
-/** El espacio libre entre la barra de arriba y la de abajo. */
+/** El espacio libre entre la barra de arriba y la de abajo (o el reproductor que flota encima). */
 function bounds() {
   const top = document.querySelector('.topbar')?.getBoundingClientRect().bottom ?? 60
-  const bottom = document.querySelector('.tabbar')?.getBoundingClientRect().top ?? innerHeight - 70
+  const bottom =
+    document.querySelector('.mini-escucha')?.getBoundingClientRect().top ??
+    document.querySelector('.tabbar')?.getBoundingClientRect().top ??
+    innerHeight - 70
   return { minX: GAP, maxX: innerWidth - SIZE - GAP, minY: top + GAP, maxY: bottom - SIZE - GAP }
 }
 

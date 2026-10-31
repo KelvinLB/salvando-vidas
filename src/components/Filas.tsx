@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
 import { Link, type To } from 'react-router-dom'
+import { IconoPuerta } from '../lib/iconos'
 
 // Varias opciones en una sola tarjeta, una por fila con su flecha, en vez de una tarjeta grande
 // por cada una: en el teléfono ocupa la mitad de alto y se lee de un vistazo. Es la «puerta» de
@@ -13,12 +14,7 @@ export default function Filas({ filas, label, className = '' }: { filas: Fila[];
       {filas.map((f) => (
         <li key={f.title}>
           <Link to={f.to} state={f.state} className="fila">
-            {f.icon ??
-              (f.emoji && (
-                <span className="tile-emoji fila-emoji" aria-hidden="true">
-                  {f.emoji}
-                </span>
-              ))}
+            {f.icon ?? (f.emoji && <IconoPuerta emoji={f.emoji} className="fila-emoji" />)}
             <span>
               <strong>{f.title}</strong>
               {f.text && <small>{f.text}</small>}

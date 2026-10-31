@@ -1,0 +1,238 @@
+/* ---------- Burbujas ----------
+   Una escena oscura y suave que llena la pantalla del teléfono, también por detrás de la barra de
+   arriba y de la de pestañas, con burbujas de vidrio para reventar. Sin marcador, sin tiempo. */
+
+.burbujas-escena {
+  --text: #eef1ef;
+  --muted: #9fb0b8;
+  --glass-bg: rgb(20 30 28 / 0.46);
+  --glass-blur: blur(22px) saturate(170%);
+  --glass-border: rgb(255 255 255 / 0.14);
+  --glass-shadow: 0 12px 32px rgb(0 0 0 / 0.4), inset 0 1px 0 rgb(255 255 255 / 0.18),
+    inset 0 -1px 0 rgb(0 0 0 / 0.25);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100vw;
+  height: max(100svh, 560px);
+  /* Sube hasta la orilla de arriba y deja que el final de la página coincida con la pantalla (el
+     margen de arriba de la barra se sale de .app y también cuenta). */
+  margin: calc(-1 * (var(--topbar-h, 60px) + 16px)) calc(50% - 50vw)
+    calc(-40px - var(--tabbar-h) - env(safe-area-inset-bottom) - env(safe-area-inset-top));
+  padding: calc(var(--topbar-h, 60px) + 8px) 12px calc(var(--tabbar-h) + env(safe-area-inset-bottom));
+  background: radial-gradient(100% 70% at 50% 40%, #1b2f3a 0%, #101a20 80%);
+  color: var(--text);
+}
+@media (prefers-reduced-transparency: reduce) {
+  .burbujas-escena {
+    --glass-bg: #16222a;
+    --glass-blur: none;
+  }
+}
+/* Sin scroll de lado en esta pantalla. */
+.app:has(.burbujas-escena) {
+  overflow-x: clip;
+}
+
+.burbujas-arriba {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  height: 52px;
+  padding: 0 6px 0 20px;
+  border-radius: 26px;
+}
+.burbujas-arriba h1 {
+  flex: 1;
+  font-size: 1rem;
+  font-weight: 800;
+  letter-spacing: -0.015em;
+}
+.burbujas-redondo {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 0;
+  border-radius: 22px;
+  background: none;
+  color: var(--text);
+  cursor: pointer;
+}
+.burbujas-terminar {
+  display: inline-flex;
+  align-items: center;
+  min-height: 40px;
+  padding: 0 16px;
+  border-radius: 20px;
+  background: rgb(255 255 255 / 0.12);
+  color: var(--text);
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+:is(.burbujas-redondo, .burbujas-terminar, .burbujas-pildora):hover {
+  background: rgb(255 255 255 / 0.1);
+}
+
+.burbujas-frase {
+  margin: 2px 0 0;
+  color: var(--muted);
+  font-size: 0.875rem;
+  text-align: center;
+}
+.burbujas-defs {
+  position: absolute;
+}
+
+.burbujas-campo {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+}
+
+.burbuja {
+  position: absolute;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  cursor: pointer;
+  animation: burbuja-llega 0.4s ease-out both;
+  -webkit-tap-highlight-color: transparent;
+}
+.burbuja svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.burbuja:focus-visible {
+  outline: 2px solid #9ff0dd;
+  outline-offset: 3px;
+}
+/* Al reventar, la burbuja crece apenas y se desvanece; nada de destellos. */
+.burbuja.reventando {
+  pointer-events: none;
+  animation: burbuja-revienta 0.24s ease-out forwards;
+}
+@keyframes burbuja-llega {
+  from {
+    opacity: 0;
+    transform: scale(0.85);
+  }
+}
+@keyframes burbuja-revienta {
+  to {
+    opacity: 0;
+    transform: scale(1.12);
+  }
+}
+
+/* La huella que deja: unas rayitas que se apagan solas. */
+.burbuja-huella {
+  position: absolute;
+  pointer-events: none;
+  fill: none;
+  stroke: #9ff0dd;
+  stroke-width: 2;
+  stroke-linecap: round;
+  animation: huella-se-apaga 0.7s ease-out forwards;
+}
+@keyframes huella-se-apaga {
+  from {
+    opacity: 0.5;
+  }
+  to {
+    opacity: 0;
+    transform: scale(1.15);
+  }
+}
+
+.burbujas-listo {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.95rem;
+  text-align: center;
+  pointer-events: none;
+}
+
+.burbujas-opciones {
+  display: flex;
+  align-items: center;
+  align-self: center;
+  gap: 2px;
+  height: 52px;
+  margin-bottom: 8px;
+  padding: 0 6px;
+  border-radius: 26px;
+  white-space: nowrap;
+}
+.burbujas-pildora {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 40px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: 20px;
+  background: none;
+  color: var(--text);
+  font: 600 0.875rem var(--font-body);
+  text-decoration: none;
+  cursor: pointer;
+}
+.burbujas-sonido {
+  padding: 0 11px;
+}
+.burbujas-sonido[aria-pressed='false'] {
+  color: var(--muted);
+}
+.burbujas-raya {
+  width: 1px;
+  height: 22px;
+  background: rgb(255 255 255 / 0.16);
+}
+
+/* En el teléfono, las barras de la app que flotan encima de la escena también van en vidrio oscuro. */
+@media (max-width: 959px) {
+  html[data-burbujas] .topbar,
+  html[data-burbujas] .tabbar {
+    --text: #eef1ef;
+    --muted: #a7b3ae;
+    --primary: #9ff0dd;
+    --glass-bg: rgb(20 30 28 / 0.46);
+    --glass-blur: blur(22px) saturate(170%);
+    --glass-border: rgb(255 255 255 / 0.14);
+    --glass-shadow: 0 12px 32px rgb(0 0 0 / 0.4), inset 0 1px 0 rgb(255 255 255 / 0.18),
+      inset 0 -1px 0 rgb(0 0 0 / 0.25);
+    --glass-lens: rgb(255 255 255 / 0.12);
+    --glass-lens-shadow: inset 0 1px 0 rgb(255 255 255 / 0.2);
+  }
+}
+@media (max-width: 959px) and (prefers-reduced-transparency: reduce) {
+  html[data-burbujas] .topbar,
+  html[data-burbujas] .tabbar {
+    --glass-bg: #16222a;
+    --glass-blur: none;
+  }
+}
+
+/* Computadora: la escena es una ventana grande con las esquinas redondas, entre las dos barras. */
+@media (min-width: 960px) {
+  .content:has(> .burbujas-escena) {
+    max-width: 900px;
+  }
+  .burbujas-escena {
+    width: auto;
+    height: max(calc(100svh - var(--topbar-h, 60px) - var(--tabbar-h) - 64px), 520px);
+    margin: 0;
+    padding: 14px 16px 8px;
+    border-radius: 28px;
+  }
+}

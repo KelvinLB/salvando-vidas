@@ -6,6 +6,7 @@ import RiskNotice from '../components/RiskNotice'
 import { saveThought } from '../lib/db'
 import { soundsLikeRisk } from '../lib/risk'
 import { newId } from '../lib/storage'
+import { IconoPuerta } from '../lib/iconos'
 
 // Relajación muscular progresiva: tensar y soltar cada zona del cuerpo.
 const BODY = [
@@ -147,12 +148,12 @@ export default function Noche() {
             content: (
               <div className="grid">
                 <Link to="/musica" className="tile">
-                  <span className="tile-emoji" aria-hidden="true">🌧️</span>
+                  <IconoPuerta emoji="🌧️" />
                   <strong>Sonidos para dormir</strong>
                   <small>Lluvia o mar, con apagado automático</small>
                 </Link>
                 <Link to="/calma" className="tile">
-                  <span className="tile-emoji" aria-hidden="true">🫧</span>
+                  <IconoPuerta emoji="🫧" />
                   <strong>Respiración 4-7-8</strong>
                   <small>Ayuda a soltar la tensión</small>
                 </Link>

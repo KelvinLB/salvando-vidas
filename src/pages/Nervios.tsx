@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { Check, RefreshCw } from 'lucide-react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import NerviosArt from '../components/NerviosArt'
-import PageHeader, { BackLink } from '../components/PageHeader'
+import PageHeader from '../components/PageHeader'
 import PetSays from '../components/PetSays'
 import { FEAR_CIRCLE, LESSONS, type Lesson, SENSATIONS, lessonById } from '../data/nervios'
 import { useStored } from '../lib/storage'
@@ -124,7 +124,6 @@ function LessonView({ lesson }: { lesson: Lesson }) {
   if (finished) {
     return (
       <div className="stack">
-        <BackLink />
         <section className="card nv-end">
           <p className="eyebrow">
             <Check size={14} strokeWidth={2.5} aria-hidden="true" /> Lección leída
@@ -152,7 +151,6 @@ function LessonView({ lesson }: { lesson: Lesson }) {
   return (
     <div className="stack">
       <div className="row spread">
-        <BackLink />
         <div className="nv-dots" aria-hidden="true">
           {lesson.screens.map((_, i) => (
             <span key={i} className={i === screen ? 'on' : i < screen ? 'past' : ''} />

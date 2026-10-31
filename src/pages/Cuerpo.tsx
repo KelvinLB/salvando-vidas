@@ -8,6 +8,7 @@ import Senal from '../components/senal/Senal'
 import { AREAS } from '../data/bodyCheck'
 import { STORIES } from '../data/bodyStories'
 import './tu-cuerpo.css'
+import { IconoPuerta } from '../lib/iconos'
 
 // Tu cuerpo por dentro: «Lo que siento» para marcar dónde se siente y bajarle, y
 // «Cómo funciona» para ver paso a paso qué pasa con cada condición y seguir la señal de la
@@ -107,9 +108,7 @@ export default function Cuerpo() {
         {!aflojar && (
           <li>
             <button type="button" className="fila" onClick={openAflojar}>
-              <span className="tile-emoji fila-emoji" aria-hidden="true">
-                🌿
-              </span>
+              <IconoPuerta emoji="🌿" className="fila-emoji" />
               <span>
                 <strong>Aflojar donde lo sientes</strong>
                 <small>La mandíbula, los hombros, el pecho: elige dónde lo notas y lo aflojamos juntos, en un minuto.</small>
@@ -120,9 +119,7 @@ export default function Cuerpo() {
         {mode === 'siento' && (
           <li>
             <button type="button" className="fila" onClick={openSenal}>
-              <span className="tile-emoji fila-emoji" aria-hidden="true">
-                ⚡
-              </span>
+              <IconoPuerta emoji="⚡" className="fila-emoji" />
               <span>
                 <strong>Sigue la señal</strong>
                 <small>
@@ -135,9 +132,7 @@ export default function Cuerpo() {
         )}
         <li>
           <Link to="/explorar" className="fila">
-            <span className="tile-emoji fila-emoji" aria-hidden="true">
-              🧭
-            </span>
+            <IconoPuerta emoji="🧭" className="fila-emoji" />
             <span>
               <strong>Explorar</strong>
               <small>Tu cuerpo por dentro, en 3D: gira el cuerpo y acércate a cada parte. Se descarga al abrirlo.</small>
@@ -146,9 +141,7 @@ export default function Cuerpo() {
         </li>
         <li>
           <Link to="/mascota" className="fila">
-            <span className="tile-emoji fila-emoji" aria-hidden="true">
-              🐾
-            </span>
+            <IconoPuerta emoji="🐾" className="fila-emoji" />
             <span>
               <strong>¿No sabes bien qué es?</strong>
               <small>Responde unas preguntas con tu mascota y te decimos qué se parece más a lo que vives.</small>

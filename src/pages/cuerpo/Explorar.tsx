@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Link, Navigate, useNavigate, useParams } from 'react-router-dom'
-import { Check, Focus, RotateCcw, RotateCw, X } from 'lucide-react'
+import { Focus, RotateCcw, RotateCw, X } from 'lucide-react'
 import Filas from '../../components/Filas'
 import PageHeader from '../../components/PageHeader'
 import { CAPAS, PARTES, parteById, type Capa, type Parte, type ParteId, type Senal } from '../../components/cuerpo3d/organos'
@@ -99,16 +99,27 @@ const AVISO: Record<Motivo, string> = {
   datos: `Tienes prendido el ahorro de datos. El cuerpo en 3D pesa ${PESO_3D} y se baja una sola vez.`,
 }
 
-/** La tarjeta corta de una parte: qué es, por qué se siente así y qué ayuda. */
-function Tarjeta({ parte, onClose }: { parte: Parte; onClose: () => void }) {
+/** La tarjeta corta de una parte: qué es, por qué se siente así y qué ayuda. Sobre el cuerpo en 3D
+ *  es una hoja de vidrio (`hoja`) que sube encima de la escena; al abrirse, el foco va a su título. */
+function Tarjeta({ parte, onClose, hoja = false }: { parte: Parte; onClose: () => void; hoja?: boolean }) {
   const [palabra, setPalabra] = useState<string | null>(null)
+  const titulo = useRef<HTMLHeadingElement>(null)
+  useEffect(() => {
+    if (hoja) titulo.current?.focus({ preventScroll: true })
+  }, [hoja, parte.id])
   const texto = (t: string) => (
     <Texto texto={t} abierta={palabra} onPalabra={(id) => setPalabra((p) => (p === id ? null : id))} />
   )
   return (
-    <article className="ex-card" aria-labelledby="ex-card-title">
+    <article
+      className={`ex-card${hoja ? ' ex-hoja vidrio' : ''}`}
+      role={hoja ? 'region' : undefined}
+      aria-labelledby="ex-card-title"
+    >
       <div className="ex-card-head">
-        <h2 id="ex-card-title">{parte.nombre}</h2>
+        <h2 id="ex-card-title" ref={titulo} tabIndex={hoja ? -1 : undefined}>
+          {parte.nombre}
+        </h2>
         <button type="button" className="icon-btn" onClick={onClose} aria-label="Cerrar la explicación">
           <X size={20} aria-hidden="true" />
         </button>
@@ -120,7 +131,7 @@ function Tarjeta({ parte, onClose }: { parte: Parte; onClose: () => void }) {
       <p>{texto(parte.ayuda)}</p>
       {palabra && <Definicion id={palabra} onCerrar={() => setPalabra(null)} />}
       {parte.ir && (
-        <Link to={parte.ir.to} className="btn ghost small">
+        <Link to={parte.ir.to} className={hoja ? 'btn small' : 'btn ghost small'}>
           {parte.ir.label}
         </Link>
       )}
@@ -300,11 +311,35 @@ export default function Explorar() {
     e.setHueco(parte ? 0.2 : 0)
   }, [id, sel, senal, fichaAbierta, fase.es])
 
-  // En 2D la tarjeta sale debajo de la lista: se acerca para que se vea sin buscarla.
+  // En 2D la tarjeta sale debajo de la lista: se acerca para que se vea sin buscarla. En 3D la hoja sube
+  // sobre el cuerpo: se acerca el escenario para que la hoja quede entera arriba de la barra de abajo.
   const tarjeta2d = useRef<HTMLDivElement>(null)
   useEffect(() => {
-    if (!en3d && sel) tarjeta2d.current?.scrollIntoView({ block: 'nearest', behavior: still ? 'auto' : 'smooth' })
-  }, [sel, en3d, still])
+    if (!sel) return
+    const behavior = still ? 'auto' : 'smooth'
+    if (!en3d) tarjeta2d.current?.scrollIntoView({ block: 'nearest', behavior })
+    else if (id === 'cuerpo') host.current?.scrollIntoView({ block: 'nearest', behavior })
+  }, [sel, en3d, id, still])
+
+  // Cerrar la hoja (con su botón o con Esc) regresa el foco a la parte en la lista, si está a la vista.
+  const cerrarHoja = useRef(() => {})
+  cerrarHoja.current = () => {
+    const cur = sel
+    setSel(null)
+    if (cur)
+      requestAnimationFrame(() =>
+        document.querySelector<HTMLElement>(`.ex-partes [data-parte="${cur}"]`)?.focus({ preventScroll: true }),
+      )
+  }
+  const hojaAbierta = id === 'cuerpo' && en3d && sel !== null
+  useEffect(() => {
+    if (!hojaAbierta) return
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && !e.defaultPrevented) cerrarHoja.current()
+    }
+    document.addEventListener('keydown', onKey)
+    return () => document.removeEventListener('keydown', onKey)
+  }, [hojaAbierta])
 
   const verCuerpo = useCallback(() => {
     setCuerpoBib(true)
@@ -349,7 +384,7 @@ export default function Explorar() {
               </p>
             )}
             {fase.es === 'listo' && (
-              <div className="ex-tools">
+              <div className="ex-tools vidrio">
                 <button type="button" className="icon-btn" onClick={() => escena.current?.girar(-45)} aria-label="Girar a la izquierda">
                   <RotateCcw size={20} aria-hidden="true" />
                 </button>
@@ -369,14 +404,35 @@ export default function Explorar() {
                 </button>
               </div>
             )}
+            {fase.es === 'listo' && id === 'cuerpo' && (
+              <div className="ex-capas vidrio" role="group" aria-label="Capas que se ven">
+                {CAPAS.map((c) => (
+                  <button
+                    key={c.id}
+                    type="button"
+                    className={`ex-capa${capas[c.id] ? ' on' : ''}`}
+                    aria-pressed={capas[c.id]}
+                    onClick={() => setCapas((s) => ({ ...s, [c.id]: !s[c.id] }))}
+                  >
+                    {c.label}
+                  </button>
+                ))}
+              </div>
+            )}
             {id === 'biblioteca' && (
-              <button type="button" className="icon-btn ex-ocultar" onClick={() => setCuerpoBib(false)} aria-label="Ocultar el cuerpo">
+              <button type="button" className="icon-btn ex-ocultar vidrio" onClick={() => setCuerpoBib(false)} aria-label="Ocultar el cuerpo">
                 <X size={20} aria-hidden="true" />
               </button>
             )}
-            <div ref={setEncima} className="ex-overlay" aria-live="polite">
-              {parte && <Tarjeta parte={parte} onClose={() => setSel(null)} />}
+            {/* En «Tocar el cuerpo» el foco ya lleva a la hoja; aquí solo se avisa, corto, qué se abrió. */}
+            <div ref={setEncima} className="ex-overlay" aria-live={id === 'cuerpo' ? undefined : 'polite'}>
+              {parte && <Tarjeta parte={parte} onClose={() => cerrarHoja.current()} hoja />}
             </div>
+            {id === 'cuerpo' && (
+              <p className="visually-hidden" aria-live="polite">
+                {parte ? `Se abrió la explicación: ${parte.nombre}` : ''}
+              </p>
+            )}
           </div>
         ) : (
           <div className="callout warm ex-aviso" role="status">
@@ -391,23 +447,6 @@ export default function Explorar() {
                 Ir a Tu cuerpo por dentro
               </Link>
             </div>
-          </div>
-        )}
-        {en3d && id === 'cuerpo' && (
-          <div className="ex-capas" role="group" aria-label="Capas que se ven">
-            <span className="ex-capas-titulo">Capas</span>
-            {CAPAS.map((c) => (
-              <button
-                key={c.id}
-                type="button"
-                className={`ex-capa${capas[c.id] ? ' on' : ''}`}
-                aria-pressed={capas[c.id]}
-                onClick={() => setCapas((s) => ({ ...s, [c.id]: !s[c.id] }))}
-              >
-                {capas[c.id] && <Check size={15} strokeWidth={2.5} aria-hidden="true" />}
-                {c.label}
-              </button>
-            ))}
           </div>
         )}
       </div>
@@ -445,6 +484,7 @@ export default function Explorar() {
                     key={p.id}
                     type="button"
                     className={`chip${sel === p.id ? ' selected' : ''}`}
+                    data-parte={p.id}
                     aria-pressed={sel === p.id}
                     onClick={() => elegir(p.id)}
                   >

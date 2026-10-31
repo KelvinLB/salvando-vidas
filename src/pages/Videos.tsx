@@ -2,6 +2,7 @@ import PageHeader from '../components/PageHeader'
 import { FAITH_VIDEOS, MOVIES, VIDEO_TOPICS, youtubeSearch } from '../data/content'
 import { useStored } from '../lib/storage'
 import './videos.css'
+import { IconoPuerta } from '../lib/iconos'
 
 // Videos y películas: lo principal es elegir un video corto; las películas quedan cerradas,
 // a un toque, para que la lista larga no compita con los videos.
@@ -28,7 +29,7 @@ export default function Videos() {
               target="_blank"
               rel="noreferrer"
             >
-              <span className="tile-emoji" aria-hidden="true">{v.emoji}</span>
+              <IconoPuerta emoji={v.emoji} />
               <strong>{v.title}</strong>
             </a>
           ))}

@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react'
+import { type ReactNode, useEffect, useRef, useState } from 'react'
+import { ChevronDown, ChevronRight } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import Filas from '../components/Filas'
 import PageHeader from '../components/PageHeader'
@@ -9,10 +10,11 @@ import { buzz, useStored } from '../lib/storage'
 
 type Phase = { label: string; seconds: number; scale: number }
 
-const PATTERNS: { id: string; name: string; hint: string; phases: Phase[] }[] = [
+const PATTERNS: { id: string; name: string; corto: string; hint: string; phases: Phase[] }[] = [
   {
     id: 'calma',
     name: 'Calma 4-6',
+    corto: 'Calma 4-6',
     hint: 'Exhalar más largo que inhalar calma el cuerpo.',
     phases: [
       { label: 'Inhala', seconds: 4, scale: 1 },
@@ -22,6 +24,7 @@ const PATTERNS: { id: string; name: string; hint: string; phases: Phase[] }[] = 
   {
     id: 'pareja',
     name: 'Pareja 5-5',
+    corto: 'Pareja 5-5',
     hint: 'El mismo tiempo para tomar y soltar el aire. Si el 4-6 se te hace largo, prueba esta.',
     phases: [
       { label: 'Inhala', seconds: 5, scale: 1 },
@@ -31,6 +34,7 @@ const PATTERNS: { id: string; name: string; hint: string; phases: Phase[] }[] = 
   {
     id: 'caja',
     name: 'Caja 4-4-4-4',
+    corto: 'Caja',
     hint: 'Ritmo parejo para ordenar la mente.',
     phases: [
       { label: 'Inhala', seconds: 4, scale: 1 },
@@ -42,6 +46,7 @@ const PATTERNS: { id: string; name: string; hint: string; phases: Phase[] }[] = 
   {
     id: '478',
     name: '4-7-8',
+    corto: '4-7-8',
     hint: 'Ayuda a soltar la tensión y a dormir.',
     phases: [
       { label: 'Inhala', seconds: 4, scale: 1 },
@@ -69,12 +74,16 @@ export function Breathing({
   initial = PATTERNS[0].id,
   autoStart = false,
   porDentro = false,
+  pantalla,
 }: {
   initial?: string
   /** En una crisis no hay que pedir un toque más: la respiración arranca sola. */
   autoStart?: boolean
   /** La respiración se ve en el pecho en 3D. En Pánico no: ahí basta el círculo. */
   porDentro?: boolean
+  /** En Calma la respiración ocupa toda la pantalla, sobre la escena oscura, con los controles en
+      vidrio encima. Lleva lo que va arriba (el título y el atajo a Pánico) y lo que va al final. */
+  pantalla?: { arriba: ReactNode; abajo: ReactNode }
 }) {
   // Los números que cambian cada segundo distraen del ritmo: por omisión, solo una línea que avanza.
   const [verSegundos, setVerSegundos] = useStored('respirar-segundos', false)
@@ -92,6 +101,40 @@ export function Breathing({
     autoStart ? duracion(PATTERNS.find((p) => p.id === initial)!.phases[0], 0) : 0,
   )
   const [cycles, setCycles] = useState(0)
+  const escena = useRef<HTMLElement>(null)
+  const enPantalla = !!pantalla
+
+  // Las barras que flotan se oscurecen solo mientras la escena está detrás de ellas: se vigila una
+  // línea a la mitad de cada barra.
+  useEffect(() => {
+    const el = escena.current
+    if (!enPantalla || !el) return
+    const raiz = document.documentElement
+    let vigilantes: IntersectionObserver[] = []
+    const vigilar = (clave: 'escenaArriba' | 'escenaAbajo', y: number) => {
+      const io = new IntersectionObserver(
+        ([e]) => {
+          if (e.isIntersecting) raiz.dataset[clave] = ''
+          else delete raiz.dataset[clave]
+        },
+        { rootMargin: `${-y}px 0px ${-(innerHeight - y - 1)}px 0px` },
+      )
+      io.observe(el)
+      return io
+    }
+    const armar = () => {
+      vigilantes.forEach((io) => io.disconnect())
+      vigilantes = [vigilar('escenaArriba', 34), vigilar('escenaAbajo', innerHeight - 44)]
+    }
+    armar()
+    addEventListener('resize', armar)
+    return () => {
+      removeEventListener('resize', armar)
+      vigilantes.forEach((io) => io.disconnect())
+      delete raiz.dataset.escenaArriba
+      delete raiz.dataset.escenaAbajo
+    }
+  }, [enPantalla])
 
   const pattern = PATTERNS.find((p) => p.id === patternId)!
   const phase = pattern.phases[index]
@@ -138,6 +181,131 @@ export function Breathing({
     <strong>Listo cuando tú lo estés</strong>
   )
 
+  const fondoDatos = puede3d && !dentro && (
+    <>
+      <p className="muted breath-3d-nota">
+        Tienes el ahorro de datos encendido. Para ver los pulmones se bajan {PESO_3D}, una sola vez.
+      </p>
+      <button type="button" className="btn ghost small" onClick={() => setBajar(true)}>
+        Ver los pulmones
+      </button>
+    </>
+  )
+  const notaSosten = CON_SOSTEN.includes(patternId) && (
+    <p className="muted small">
+      Va mejor cuando ya practicaste. Si en un sostén te falta el aire, suéltalo; también puedes regresar a Calma 4-6
+      o respirar a tu ritmo.
+    </p>
+  )
+  const notaFallo = fallo && (
+    <p className="muted breath-3d-nota">Esta vez no se pudieron mostrar los pulmones. Seguimos con un círculo.</p>
+  )
+  const porque = (
+    <details className="breath-porque">
+      <summary>¿Por qué calma?</summary>
+      <p className="muted small">
+        {dentro && 'Respira con los pulmones: el aire sube cuando lo tomas y baja cuando lo sueltas. '}Al soltar el
+        aire despacio, el nervio vago frena un poquito al corazón: por eso exhalar largo calma. Empezamos un poco más
+        rápido para que no te falte el aire, y con práctica se vuelve más fácil.
+      </p>
+    </details>
+  )
+  const segundosToggle = (
+    <label className="toggle breath-segundos">
+      <input type="checkbox" role="switch" checked={verSegundos} onChange={(e) => setVerSegundos(e.target.checked)} />
+      Ver los segundos
+    </label>
+  )
+  const elegir = (id: string) => {
+    setPatternId(id)
+    setRunning(false)
+  }
+
+  if (pantalla) {
+    // Lo único al frente es respirar: la escena llena la pantalla y lo que se toca flota encima.
+    return (
+      <section ref={escena} className="calma-escena" aria-label="Respirar">
+        {pantalla.arriba}
+        <div className="vidrio calma-seg" role="radiogroup" aria-label="Tipo de respiración">
+          {PATTERNS.map((p) => (
+            <button
+              key={p.id}
+              type="button"
+              role="radio"
+              aria-checked={p.id === patternId}
+              aria-label={p.name}
+              className="calma-seg-op"
+              onClick={() => elegir(p.id)}
+            >
+              {p.corto}
+            </button>
+          ))}
+        </div>
+        {!running && <p className="calma-pista">{pattern.hint}</p>}
+        {!running && notaSosten}
+        {fondoDatos}
+        <div className="calma-stage">
+          {dentro ? (
+            <RespirarPorDentro
+              aire={{ tipo: running ? (AIRE[phase.label] ?? 'sostiene') : 'quieto', segundos }}
+              paso={running ? paso : 'quieto'}
+              onFalla={() => setFallo(true)}
+            />
+          ) : (
+            <div className="breath-stage">
+              <div
+                className="breath-circle"
+                style={{
+                  transform: `scale(${running ? phase.scale : 0.7})`,
+                  transitionDuration: `${running ? segundos : 0.6}s`,
+                }}
+              />
+            </div>
+          )}
+        </div>
+        {notaFallo}
+        <div className="calma-fase" aria-live="polite">
+          {running ? (
+            <>
+              <strong key={paso} className="breath-fase">
+                {DECIR[phase.label] ?? phase.label}
+              </strong>
+              {verSegundos ? (
+                <span className="calma-segundos">{left}</span>
+              ) : (
+                <span className="breath-progreso" aria-hidden="true">
+                  <i key={paso} className="breath-avance" style={{ animationDuration: `${segundos}s` }} />
+                </span>
+              )}
+            </>
+          ) : (
+            <strong>Listo cuando tú lo estés</strong>
+          )}
+        </div>
+        <p className="calma-sub">
+          {!running
+            ? 'Respira suave, sin llenarte del todo. El ritmo se va haciendo lento solo.'
+            : cycles > 0
+              ? `${cycles} ${cycles === 1 ? 'ciclo' : 'ciclos'}. Lo estás haciendo bien.${cycles >= 3 ? ' Si prefieres, sigue a tu ritmo: también sirve.' : ''}`
+              : 'Suave, sin llenarte del todo.'}
+          {running && llevas(pattern.phases, cycles) >= 120 && ' Puedes parar cuando quieras o seguir un poco más.'}
+        </p>
+        <button
+          type="button"
+          className={`btn big calma-boton ${running ? 'vidrio calma-pausar' : ''}`}
+          onClick={running ? () => setRunning(false) : start}
+        >
+          {running ? 'Pausar' : 'Empezar'}
+        </button>
+        <div className="calma-extras">
+          {!running && porque}
+          {segundosToggle}
+        </div>
+        {pantalla.abajo}
+      </section>
+    )
+  }
+
   return (
     <section className="card center">
       <div className="chips" role="radiogroup" aria-label="Tipo de respiración">
@@ -147,33 +315,15 @@ export function Breathing({
             role="radio"
             aria-checked={p.id === patternId}
             className={`chip ${p.id === patternId ? 'selected' : ''}`}
-            onClick={() => {
-              setPatternId(p.id)
-              setRunning(false)
-            }}
+            onClick={() => elegir(p.id)}
           >
             {p.name}
           </button>
         ))}
       </div>
       <p className="muted">{pattern.hint}</p>
-      {CON_SOSTEN.includes(patternId) && (
-        <p className="muted small">
-          Va mejor cuando ya practicaste. Si en un sostén te falta el aire, suéltalo; también puedes regresar a Calma 4-6
-          o respirar a tu ritmo.
-        </p>
-      )}
-
-      {puede3d && !dentro && (
-        <>
-          <p className="muted breath-3d-nota">
-            Tienes el ahorro de datos encendido. Para ver los pulmones se bajan {PESO_3D}, una sola vez.
-          </p>
-          <button type="button" className="btn ghost small" onClick={() => setBajar(true)}>
-            Ver los pulmones
-          </button>
-        </>
-      )}
+      {notaSosten}
+      {fondoDatos}
 
       {dentro ? (
         <RespirarPorDentro
@@ -197,20 +347,13 @@ export function Breathing({
           <div className="breath-label">{etiqueta}</div>
         </div>
       )}
-      {fallo && <p className="muted breath-3d-nota">Esta vez no se pudieron mostrar los pulmones. Seguimos con un círculo.</p>}
+      {notaFallo}
 
       {!running && (
         <>
           <p className="muted small">Respira suave, sin llenarte del todo. El ritmo se va haciendo lento solo.</p>
           {/* Lo que explica va a un toque: mientras respiras, solo los pulmones y el botón. */}
-          <details className="breath-porque">
-            <summary>¿Por qué calma?</summary>
-            <p className="muted small">
-              {dentro && 'Respira con los pulmones: el aire sube cuando lo tomas y baja cuando lo sueltas. '}Al soltar el
-              aire despacio, el nervio vago frena un poquito al corazón: por eso exhalar largo calma. Empezamos un poco más
-              rápido para que no te falte el aire, y con práctica se vuelve más fácil.
-            </p>
-          </details>
+          {porque}
         </>
       )}
       {running && cycles > 0 && (
@@ -225,10 +368,7 @@ export function Breathing({
       <button className="btn big" onClick={running ? () => setRunning(false) : start}>
         {running ? 'Pausar' : 'Empezar'}
       </button>
-      <label className="toggle breath-segundos">
-        <input type="checkbox" role="switch" checked={verSegundos} onChange={(e) => setVerSegundos(e.target.checked)} />
-        Ver los segundos
-      </label>
+      {segundosToggle}
     </section>
   )
 }
@@ -287,22 +427,45 @@ function Grounding() {
   )
 }
 
-// Una sola cosa al frente: respirar. Lo demás son puertas, cada una a su propia pantalla, en dos
-// listas cortas: lo que sirve ahorita y lo que sirve para entender y practicar. En computadora, la
-// respiración va a la izquierda y las puertas a la derecha.
+// Una sola cosa al frente: respirar, a pantalla completa sobre la escena de los pulmones. Lo demás son
+// puertas, cada una a su propia pantalla, en dos listas cortas que quedan al bajar: lo que sirve
+// ahorita y lo que sirve para entender y practicar. En computadora, la escena va a la izquierda y las
+// puertas a la derecha.
 export default function Calma() {
+  const bajarALasPuertas = () =>
+    document
+      .getElementById('calma-mas')
+      ?.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' })
+
   return (
     <div className="pagina-ancha calma">
-      <PageHeader title="Calma" subtitle="Respira con los pulmones. No hay prisa." />
-      <div className="columna">
-        <Link to="/panico" className="card link-card emergency-soft calma-panico">
-          <h2>¿Es un ataque de pánico?</h2>
-          <p className="muted">Te guiamos paso a paso para atravesarlo.</p>
-        </Link>
-        <Breathing porDentro />
+      <div className="columna fija">
+        <Breathing
+          porDentro
+          pantalla={{
+            arriba: (
+              <div className="calma-arriba">
+                <h1>Calma</h1>
+                <Link to="/panico" className="vidrio calma-panico">
+                  ¿Es un ataque de pánico?
+                  <ChevronRight size={16} strokeWidth={2.4} aria-hidden="true" />
+                </Link>
+              </div>
+            ),
+            abajo: (
+              <button type="button" className="vidrio calma-mas" onClick={bajarALasPuertas}>
+                <span>
+                  <strong>Más para calmarte</strong>
+                  <small>Volver al presente, dónde lo sientes, la noche…</small>
+                </span>
+                <ChevronDown size={20} strokeWidth={2} aria-hidden="true" />
+              </button>
+            ),
+          }}
+        />
       </div>
-      <div className="columna">
-        <section className="stack tight" aria-labelledby="calma-ahorita-title">
+      <div className="columna calma-puertas">
+        <section className="stack tight" id="calma-mas" aria-labelledby="calma-ahorita-title">
           <h2 id="calma-ahorita-title" className="section-title">
             Para ahorita
           </h2>

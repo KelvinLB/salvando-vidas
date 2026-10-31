@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { BackLink } from '../components/PageHeader'
 import PetSays from '../components/PetSays'
 import {
   FEARS,
@@ -218,7 +217,6 @@ export default function Panico() {
   if (phase === 'inicio') {
     return (
       <div className="stack panic">
-        <BackLink />
         <section className="card center" aria-live="polite">
           <h1>Estoy contigo.</h1>
           <p className="panic-text">
@@ -250,7 +248,6 @@ export default function Panico() {
   if (phase === 'final') {
     return (
       <div className="stack panic">
-        <BackLink />
         <section className="card center">
           <p className="big-emoji">🌿</p>
           <h1>¿Cómo vas?</h1>
@@ -278,7 +275,6 @@ export default function Panico() {
     const toggleFear = (id: string) => setFears((l) => (l.includes(id) ? l.filter((x) => x !== id) : [...l, id]))
     return (
       <div className="stack panic">
-        <BackLink />
         <section className="card">
           <h1>Un minuto, si quieres</h1>
           <h2 className="panic-q" id="temias">
@@ -330,7 +326,6 @@ export default function Panico() {
     const first = lines.every((l) => l.times === 1)
     return (
       <div className="stack panic">
-        <BackLink />
         {saved ? (
           <section className="card">
             <h1>Lo que temías y lo que pasó</h1>
@@ -375,7 +370,6 @@ export default function Panico() {
   return (
     <div className="stack panic">
       <div className="row spread">
-        <BackLink />
         <p className="muted small">
           Paso {step + 1} de {steps.length}
         </p>

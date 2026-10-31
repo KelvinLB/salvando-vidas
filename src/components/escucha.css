@@ -1,0 +1,94 @@
+/* Reproductor chico de «Para escuchar»: una píldora de vidrio justo arriba de las pestañas,
+   del mismo ancho que la barra. */
+.mini-escucha {
+  position: fixed;
+  left: 50%;
+  bottom: calc(12px + 64px + 8px + env(safe-area-inset-bottom));
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  width: min(420px, calc(100% - 32px));
+  height: 56px;
+  padding: 0 6px 0 18px;
+  border-radius: 28px;
+  transform: translateX(-50%);
+  animation: mini-escucha-llega 0.25s ease-out;
+}
+@keyframes mini-escucha-llega {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 8px);
+  }
+}
+.mini-escucha-titulo {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  color: var(--text);
+  text-decoration: none;
+  line-height: 1.2;
+}
+.mini-escucha-titulo small {
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+.mini-escucha-titulo strong {
+  overflow: hidden;
+  font-size: 0.95rem;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.mini-escucha-boton {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  color: var(--text);
+  cursor: pointer;
+}
+.mini-escucha-boton.principal {
+  background: var(--glass-lens);
+  box-shadow: var(--glass-lens-shadow);
+  color: var(--primary);
+}
+@media (min-width: 760px) {
+  .mini-escucha {
+    width: min(600px, calc(100% - 32px));
+  }
+}
+
+/* Con el reproductor a la vista, lo último de la página y el aviso de actualización suben. */
+.app.con-escucha {
+  padding-bottom: calc(var(--tabbar-h) + 64px + env(safe-area-inset-bottom));
+}
+.app.con-escucha .toast {
+  bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom) + 76px);
+}
+
+/* El reproductor de cada reflexión dentro de /escuchar. */
+.escucha-reproductor {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.escucha-avance {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.escucha-avance input {
+  flex: 1;
+  min-width: 0;
+  accent-color: var(--primary);
+}
+.escucha-avance span {
+  flex: none;
+  font-variant-numeric: tabular-nums;
+}

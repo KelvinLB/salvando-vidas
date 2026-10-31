@@ -1,18 +1,32 @@
 import { Suspense, useEffect, useRef } from 'react'
-import { Compass, House, LifeBuoy, NotebookPen, Puzzle, Sprout, Wind } from 'lucide-react'
+import { ChevronLeft, Compass, House, LifeBuoy, Sprout, Wind } from 'lucide-react'
 import { Link, NavLink, Outlet, useLocation } from 'react-router-dom'
 import FloatingPet from './FloatingPet'
+import MiniEscucha from './MiniEscucha'
 import UpdatePrompt from './UpdatePrompt'
 import { prepareGift } from '../lib/gifts'
 import { MOMENT_SOURCES, syncMoments } from '../lib/moments'
-import { SECTIONS, rememberStep } from '../lib/sections'
+import { EscuchaProvider, useMiniVisible } from '../lib/escucha'
+import { SECTIONS, rememberStep, useBack } from '../lib/sections'
 import { onStoredChange } from '../lib/storage'
+import { IconoDiario, IconoDistraer } from '../lib/iconos'
 
-const ICONS = { '/': House, '/calma': Wind, '/explorar': Compass, '/distraer': Puzzle, '/diario': NotebookPen, '/mi-espacio': Sprout }
+const ICONS = { '/': House, '/calma': Wind, '/explorar': Compass, '/distraer': IconoDistraer, '/diario': IconoDiario, '/mi-espacio': Sprout }
 
+// La voz de «Para escuchar» vive aquí arriba, para que siga sonando al cambiar de pantalla.
 export default function Layout() {
+  return (
+    <EscuchaProvider>
+      <Marco />
+    </EscuchaProvider>
+  )
+}
+
+function Marco() {
   const { pathname, search } = useLocation()
   const topbar = useRef<HTMLElement>(null)
+  const back = useBack()
+  const conEscucha = useMiniVisible()
 
   useEffect(() => {
     rememberStep(pathname + search)
@@ -49,12 +63,25 @@ export default function Layout() {
   }, [])
 
   return (
-    <div className="app">
+    <div className={`app${conEscucha ? ' con-escucha' : ''}`}>
       <header className="topbar vidrio" ref={topbar}>
-        <Link to="/" className="brand" aria-label="Ir al inicio">
-          <img src="/logo.svg" alt="" width={32} height={32} />
-          <span>Salvando Vidas</span>
-        </Link>
+        {/* En las pestañas va la marca; más adentro, «volver» dice a dónde regresa. */}
+        {back ? (
+          <button
+            type="button"
+            className="topbar-back"
+            onClick={back.go}
+            aria-label={back.label ? `Volver a ${back.label}` : 'Volver'}
+          >
+            <ChevronLeft size={22} strokeWidth={2.25} aria-hidden="true" />
+            <span>{back.label || 'Volver'}</span>
+          </button>
+        ) : (
+          <Link to="/" className="brand" aria-label="Ir al inicio">
+            <img src="/logo.svg" alt="" width={32} height={32} />
+            <span>Salvando Vidas</span>
+          </Link>
+        )}
         {pathname !== '/ayuda' && (
           <Link to="/ayuda" className="sos">
             <LifeBuoy size={18} strokeWidth={2} aria-hidden="true" />
@@ -90,6 +117,7 @@ export default function Layout() {
         })}
       </nav>
 
+      <MiniEscucha />
       <FloatingPet />
       <UpdatePrompt />
     </div>
