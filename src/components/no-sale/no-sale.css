@@ -18,16 +18,14 @@
   --ns-paper-edge: #e6d6b2;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --ns-frost: #3a4247;
-    --ns-frost-edge: #4c565c;
-    --ns-frost-ink: rgb(241 236 229 / 0.6);
-    --ns-frame: #4f4134;
-    --ns-card: #f3ece0;
-    --ns-paper: #efe4cb;
-    --ns-paper-edge: #b9a77f;
-  }
+:root:where([data-tema='oscuro']) {
+  --ns-frost: #3a4247;
+  --ns-frost-edge: #4c565c;
+  --ns-frost-ink: rgb(241 236 229 / 0.6);
+  --ns-frame: #4f4134;
+  --ns-card: #f3ece0;
+  --ns-paper: #efe4cb;
+  --ns-paper-edge: #b9a77f;
 }
 
 /* Botón de texto, para lo que no es la acción principal. */

@@ -7,6 +7,29 @@
     <meta name="description" content="Un espacio seguro y gratuito para respirar, distraer la mente y encontrar ayuda cuando más se necesita." />
     <meta name="theme-color" content="#fbfbf9" media="(prefers-color-scheme: light)" />
     <meta name="theme-color" content="#0b0d0c" media="(prefers-color-scheme: dark)" />
+    <script>
+      // Claro u oscuro, antes de pintar, para que no se vea un destello del otro tema. Lo elige la
+      // persona en Ajustes (sv:tema); «Automático» sigue al teléfono, también si cambia con la app
+      // abierta. Ver src/lib/tema.ts.
+      ;(function () {
+        var sistema = window.matchMedia('(prefers-color-scheme: dark)')
+        function aplicar() {
+          var tema = 'auto'
+          try {
+            tema = JSON.parse(localStorage.getItem('sv:tema')) || 'auto'
+          } catch (e) {}
+          var oscuro = tema === 'oscuro' || (tema !== 'claro' && sistema.matches)
+          document.documentElement.setAttribute('data-tema', oscuro ? 'oscuro' : 'claro')
+          var barras = document.querySelectorAll('meta[name="theme-color"]')
+          for (var i = 0; i < barras.length; i++) barras[i].setAttribute('content', oscuro ? '#0b0d0c' : '#fbfbf9')
+        }
+        aplicar()
+        sistema.addEventListener('change', aplicar)
+        window.addEventListener('sv:changed', function (e) {
+          if (e.detail === 'tema') aplicar()
+        })
+      })()
+    </script>
     <link rel="icon" href="/favicon.ico" sizes="48x48" />
     <link rel="icon" href="/logo.svg" sizes="any" type="image/svg+xml" />
     <link rel="apple-touch-icon" href="/apple-touch-icon-180x180.png" />

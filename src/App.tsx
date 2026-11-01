@@ -22,6 +22,7 @@ const Ajustes = lazy(() => import('./pages/espacio/Ajustes'))
 const Diario = lazy(() => import('./pages/Diario'))
 const Especialista = lazy(() => import('./pages/Especialista'))
 const Opinion = lazy(() => import('./pages/Opinion'))
+const Instalar = lazy(() => import('./pages/Instalar'))
 const Noche = lazy(() => import('./pages/Noche'))
 const Responder = lazy(() => import('./pages/Responder'))
 const Mascota = lazy(() => import('./pages/Mascota'))
@@ -84,6 +85,7 @@ export default function App() {
         <Route path="desahogo" element={<Navigate to="/diario" replace />} />
         <Route path="especialista" element={<Especialista />} />
         <Route path="opinion" element={<Opinion />} />
+        <Route path="instalar" element={<Instalar />} />
         <Route path="panico" element={<Panico />} />
         <Route path="noche" element={<Noche />} />
         <Route path="responder" element={<Responder />} />

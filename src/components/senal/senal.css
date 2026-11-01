@@ -44,49 +44,47 @@
   --sg-cyl-op: 0.55;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --sg-stage-1: #24211e;
-    --sg-stage-2: #1a1816;
-    --sg-ground: #000000;
-    --sg-skin-1: #4c443d;
-    --sg-skin-2: #2f2925;
-    --sg-hi: #fff4e8;
-    --sg-shade: #000000;
-    --sg-cavity: #3d302b;
-    --sg-bone: #6b6157;
-    --sg-line: rgb(255 240 225 / 0.16);
-    --sg-brain: #8a636b;
-    --sg-brain-2: #6d4a52;
-    --sg-pfc: #55705f;
-    --sg-amy: #b9786c;
-    --sg-hypo: #a66d78;
-    --sg-lung: #87605a;
-    --sg-lung-2: #6a4a45;
-    --sg-airway: #a3807a;
-    --sg-heart: #c9675d;
-    --sg-heart-2: #97473f;
-    --sg-atrium: #a4626a;
-    --sg-vessel: #b76d66;
-    --sg-vein: #7f6c8a;
-    --sg-liver: #8e5f53;
-    --sg-stomach: #9b7c55;
-    --sg-gut: #937953;
-    --sg-gut-2: #6f5839;
-    --sg-kidney: #93655a;
-    --sg-adrenal: #c49a4f;
-    --sg-muscle: #9a6c60;
-    --sg-fiber: #7a5248;
-    --sg-dim: #4a4743;
-    --sg-nerve: #8f7a5a;
-    --sg-sig: #f0a54c;
-    --sg-sig-glow: #ffcf86;
-    --sg-vagus: #6f8fbf;
-    --sg-vagus-glow: #8cc0ff;
-    --sg-warm: #f0a067;
-    --sg-sheen-op: 0.16;
-    --sg-cyl-op: 0.32;
-  }
+:root:where([data-tema='oscuro']) {
+  --sg-stage-1: #24211e;
+  --sg-stage-2: #1a1816;
+  --sg-ground: #000000;
+  --sg-skin-1: #4c443d;
+  --sg-skin-2: #2f2925;
+  --sg-hi: #fff4e8;
+  --sg-shade: #000000;
+  --sg-cavity: #3d302b;
+  --sg-bone: #6b6157;
+  --sg-line: rgb(255 240 225 / 0.16);
+  --sg-brain: #8a636b;
+  --sg-brain-2: #6d4a52;
+  --sg-pfc: #55705f;
+  --sg-amy: #b9786c;
+  --sg-hypo: #a66d78;
+  --sg-lung: #87605a;
+  --sg-lung-2: #6a4a45;
+  --sg-airway: #a3807a;
+  --sg-heart: #c9675d;
+  --sg-heart-2: #97473f;
+  --sg-atrium: #a4626a;
+  --sg-vessel: #b76d66;
+  --sg-vein: #7f6c8a;
+  --sg-liver: #8e5f53;
+  --sg-stomach: #9b7c55;
+  --sg-gut: #937953;
+  --sg-gut-2: #6f5839;
+  --sg-kidney: #93655a;
+  --sg-adrenal: #c49a4f;
+  --sg-muscle: #9a6c60;
+  --sg-fiber: #7a5248;
+  --sg-dim: #4a4743;
+  --sg-nerve: #8f7a5a;
+  --sg-sig: #f0a54c;
+  --sg-sig-glow: #ffcf86;
+  --sg-vagus: #6f8fbf;
+  --sg-vagus-glow: #8cc0ff;
+  --sg-warm: #f0a067;
+  --sg-sheen-op: 0.16;
+  --sg-cyl-op: 0.32;
 }
 
 /* La tarjeta: en pantallas anchas, el dibujo a la izquierda y los controles a la derecha. */

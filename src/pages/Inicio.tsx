@@ -10,6 +10,7 @@ import { planDone, useDayPlans } from '../lib/dayplan'
 import { type Letter, type MoodEntry, pick, today, useAddress, useStored } from '../lib/storage'
 import { IconoPuerta } from '../lib/iconos'
 import CaraAnimo from '../components/CaraAnimo'
+import InvitarInstalar from '../components/Instalar'
 
 function greeting() {
   const h = new Date().getHours()
@@ -200,6 +201,9 @@ export default function Inicio() {
                 ]),
           ]}
         />
+
+        {/* En un día muy pesado no se suma nada más a la pantalla. */}
+        {!(todayMood && todayMood <= 2) && <InvitarInstalar />}
 
       </div>
 

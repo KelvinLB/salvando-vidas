@@ -6,10 +6,13 @@ import '@fontsource-variable/inter'
 import '@fontsource-variable/caveat'
 import './styles.css'
 import App from './App'
+import { escucharInstalar } from './lib/instalar'
 import { migrate } from './lib/migrate'
 
 // Lo guardado con una versión anterior pasa a la forma nueva antes de dibujar nada.
 migrate()
+// El aviso de «se puede instalar» llega una sola vez y temprano: se escucha antes de dibujar.
+escucharInstalar()
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

@@ -15,6 +15,7 @@ export default defineConfig({
           'Un espacio seguro y gratuito para respirar, distraer la mente y encontrar ayuda cuando más se necesita.',
         lang: 'es',
         dir: 'ltr',
+        id: '/',
         start_url: '/',
         scope: '/',
         display: 'standalone',
@@ -28,6 +29,13 @@ export default defineConfig({
           { src: 'pwa-512x512.png', sizes: '512x512', type: 'image/png', purpose: 'any' },
           { src: 'maskable-icon-512x512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
         ],
+        // Con capturas, Chrome en Android muestra una ventana de instalar más clara, como la de una tienda.
+        screenshots: [
+          { src: 'screenshots/inicio.webp', sizes: '780x1688', type: 'image/webp', form_factor: 'narrow', label: 'Inicio: cómo te sientes hoy y ayuda para el pánico' },
+          { src: 'screenshots/calma.webp', sizes: '780x1688', type: 'image/webp', form_factor: 'narrow', label: 'Calma: respirar con los pulmones' },
+          { src: 'screenshots/explorar.webp', sizes: '780x1688', type: 'image/webp', form_factor: 'narrow', label: 'Explorar: tocar el cuerpo por dentro' },
+          { src: 'screenshots/inicio-ancho.webp', sizes: '1280x800', type: 'image/webp', form_factor: 'wide', label: 'Inicio en la computadora' },
+        ],
         shortcuts: [
           { name: 'Tengo pánico', short_name: 'Pánico', url: '/panico' },
           { name: 'Necesito ayuda ahora', short_name: 'Ayuda', url: '/ayuda' },
@@ -38,7 +46,8 @@ export default defineConfig({
         globPatterns: ['**/*.{js,css,html,svg,png,ico,woff2}'],
         // El español solo usa el subconjunto latino de las fuentes.
         // three.js (la escena 3D) tampoco: solo lo baja quien abre «Explorar por dentro».
-        globIgnores: ['**/*-{cyrillic,cyrillic-ext,greek,greek-ext,vietnamese,latin-ext}-*', '**/escena-*.js'],
+        // Las capturas solo las usa la ventana de instalar: no se guardan para usar sin internet.
+        globIgnores: ['**/*-{cyrillic,cyrillic-ext,greek,greek-ext,vietnamese,latin-ext}-*', '**/escena-*.js', 'screenshots/**'],
         navigateFallback: '/index.html',
         // Los modelos 3D de «Explorar por dentro» no van en el precache (no todos los abren): se
         // guardan la primera vez que se abren y desde ahí funcionan sin internet. El nombre lleva

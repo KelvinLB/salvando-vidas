@@ -9,7 +9,7 @@ export const SECTIONS = [
   { to: '/explorar', label: 'Explorar', also: ['/explorar/'] },
   { to: '/distraer', label: 'Distraer', also: ['/distraer/', '/juegos', '/musica', '/videos', '/barrio'] },
   { to: '/diario', label: 'Mi diario', also: ['/responder'] },
-  { to: '/mi-espacio', label: 'Mi espacio', also: ['/mi-espacio/', '/mi-dia', '/especialista', '/mascota', '/redes', '/opinion'] },
+  { to: '/mi-espacio', label: 'Mi espacio', also: ['/mi-espacio/', '/mi-dia', '/especialista', '/mascota', '/redes', '/opinion', '/instalar'] },
 ] as const
 
 /** Cómo se nombra cada pantalla en «Volver a…». */
@@ -32,6 +32,7 @@ const NAMES: Record<string, string> = {
   '/mi-espacio/medicamentos': 'tus medicamentos',
   '/mi-espacio/como-voy': 'cómo vas',
   '/mi-espacio/ajustes': 'ajustes',
+  '/instalar': 'instalar la app',
   '/cuerpo': 'tu cuerpo',
   '/explorar': 'Explorar',
   '/explorar/cuerpo': 'el cuerpo',

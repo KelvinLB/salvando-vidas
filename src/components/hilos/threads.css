@@ -15,19 +15,17 @@
   --h-c6: #8f6bb8;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --h-tile: #26231f;
-    --h-tile-on: #2c2925;
-    --h-thread-loose: #5d554b;
-    --h-thread: #c9a27d;
-    --h-c1: #f08aa8;
-    --h-c2: #7f9fe0;
-    --h-c3: #f0c25a;
-    --h-c4: #7dbb9f;
-    --h-c5: #f0915c;
-    --h-c6: #b394dd;
-  }
+:root:where([data-tema='oscuro']) {
+  --h-tile: #26231f;
+  --h-tile-on: #2c2925;
+  --h-thread-loose: #5d554b;
+  --h-thread: #c9a27d;
+  --h-c1: #f08aa8;
+  --h-c2: #7f9fe0;
+  --h-c3: #f0c25a;
+  --h-c4: #7dbb9f;
+  --h-c5: #f0915c;
+  --h-c6: #b394dd;
 }
 
 .h-th {

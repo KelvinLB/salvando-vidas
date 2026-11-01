@@ -10,6 +10,7 @@ import { howLongAgo } from '../../lib/diary'
 import { makeKey, useDiaryLock } from '../../lib/lock'
 import { SOUNDS_KEY } from '../../lib/petfx'
 import { type Address, clearAll, today, useStored } from '../../lib/storage'
+import { TEMAS, TEMA_KEY, type Tema } from '../../lib/tema'
 
 // Ajustes: cómo te acompaña la app y qué pasa con tus datos. Ya no está al mismo nivel que lo
 // personal: se llega por el engrane de Mi espacio. Cada grupo de ajustes es un capítulo, con lo
@@ -257,6 +258,7 @@ export default function Ajustes() {
   const [sounds, setSounds] = useStored(SOUNDS_KEY, true)
   const [country, setCountry] = useStored('country', guessCountry)
   const [confirming, setConfirming] = useState(false)
+  const [tema, setTema] = useStored<Tema>(TEMA_KEY, 'auto')
 
   return (
     <div className="stack">
@@ -264,6 +266,34 @@ export default function Ajustes() {
         label="Ajustes"
         antes={<PageHeader title="Ajustes" subtitle="Cómo te acompaña la app y qué pasa con tus datos." />}
         capitulos={[
+          {
+            id: 'vista',
+            emoji: '🌗',
+            title: 'Claro u oscuro',
+            text: 'Cómo se ve la app: como tu teléfono, clara u oscura',
+            content: (
+              <section className="card field">
+                <strong id="tema-titulo">Cómo se ve la app</strong>
+                <small className="muted">
+                  «Automático» sigue a tu teléfono. El oscuro cansa menos la vista de noche o con poca luz.
+                </small>
+                <div className="chips" role="radiogroup" aria-labelledby="tema-titulo">
+                  {TEMAS.map((t) => (
+                    <button
+                      key={t.value}
+                      type="button"
+                      role="radio"
+                      aria-checked={tema === t.value}
+                      className={`chip${tema === t.value ? ' selected' : ''}`}
+                      onClick={() => setTema(t.value)}
+                    >
+                      {t.label}
+                    </button>
+                  ))}
+                </div>
+              </section>
+            ),
+          },
           {
             id: 'trato',
             emoji: '💬',

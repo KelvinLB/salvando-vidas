@@ -19,11 +19,9 @@
   --o-hi: white;
   --o-hi-amt: 40%;
 }
-@media (prefers-color-scheme: dark) {
-  .body-stage {
-    --skin-vol: #000;
-    --o-hi-amt: 16%;
-  }
+:where(:root[data-tema='oscuro']) .body-stage {
+  --skin-vol: #000;
+  --o-hi-amt: 16%;
 }
 
 /* La piel del muñequito de Desde afuera, si la persona se hizo uno. */
@@ -31,11 +29,9 @@
   --skin-light: color-mix(in srgb, var(--yo-skin) 80%, white);
   --skin-shade: color-mix(in srgb, var(--yo-skin) 90%, black);
 }
-@media (prefers-color-scheme: dark) {
-  .body-stage.mine {
-    --skin-light: color-mix(in srgb, var(--yo-skin) 72%, var(--bg));
-    --skin-shade: color-mix(in srgb, var(--yo-skin) 48%, var(--bg));
-  }
+:where(:root[data-tema='oscuro']) .body-stage.mine {
+  --skin-light: color-mix(in srgb, var(--yo-skin) 72%, var(--bg));
+  --skin-shade: color-mix(in srgb, var(--yo-skin) 48%, var(--bg));
 }
 
 /* Cómo se tiñe el cuerpo según lo que pasa */
@@ -94,10 +90,8 @@
   fill: #4a566a;
   opacity: 0.72;
 }
-@media (prefers-color-scheme: dark) {
-  .b-shirt {
-    fill: color-mix(in srgb, var(--b-shirt) 70%, var(--bg));
-  }
+:where(:root[data-tema='oscuro']) .b-shirt {
+  fill: color-mix(in srgb, var(--b-shirt) 70%, var(--bg));
 }
 .b-hair {
   opacity: 0.94;
@@ -150,11 +144,9 @@
   stroke-linecap: round;
   opacity: 0.8;
 }
-@media (prefers-color-scheme: dark) {
-  .b-airway {
-    stroke: color-mix(in srgb, var(--c-lung), white 22%);
-    opacity: 0.6;
-  }
+:where(:root[data-tema='oscuro']) .b-airway {
+  stroke: color-mix(in srgb, var(--c-lung), white 22%);
+  opacity: 0.6;
 }
 .b-airway.thick {
   stroke-width: 2.4;

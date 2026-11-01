@@ -1,5 +1,6 @@
 import { type KeyboardEvent, type PointerEvent, type Ref, useEffect, useImperativeHandle, useRef, useState } from 'react'
 import { readWindow, saveWindow } from '../../lib/sentido'
+import { alCambiarTema } from '../../lib/tema'
 
 // La ventana empañada: lo que no sale se siente como ver la vida tras un vidrio con vaho.
 // Detrás está el barrio de noche, con su papel picado, sus faroles y una ventana con luz.
@@ -479,9 +480,7 @@ export default function Ventana({ still, onTalk, ref }: Props) {
     const ro = new ResizeObserver(size)
     ro.observe(win)
 
-    const dark = window.matchMedia('(prefers-color-scheme: dark)')
-    const retheme = () => drawFog()
-    dark.addEventListener('change', retheme)
+    const dejarDeEscuchar = alCambiarTema(() => drawFog())
 
     let io: IntersectionObserver | undefined
     if ('IntersectionObserver' in window) {
@@ -494,7 +493,7 @@ export default function Ventana({ still, onTalk, ref }: Props) {
     return () => {
       ro.disconnect()
       io?.disconnect()
-      dark.removeEventListener('change', retheme)
+      dejarDeEscuchar()
       cancelAnimationFrame(st.raf)
       st.raf = 0
     }

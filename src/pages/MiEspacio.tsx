@@ -15,6 +15,7 @@ import { lastDays, moodTrend } from '../lib/progress'
 import { type JournalEntry, type Letter, type Medication, type MoodEntry, today, useStored } from '../lib/storage'
 import { TrendBadge } from './espacio/ComoVoy'
 import { IconoPuerta } from '../lib/iconos'
+import { abiertaComoApp } from '../lib/instalar'
 
 // Mi espacio: lo personal, ordenado por para qué sirve. Cada renglón dice cómo va, para que
 // se entienda sin entrar. Los ajustes quedan aparte, detrás del engrane.
@@ -189,7 +190,12 @@ export default function MiEspacio() {
       </div>
 
       <p className="space-more">
-        Más: <Link to="/redes">Lo que se dice en redes</Link> · <Link to="/opinion">Tu opinión</Link>
+        Más: {!abiertaComoApp() && (
+          <>
+            <Link to="/instalar">Instalar la app</Link> ·{' '}
+          </>
+        )}
+        <Link to="/redes">Lo que se dice en redes</Link> · <Link to="/opinion">Tu opinión</Link>
       </p>
     </div>
   )

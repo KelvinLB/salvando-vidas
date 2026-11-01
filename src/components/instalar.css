@@ -1,0 +1,123 @@
+/* Instalar la app: la invitación de Inicio y la pantalla con los pasos. */
+
+.instalar-tarjeta {
+  position: relative;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 14px;
+}
+.instalar-icono img {
+  display: block;
+  border-radius: 11px;
+}
+.instalar-texto {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+  padding-right: 28px;
+}
+.instalar-texto h2 {
+  font-size: 1.05rem;
+}
+.instalar-texto .row {
+  margin-top: 6px;
+}
+.instalar-cerrar {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  display: grid;
+  place-items: center;
+}
+.instalar-listo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  color: var(--primary);
+  font-weight: 650;
+}
+
+.instalar-por-que li {
+  padding: 14px 20px;
+}
+.instalar-por-que-fila {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.instalar-por-que-fila > span:last-child {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.instalar-por-que-fila small {
+  color: var(--muted);
+  line-height: 1.35;
+}
+.ico-circulo {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--surface-soft);
+  color: var(--primary);
+}
+
+.instalar-pasos {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin: 4px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.instalar-pasos li {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  line-height: 1.45;
+}
+.instalar-num {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  margin-top: 1px;
+  border-radius: 50%;
+  background: var(--primary);
+  color: var(--primary-ink);
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+.instalar-paso-icono {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  margin-top: -4px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: var(--text);
+}
+.instalar-hecho h2 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--primary);
+}
+.instalar-otros summary {
+  cursor: pointer;
+  padding: 6px 0;
+  color: var(--muted);
+  font-weight: 600;
+}
+.instalar-otros h3 {
+  margin: 12px 0 8px;
+}
